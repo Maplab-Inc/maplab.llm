@@ -33,7 +33,7 @@ _set_env("MAPLAB_API_KEY")
 # fine-tuned 4o-mini id: ft:gpt-4o-mini-2024-07-18:maplab::AdljqShw
 # fine-tuned 4o id: ft:gpt-4o-2024-08-06:maplab::AdrJCNPA
 tools = [optimize_routes, direction, isochrone, matrix, overpass, get_local_endpoint_schema]
-endpoint="https://maplab--example-vllm-openai-compatible-serve.modal.run/v1/chat/completions"
+endpoint="https://maplab--maplab-vllm-serve.modal.run/geoassistant"
 llm = modal.Modal(endpoint_url=endpoint)
 llm.endpoint_url = endpoint
 llm._identifying_params
@@ -45,12 +45,10 @@ Answer: Let's think step by step."""
 prompt = PromptTemplate.from_template(template)
 llm_chain = LLMChain(prompt=prompt, llm=llm)
 
-response = llm_chain.invoke("Hi")
-
 sys_msg = SystemMessage(content=get_assistant_guidelines())
 
 def assistant(state: MessagesState):
-   return {"messages": [llm.invoke([sys_msg] + state["messages"])]}
+   return {"messages": [llm_chain.invoke([sys_msg] + state["messages"])]}
 
 builder = StateGraph(MessagesState)
 

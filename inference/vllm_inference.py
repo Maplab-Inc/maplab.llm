@@ -17,7 +17,7 @@ try:
 except modal.exception.NotFoundError:
     raise Exception("Download models first with modal run download_llama.py")
 
-app = modal.App("example-vllm-openai-compatible", image=vllm_image)
+app = modal.App("maplab-vllm", image=vllm_image)
 
 N_GPU = 1  # tip: for best results, first upgrade to more powerful GPUs, and only then increase GPU count
 TOKEN = "super-secret-token"  # auth token. for production use, replace with a modal.Secret
@@ -54,7 +54,7 @@ web_app = fastapi.FastAPI(
     docs_url="/docs",
 )
 
-@web_app.post("/generate_response")
+@web_app.post("/geoassistant")
 async def generate_response(request: Request):
     from vllm.sampling_params import SamplingParams
 
@@ -63,10 +63,10 @@ async def generate_response(request: Request):
     engine = web_app.state.engine_client
     
     params = SamplingParams(
-        temperature=0.5,
+        temperature=0.3,
         top_k=50,
         top_p=0.9,
-        max_tokens=100000,  # Ensure this matches the `max_new_tokens` setting
+        max_tokens=100,  # Ensure this matches the `max_new_tokens` setting
     )
     
     responses = []
