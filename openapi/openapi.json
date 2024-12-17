@@ -1,0 +1,265 @@
+{
+  "components": {
+    "Coordinate": {
+      "type": "object",
+      "properties": {
+        "longitude": {
+          "type": "number",
+          "format": "double"
+        },
+        "latitude": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    },
+    "Demand": {
+      "type": "object",
+      "properties": {
+        "productId": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "quantity": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    },
+    "FirstSolutionAlgorithm": {
+      "enum": [
+        "Unset",
+        "Automatic",
+        "PathCheapestArc",
+        "GlobalCheapestArc",
+        "LocalCheapestArc",
+        "AllUnperformed",
+        "BestInsertion",
+        "ParallelCheapestInsertion",
+        "SequentialCheapestInsertion",
+        "Christofides",
+        "Savings",
+        "Sweep",
+        "FirstUnboundMinValue"
+      ],
+      "type": "string"
+    },
+    "HeuristicParameters": {
+      "type": "object",
+      "properties": {
+        "timeLimitSeconds": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "firstSolutionAlgorithm": {
+          "$ref": "#/components/schemas/FirstSolutionAlgorithm"
+        },
+        "metaheuristic": {
+          "$ref": "#/components/schemas/Metaheuristic"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Job": {
+      "required": ["location"],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "location": {
+          "$ref": "#/components/schemas/Coordinate"
+        },
+        "demands": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/Demand"
+          },
+          "nullable": true
+        },
+        "priority": {
+          "$ref": "#/components/schemas/Priority"
+        },
+        "requiredSkills": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "nullable": true
+        },
+        "timeWindow": {
+          "$ref": "#/components/schemas/TimeWindow"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Metaheuristic": {
+      "enum": [
+        "Unset",
+        "Automatic",
+        "GreedyDescent",
+        "GuidedLocalSearch",
+        "SimulatedAnnealing",
+        "TabuSearch",
+        "GenericTabuSearch"
+      ],
+      "type": "string"
+    },
+    "OptimizationRequestDto": {
+      "required": ["jobs", "vehicles"],
+      "type": "object",
+      "properties": {
+        "jobs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/Job"
+          },
+          "nullable": true
+        },
+        "reloads": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/Reload"
+          },
+          "nullable": true
+        },
+        "vehicles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/Vehicle"
+          },
+          "nullable": true
+        },
+        "depot": {
+          "$ref": "#/components/schemas/Coordinate"
+        },
+        "routingOptions": {
+          "$ref": "#/components/schemas/RoutingOptions"
+        },
+        "heuristicParameters": {
+          "$ref": "#/components/schemas/HeuristicParameters"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Priority": {
+      "enum": ["None", "Low", "Default", "High"],
+      "type": "string"
+    },
+    "Product": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "capacity": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "load": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Profile": {
+      "enum": ["Car", "Truck"],
+      "type": "string"
+    },
+    "Reload": {
+      "required": ["location"],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "location": {
+          "$ref": "#/components/schemas/Coordinate"
+        }
+      },
+      "additionalProperties": false
+    },
+    "RoutingOptions": {
+      "type": "object",
+      "properties": {
+        "profile": {
+          "$ref": "#/components/schemas/Profile"
+        }
+      },
+      "additionalProperties": false
+    },
+    "TimeWindow": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "to": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "additionalProperties": false
+    },
+    "TrackMode": {
+      "enum": ["Default", "RoundTrip", "LastVisit", "VehicleEnd"],
+      "type": "string"
+    },
+    "Vehicle": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "products": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/Product"
+          },
+          "nullable": true
+        },
+        "start": {
+          "$ref": "#/components/schemas/Coordinate"
+        },
+        "end": {
+          "$ref": "#/components/schemas/Coordinate"
+        },
+        "trackMode": {
+          "$ref": "#/components/schemas/TrackMode"
+        },
+        "skills": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "nullable": true
+        },
+        "timeWindow": {
+          "$ref": "#/components/schemas/TimeWindow"
+        },
+        "maxDrivingDistance": {
+          "type": "integer",
+          "format": "int64",
+          "nullable": true
+        },
+        "maxDrivingTime": {
+          "type": "integer",
+          "format": "int64",
+          "nullable": true
+        },
+        "averageDrivingSpeed": {
+          "type": "integer",
+          "format": "int32",
+          "nullable": true
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

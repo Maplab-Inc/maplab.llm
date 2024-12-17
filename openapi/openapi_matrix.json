@@ -1,0 +1,129 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "API",
+    "version": "v1"
+  },
+  "paths": {
+    "/v1/Router/Matrix": {
+      "post": {
+        "tags": [
+          "Router"
+        ],
+        "summary": "Get a matrix of distances and durations between multiple locations.",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatrixRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatrixRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatrixRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "MatrixRequest": {
+        "type": "object",
+        "properties": {
+          "locations": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "format": "double"
+              }
+            },
+            "description": "The waypoints to use for the matrix as an array of longitude/latitude pairs in WGS 84 (EPSG:4326)",
+            "nullable": true,
+            "example": [
+              [
+                8.681495,
+                49.41461
+              ],
+              [
+                8.686507,
+                49.41943
+              ],
+              [
+                8.687872,
+                49.42032
+              ]
+            ]
+          },
+          "destinations": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "The indices represent the position of the locations in the list.\r\nFor example, if you have a list of five locations, and you want to specify the first and fourth locations as destinations,\r\nyou would use the indices [0,3].\r\nBy default, all locations are set as destinations.\r\nThis allows you to specify which locations in your list should be treated as destinations in the matrix calculation.",
+            "nullable": true
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "the Source parameter can take a list of indices that refer to the list of locations.\r\nThe indices represent the position of the locations in the list. For example,\r\nif you have a list of five locations and you want to specify the first and fourth locations as sources,\r\nyou would use the indices [0,3].\r\nBy default, all locations are set as sources.\r\nThis allows you to specify which locations in your list should be treated as sources in the matrix calculation.",
+            "nullable": true
+          },
+          "id": {
+            "type": "string",
+            "description": "An aritrary identifier for this request. It will be returned in the response.",
+            "nullable": true
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Metrics"
+            },
+            "nullable": true
+          },
+          "resolveLocations": {
+            "type": "boolean",
+            "description": "Specifies whether given locations are resolved or not. If the parameter value set to true, \r\nevery element in destinations and sources will contain a name element that identifies the name of the closest street. \r\nDefault is false."
+          },
+          "profile": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "securitySchemes": {
+      "ApiKey": {
+        "type": "apiKey",
+        "description": "API Key needed to access the endpoints. API Key is passed in the request header.",
+        "name": "X-API-KEY",
+        "in": "header"
+      }
+    }
+  },
+  "security": [
+    {
+      "ApiKey": [ ]
+    }
+  ]
+}

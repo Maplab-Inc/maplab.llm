@@ -1,0 +1,371 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "API",
+    "version": "v1"
+  },
+  "paths": {
+    "/v1/Router/Isochrones": {
+      "post": {
+        "tags": [
+          "Router"
+        ],
+        "summary": "Get isochrones for a given location.",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IsochroneRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IsochroneRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/IsochroneRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AlternativeRoutes": {
+        "type": "object",
+        "properties": {
+          "routesCount": {
+            "type": "integer",
+            "description": "The AlternativeRoutesCount parameter allows the user to request additional routes that are nearly as optimal as the best route.\r\nFor example, if AlternativeRoutesCount is set to 2, the router will return the optimal route and up to two alternative routes.\r\nThese alternative routes are the next best routes according to the routing algorithm’s criteria.\r\nPlease note that the actual number of alternative routes returned may be less than the AlternativeRoutesCount if there are not enough viable alternative routes.\r\nImpact on Performance: Increasing the AlternativeRoutesCount can increase the computation time for the routing request, as the service needs to calculate more routes.\r\nDefault Value: If AlternativeRoutesCount is not specified, ORS will return only the optimal route.",
+            "format": "int32"
+          },
+          "weightFactor": {
+            "type": "number",
+            "description": "Maximum factor by which route weight may diverge from the optimal route. \r\nThe default value of 1.4 means alternatives can be up to 1.4 times longer (costly) than the optimal route.",
+            "format": "double"
+          },
+          "shareFactor": {
+            "type": "number",
+            "description": "Maximum fraction of the route that alternatives may share with the optimal route. \r\nThe default value of 0.6 means alternatives can share up to 60% of path segments with the optimal route.",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AvoidBorders": {
+        "enum": [
+          "None",
+          "All",
+          "Controlled"
+        ],
+        "type": "string",
+        "description": "Setting AvoidBorders to \"all\", router will calculate a route that tries to avoid crossing all borders.\r\nSetting AvoidBorders to \"controlled\", router will calculate a route that tries to avoid crossing controlled borders.\r\nNot specify this option, router will use the normal routing algorithm which may include crossing borders.\r\nIt’s important to note that avoiding borders might result in a longer route, both in terms of distance and time.\r\nAlso, the AvoidBorders option is not a strict constraint. That means router might still cross borders if there’s no reasonable alternative route."
+      },
+      "Coordinate": {
+        "type": "object",
+        "properties": {
+          "longitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Demand": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DirectionResponseOptions": {
+        "type": "object",
+        "properties": {
+          "attributes": {
+            "$ref": "#/components/schemas/RouteAttributes"
+          },
+          "returnInstructions": {
+            "type": "boolean",
+            "description": "If set to true, the response will include detailed instructions for each step of the route,\r\nsuch as “Turn left on Main St.” or “Continue straight for 2 km.”\r\nThese instructions can be useful for navigation purposes,\r\nproviding the user with clear directions on how to follow the calculated route."
+          },
+          "instructionFormat": {
+            "$ref": "#/components/schemas/InstructionFormat"
+          },
+          "language": {
+            "type": "string",
+            "description": "Language for the route instructions.",
+            "nullable": true
+          },
+          "responseFromat": {
+            "$ref": "#/components/schemas/ResponseFromat"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DirectionsRequest": {
+        "type": "object",
+        "properties": {
+          "coordinates": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "format": "double"
+              }
+            },
+            "description": "The waypoints to use for the route as an array of longitude/latitude pairs in WGS 84 (EPSG:4326)",
+            "nullable": true,
+            "example": [
+              [
+                8.681495,
+                49.41461
+              ],
+              [
+                8.686507,
+                49.41943
+              ],
+              [
+                8.687872,
+                49.42032
+              ]
+            ]
+          },
+          "id": {
+            "type": "string",
+            "description": "Arbitrary identification string of the request reflected in the meta information.",
+            "nullable": true,
+            "example": "my_request"
+          },
+          "elevation": {
+            "type": "boolean",
+            "description": "Includes elevation data in the routing response.\r\nThis means that the service will consider the elevation changes along the route,\r\nproviding more accurate information about the terrain and elevation profile of the route."
+          },
+          "extraInfo": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExtraInfo"
+            },
+            "nullable": true
+          },
+          "geometrySimplify": {
+            "type": "boolean",
+            "description": "When set to true, the service reduces the number of points in the route’s geometry, which can help to make the route data more manageable and less complex.\r\nThis simplification process is particularly useful when you need to display the route on a map or when you want to reduce the amount of data being transmitted.\r\nIt helps to maintain the overall shape and path of the route while removing unnecessary details."
+          },
+          "geometry": {
+            "type": "boolean",
+            "description": "When set to true, it includes the route geometry in the response.\r\nThis means that the service will return the detailed path of the route as a series of coordinates.\r\nIf geometry is set to false, the route geometry will not be included in the response,\r\nwhich can be useful if you only need other information about the route, such as distance or duration, without the detailed path."
+          },
+          "maneuvers": {
+            "type": "boolean",
+            "description": "includes detailed maneuver instructions in the routing response.\r\nThese instructions provide step-by-step guidance for navigating the route, such as turning left, right, or continuing straight at specific points.\r\nIncluding maneuvers can be particularly useful for applications that require detailed navigation instructions, such as turn-by-turn navigation systems."
+          },
+          "suppressWarnings": {
+            "type": "boolean",
+            "description": "Suppresses warning messages in the routing response.\r\nThis can be useful if you want to avoid receiving warning messages about potential issues or limitations related to the route calculation.\r\nFor example, if there are certain restrictions or conditions that might affect the route,\r\nsetting SuppressWarnings to true will prevent these warnings from being included in the response,\r\nallowing you to focus on the main routing information."
+          },
+          "roundAboutExits": {
+            "type": "boolean",
+            "description": "includes detailed instructions for navigating roundabouts in the routing response.\r\nThis means that the service will provide specific exit numbers and directions for each roundabout encountered along the route.\r\nFor example, instead of just saying “Enter the roundabout,” the instructions might say “Take the third exit at the roundabout,”\r\nwhich can be very helpful for drivers to navigate roundabouts accurately."
+          },
+          "profile": {
+            "type": "string",
+            "description": "The profile which should be used for the route calculation.",
+            "nullable": true
+          },
+          "routeOptions": {
+            "$ref": "#/components/schemas/RouteOptions"
+          },
+          "alternativeRoutes": {
+            "$ref": "#/components/schemas/AlternativeRoutes"
+          },
+          "routeResponseOptions": {
+            "$ref": "#/components/schemas/DirectionResponseOptions"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ExtraInfo": {
+        "enum": [
+          "Steepness",
+          "Suitability",
+          "Surface",
+          "WayCategory",
+          "WayType",
+          "Tollways",
+          "TrailDifficulty",
+          "Osmid",
+          "RoadAccessRestrictions",
+          "CountryInfo",
+          "Green",
+          "Noise",
+          "Csv",
+          "Shadow"
+        ],
+        "type": "string"
+      },
+      "FirstSolutionAlgorithm": {
+        "enum": [
+          "Unset",
+          "Automatic",
+          "PathCheapestArc",
+          "GlobalCheapestArc",
+          "LocalCheapestArc",
+          "AllUnperformed",
+          "BestInsertion",
+          "ParallelCheapestInsertion",
+          "SequentialCheapestInsertion",
+          "Christofides",
+          "Savings",
+          "Sweep",
+          "FirstUnboundMinValue"
+        ],
+        "type": "string"
+      },
+      "HeuristicParameters": {
+        "type": "object",
+        "properties": {
+          "timeLimitSeconds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "firstSolutionAlgorithm": {
+            "$ref": "#/components/schemas/FirstSolutionAlgorithm"
+          },
+          "metaheuristic": {
+            "$ref": "#/components/schemas/Metaheuristic"
+          }
+        },
+        "additionalProperties": false
+      },
+      "InstructionFormat": {
+        "enum": [
+          "Text",
+          "Html"
+        ],
+        "type": "string",
+        "description": "Defines the format of the instructions provided in the response."
+      },
+      "IsochroneRequest": {
+        "type": "object",
+        "properties": {
+          "locations": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "format": "double"
+              }
+            },
+            "description": "The waypoints to use for the isochrone as an array of longitude/latitude pairs in WGS 84 (EPSG:4326)",
+            "nullable": true,
+            "example": [
+              [
+                8.681495,
+                49.41461
+              ],
+              [
+                8.686507,
+                49.41943
+              ],
+              [
+                8.687872,
+                49.42032
+              ]
+            ]
+          },
+          "range": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "A list of specific single range values. For example, if you set the Range to [300, 600, 900],\r\nthe isochrone service will return areas reachable within 300, 600, and 900 units\r\n(either seconds or meters, depending on the range_type parameter) from the given location.",
+            "nullable": true
+          },
+          "area": {
+            "type": "boolean"
+          },
+          "reachFactor": {
+            "type": "boolean",
+            "description": "The reachfactor is a measure of the isochrone’s proportion of a circle generated with a mean speed for the specific profile.\r\nIt’s essentially a comparison of the area of the isochrone to the area of a circle with the same range.\r\nHere’s how it’s calculated:\r\nFirst, a circle is generated with a radius equal to the mean speed multiplied by the range of the isochrone.\r\nFor example, if you have a 10-minute isochrone for a car, and the mean speed for a car is 100 km/h,\r\nyou would have a radius of 360 * 600 for the circle.\r\nThe reachfactor is then calculated by dividing the actual area of the 10-minute isochrone by the area of this circle.\r\nThis gives you a measure of how “efficient” the isochrone is compared to a perfect circle.\r\nA reachfactor close to 1 means the isochrone covers almost the same area as the circle, indicating efficient travel.\r\nA reachfactor much less than 1 indicates that the actual reachable area is much less than the circle,\r\nsuggesting less efficient travel due to factors like road layout, traffic conditions, etc.s"
+          },
+          "totalPop": {
+            "type": "boolean",
+            "description": "A parameter that returns population statistics from the Global Human Settlement Layer (GHSL).\r\nWhen you request an isochrone, you can include total_pop in the list of attributes to get information about the total population within each isochrone.\r\nThis can be useful for various types of analysis. For example, if you’re planning a new store location,\r\nyou might want to know the total population within a 15-minute drive of the potential location.\r\nThe TotalPop attribute can provide this information."
+          },
+          "id": {
+            "type": "string",
+            "description": "An arbitrary identification that will be returned in the response.",
+            "nullable": true
+          },
+          "intersections": {
+            "type": "boolean",
+            "description": "When you’re generating isochrones, the Intersections boolean parameter specifies whether to return intersecting polygons.\r\nIf Intersections is set to true, the service will return all isochrones, even if they overlap or intersect with each other.\r\nThis can be useful if you want to see all possible areas reachable from multiple points, even if those areas overlap.\r\nIf Intersections is set to false, the service will only return the unique areas, removing any overlaps or intersections.\r\nThis can be useful if you want to see the total unique area reachable from multiple points."
+          },
+          "interval": {
+            "type": "integer",
+            "description": "parameter is used when generating isochrones or equidistants and a single range value is given.\r\nThe Interval parameter specifies the intervals at which additional isochrones should be generated within the given range.\r\nThe value of the Interval is in seconds for time and meters for distance.\r\nFor example, if you set the Range to 900 (seconds or meters) and the Interval to 300,\r\nthe isochrone service will return three isochrones: one for 300 units, one for 600 units, and one for 900 units.",
+            "format": "int32",
+            "nullable": true
+          },
+          "locationType": {
+            "$ref": "#/components/schemas/LocationType"
+          },
+          "routeOptions": {
+            "$ref": "#/components/schemas/RouteOptions"
+          },
+          "rangeType": {
+            "$ref": "#/components/schemas/RangeType"
+          },
+          "smoothing": {
+            "type": "integer",
+            "description": "The smoothing parameter applies a level of generalization to the isochrone polygons generated1. The value for smoothing is a float between 0 and 1.\r\nA higher value closer to 1 will result in a more generalized shape, meaning the isochrone polygon will have fewer edges and corners, making it appear smoother.\r\nConversely, a lower value closer to 0 will result in a less generalized shape, meaning the isochrone polygon will have more edges and corners, making it appear more detailed.\r\nThis parameter can be useful when you want to control the level of detail in the isochrone polygons.\r\nFor example, if you’re visualizing the data and prefer a smoother appearance, you might choose a higher smoothing value.",
+            "format": "int32",
+            "nullable": true
+          },
+          "profile": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "securitySchemes": {
+      "ApiKey": {
+        "type": "apiKey",
+        "description": "API Key needed to access the endpoints. API Key is passed in the request header.",
+        "name": "X-API-KEY",
+        "in": "header"
+      }
+    }
+  },
+  "security": [
+    {
+      "ApiKey": [ ]
+    }
+  ]
+}

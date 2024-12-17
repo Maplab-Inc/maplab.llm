@@ -1,0 +1,369 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "API",
+    "version": "v1"
+  },
+  "paths": {
+    "/v1/Router/Directions": {
+      "post": {
+        "tags": [
+          "Router"
+        ],
+        "summary": "Get directions between two locations.",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DirectionsRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DirectionsRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DirectionsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AlternativeRoutes": {
+        "type": "object",
+        "properties": {
+          "routesCount": {
+            "type": "integer",
+            "description": "The AlternativeRoutesCount parameter allows the user to request additional routes that are nearly as optimal as the best route.\r\nFor example, if AlternativeRoutesCount is set to 2, the router will return the optimal route and up to two alternative routes.\r\nThese alternative routes are the next best routes according to the routing algorithm’s criteria.\r\nPlease note that the actual number of alternative routes returned may be less than the AlternativeRoutesCount if there are not enough viable alternative routes.\r\nImpact on Performance: Increasing the AlternativeRoutesCount can increase the computation time for the routing request, as the service needs to calculate more routes.\r\nDefault Value: If AlternativeRoutesCount is not specified, ORS will return only the optimal route.",
+            "format": "int32"
+          },
+          "weightFactor": {
+            "type": "number",
+            "description": "Maximum factor by which route weight may diverge from the optimal route. \r\nThe default value of 1.4 means alternatives can be up to 1.4 times longer (costly) than the optimal route.",
+            "format": "double"
+          },
+          "shareFactor": {
+            "type": "number",
+            "description": "Maximum fraction of the route that alternatives may share with the optimal route. \r\nThe default value of 0.6 means alternatives can share up to 60% of path segments with the optimal route.",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AvoidBorders": {
+        "enum": [
+          "None",
+          "All",
+          "Controlled"
+        ],
+        "type": "string",
+        "description": "Setting AvoidBorders to \"all\", router will calculate a route that tries to avoid crossing all borders.\r\nSetting AvoidBorders to \"controlled\", router will calculate a route that tries to avoid crossing controlled borders.\r\nNot specify this option, router will use the normal routing algorithm which may include crossing borders.\r\nIt’s important to note that avoiding borders might result in a longer route, both in terms of distance and time.\r\nAlso, the AvoidBorders option is not a strict constraint. That means router might still cross borders if there’s no reasonable alternative route."
+      },
+      "DirectionResponseOptions": {
+        "type": "object",
+        "properties": {
+          "attributes": {
+            "$ref": "#/components/schemas/RouteAttributes"
+          },
+          "returnInstructions": {
+            "type": "boolean",
+            "description": "If set to true, the response will include detailed instructions for each step of the route,\r\nsuch as “Turn left on Main St.” or “Continue straight for 2 km.”\r\nThese instructions can be useful for navigation purposes,\r\nproviding the user with clear directions on how to follow the calculated route."
+          },
+          "instructionFormat": {
+            "$ref": "#/components/schemas/InstructionFormat"
+          },
+          "language": {
+            "type": "string",
+            "description": "Language for the route instructions.",
+            "nullable": true
+          },
+          "responseFromat": {
+            "$ref": "#/components/schemas/ResponseFromat"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DirectionsRequest": {
+        "type": "object",
+        "properties": {
+          "coordinates": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "format": "double"
+              }
+            },
+            "description": "The waypoints to use for the route as an array of longitude/latitude pairs in WGS 84 (EPSG:4326)",
+            "nullable": true,
+            "example": [
+              [
+                8.681495,
+                49.41461
+              ],
+              [
+                8.686507,
+                49.41943
+              ],
+              [
+                8.687872,
+                49.42032
+              ]
+            ]
+          },
+          "id": {
+            "type": "string",
+            "description": "Arbitrary identification string of the request reflected in the meta information.",
+            "nullable": true,
+            "example": "my_request"
+          },
+          "elevation": {
+            "type": "boolean",
+            "description": "Includes elevation data in the routing response.\r\nThis means that the service will consider the elevation changes along the route,\r\nproviding more accurate information about the terrain and elevation profile of the route."
+          },
+          "extraInfo": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExtraInfo"
+            },
+            "nullable": true
+          },
+          "geometrySimplify": {
+            "type": "boolean",
+            "description": "When set to true, the service reduces the number of points in the route’s geometry, which can help to make the route data more manageable and less complex.\r\nThis simplification process is particularly useful when you need to display the route on a map or when you want to reduce the amount of data being transmitted.\r\nIt helps to maintain the overall shape and path of the route while removing unnecessary details."
+          },
+          "geometry": {
+            "type": "boolean",
+            "description": "When set to true, it includes the route geometry in the response.\r\nThis means that the service will return the detailed path of the route as a series of coordinates.\r\nIf geometry is set to false, the route geometry will not be included in the response,\r\nwhich can be useful if you only need other information about the route, such as distance or duration, without the detailed path."
+          },
+          "maneuvers": {
+            "type": "boolean",
+            "description": "includes detailed maneuver instructions in the routing response.\r\nThese instructions provide step-by-step guidance for navigating the route, such as turning left, right, or continuing straight at specific points.\r\nIncluding maneuvers can be particularly useful for applications that require detailed navigation instructions, such as turn-by-turn navigation systems."
+          },
+          "suppressWarnings": {
+            "type": "boolean",
+            "description": "Suppresses warning messages in the routing response.\r\nThis can be useful if you want to avoid receiving warning messages about potential issues or limitations related to the route calculation.\r\nFor example, if there are certain restrictions or conditions that might affect the route,\r\nsetting SuppressWarnings to true will prevent these warnings from being included in the response,\r\nallowing you to focus on the main routing information."
+          },
+          "roundAboutExits": {
+            "type": "boolean",
+            "description": "includes detailed instructions for navigating roundabouts in the routing response.\r\nThis means that the service will provide specific exit numbers and directions for each roundabout encountered along the route.\r\nFor example, instead of just saying “Enter the roundabout,” the instructions might say “Take the third exit at the roundabout,”\r\nwhich can be very helpful for drivers to navigate roundabouts accurately."
+          },
+          "profile": {
+            "enum": [
+              "driving-car",
+              "driving-hgv"
+            ],
+            "type": "string",
+            "description": "The profile which should be used for the route calculation."
+          },
+          "routeOptions": {
+            "$ref": "#/components/schemas/RouteOptions"
+          },
+          "alternativeRoutes": {
+            "$ref": "#/components/schemas/AlternativeRoutes"
+          },
+          "routeResponseOptions": {
+            "$ref": "#/components/schemas/DirectionResponseOptions"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ExtraInfo": {
+        "enum": [
+          "Steepness",
+          "Suitability",
+          "Surface",
+          "WayCategory",
+          "WayType",
+          "Tollways",
+          "TrailDifficulty",
+          "Osmid",
+          "RoadAccessRestrictions",
+          "CountryInfo",
+          "Green",
+          "Noise",
+          "Csv",
+          "Shadow"
+        ],
+        "type": "string"
+      },
+      "InstructionFormat": {
+        "enum": [
+          "Text",
+          "Html"
+        ],
+        "type": "string",
+        "description": "Defines the format of the instructions provided in the response."
+      },
+      "Metrics": {
+        "enum": [
+          "Duration",
+          "Distance"
+        ],
+        "type": "string",
+        "description": "Specifies a list of returned metrics.\r\ndistance - Returns distance matrix for specified points in defined units.\r\nduration - Returns duration matrix for specified points in seconds."
+      },
+      "Profile": {
+        "enum": [
+          "Car",
+          "Truck"
+        ],
+        "type": "string"
+      },
+      "ResponseFromat": {
+        "enum": [
+          "Default",
+          "Json",
+          "Geojson",
+          "Gpx"
+        ],
+        "type": "string",
+        "description": "Json: This is the standard JavaScript Object Notation format. It’s a lightweight data-interchange format that is easy for humans to read\r\nand write and easy for machines to parse and generate1.\r\nGeoJson: This is a format for encoding a variety of geographic data structures. A GeoJSON object may represent a geometry,\r\na feature, or a collection of features. It’s based on the JSON format and includes information about the geographic features,\r\nincluding points (like locations), lines (like streets), and polygons (like countries)12.\r\nGpx: This stands for GPS Exchange Format. It’s a type of data format that’s used to describe waypoints, tracks, and routes.\r\nIts tags store location data (like latitude and longitude) and other information like elevation, time, and temperature."
+      },
+      "RouteAttributes": {
+        "type": "object",
+        "properties": {
+          "averageSpeed": {
+            "type": "boolean",
+            "description": "refers to the average speed assumed for a particular type of road or transport mode when calculating routes.\r\nThis value is used in the routing algorithm to estimate the travel times between different points on the map."
+          },
+          "detourFactor": {
+            "type": "boolean",
+            "description": "a measure of the difference from a straight line from the start to the end in terms of distance.\r\nFor example, if a route has double the distance compared to a straight line from point A to point B,\r\nit would have a DetourFactor of 2. This means that the route is twice as long as the direct path from the start to the end point.\r\nIt’s a useful metric for understanding the efficiency of a route."
+          },
+          "percentage": {
+            "type": "boolean",
+            "description": "A way of expressing the length of each segment in relation to the total length of the route.\r\nCan be useful for understanding the composition of the route, such as which segments are the longest or shortest,\r\nor how a particular segment compares to the overall route."
+          },
+          "elevation": {
+            "type": "boolean",
+            "description": "ORS property binding: elevation: boolean."
+          }
+        },
+        "additionalProperties": false
+      },
+      "RouteOptions": {
+        "type": "object",
+        "properties": {
+          "avoidHighways": {
+            "type": "boolean",
+            "description": "Setting AvoidHighways to true, router will calculate a route that tries to avoid highways as much as possible.\r\nSetting AvoidHighways to false or don’t specify this option, the router will use highways where it makes sense based on other routing preferences.\r\nIt’s important to note that avoiding highways might result in a longer route, both in terms of distance and time.\r\nAlso, the avoid highways option is not a strict constraint. That means router might still use highways if there’s no reasonable alternative route."
+          },
+          "avoidTollways": {
+            "type": "boolean",
+            "description": "Setting AvoidTollways to true, router will calculate a route that tries to avoid toll roads as much as possible.\r\nSetting AvoidTollways to false or don’t specify this option, router will use toll roads where it makes sense to do so based on other routing preferences.\r\nIt’s important to note that avoiding toll roads might result in a longer route, both in terms of distance and time.\r\nAlso, the tollways option is not a strict constraint. That means router might still use toll roads if there’s no reasonable alternative route."
+          },
+          "avoidFerries": {
+            "type": "boolean",
+            "description": "Setting AvoidFerries to true, router will calculate a route that tries to avoid ferry routes as much as possible.\r\nSetting AvoidFerries to false or don’t specify this option, router will use ferry routes where it makes sense to do so based on other routing preferences.\r\nIt’s important to note that avoiding ferries might result in a longer route, both in terms of distance and time1.\r\nAlso, the avoid ferries option is not a strict constraint. That means router might still use ferry routes if there’s no reasonable alternative route."
+          },
+          "avoidBorders": {
+            "$ref": "#/components/schemas/AvoidBorders"
+          },
+          "avoidCountries": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "List of countries to exclude from matrix with driving-* profiles.\r\nCan be used together with 'avoid_borders': 'controlled'.\r\n[ 11, 193 ] would exclude Austria and Switzerland.\r\nList of countries and application examples can be found https://giscience.github.io/openrouteservice/technical-details/country-list.\r\nAlso, ISO standard country codes cna be used in place of the numerical ids, for example, DE or DEU for Germany.",
+            "nullable": true,
+            "example": [
+              11,
+              193
+            ]
+          },
+          "avoidPolygons": {
+            "type": "string",
+            "description": "You can define the areas to avoid as polygons or multipolygons in GeoJSON format.\r\nRouter will then calculate a route that tries to avoid these areas as much as possible.\r\nIt’s important to note that the AvoidPolygons option is not a strict constraint. That means router might still pass through the polygons if there’s no reasonable alternative route.",
+            "nullable": true
+          },
+          "restrictUTurns": {
+            "type": "boolean",
+            "description": "If RestrictUTurns is set to true, router will force the route to keep going straight at waypoints, restricting U-turns even if U-turns would be faster.\r\nNot specifying this option or set RestrictUTurns to false, router will allow U-turns at waypoints if it makes the route faster."
+          },
+          "routePreference": {
+            "$ref": "#/components/schemas/RoutePreference"
+          },
+          "radiuses": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "The radius array is used to specify the maximum search distance for nearby road segments for each waypoint in your route.\r\nEach value in the array corresponds to a waypoint in your route.\r\nThe value is the maximum distance (measured in metres) router will search from the waypoint to find a nearby road segment.\r\nIf the value is -1, router will use the maximum possible search radius.\r\nIf only a single value is provider, that value will be used for all waypoints.\r\nin the example of [200,-1,30], router will search within 200 metres of the first waypoint,\r\nuse the maximum possible search radius for the second waypoint,\r\nand search within 30 metres of the third waypoint to find nearby road segments.\r\nThis feature allows you to control the precision of the route calculation around each waypoint.\r\nFor example, if a waypoint is in a dense urban area with many roads,\r\nyou might want to use a smaller radius to ensure the route uses a specific road.\r\nConversely, in a rural area, you might use a larger radius or -1 to ensure the route calculation\r\ndoesn’t fail if the exact waypoint is not located on a road.",
+            "nullable": true,
+            "example": [
+              200,
+              -1,
+              30
+            ]
+          },
+          "units": {
+            "$ref": "#/components/schemas/RouteUnit"
+          },
+          "maximumSpeed": {
+            "type": "number",
+            "description": "Maximum speed in km/h.",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RoutePreference": {
+        "enum": [
+          "Recommended",
+          "Fastest",
+          "Shortest"
+        ],
+        "type": "string",
+        "description": "This property can be set to one of three values:\r\nfastest: This will return the quickest route, usually the one with the shortest travel time.\r\nshortest: This will return the shortest route in terms of distance, which may not necessarily be the fastest.\r\nrecommended: This will return the route that the router recommends based on a combination of factors such as road type,\r\ntraffic conditions, and other factors."
+      },
+      "RouteUnit": {
+        "enum": [
+          "M",
+          "Km",
+          "Mi"
+        ],
+        "type": "string",
+        "description": "Specifies the unit distance to use."
+      },
+      "RoutingOptions": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "$ref": "#/components/schemas/Profile"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "securitySchemes": {
+      "ApiKey": {
+        "type": "apiKey",
+        "description": "API Key needed to access the endpoints. API Key is passed in the request header.",
+        "name": "X-API-KEY",
+        "in": "header"
+      }
+    }
+  },
+  "security": [
+    {
+      "ApiKey": [ ]
+    }
+  ]
+}

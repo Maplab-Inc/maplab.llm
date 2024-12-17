@@ -1,0 +1,259 @@
+{
+    "Jobs": [
+        {
+            "Id": {
+                "type": "number",
+                "description": "Unique identifier for the job",
+                "example": 1749,
+                "required": true
+            },
+            "Location": {
+                "type": "object",
+                "description": "Location is the geographical location of the job.",
+                "required": true,
+                "properties": {
+                    "Latitude": {
+                        "type": "number",
+                        "description": "Latitude of the job location",
+                        "example": 37.7749,
+                        "required": true
+                    },
+                    "Longitude": {
+                        "type": "number",
+                        "description": "Longitude of the job location",
+                        "example": -122.4194,
+                        "required": true
+                    }
+                }
+            },
+            "Demands": [
+                {
+                    "type": "number",
+                    "description": "How much of this product is required for the job",
+                    "example": 2500,
+                    "required": true
+                }
+            ],
+            "Priority": {
+                "type": "enum ['Low', 'Medium', 'High']",
+                "description": "Priority of the job",
+                "example": "Hight",
+                "required": true
+            },
+            "RequiredSkills": {
+                "type": "array",
+                "description": "Skills required to accomplish this job",
+                "promptMessageExample": "I want vehicle 774 to delivery to Customer 1 (set a unique skill to both vehicle 774 and this job)",
+                "items": {
+                    "type": "string",
+                    "example": "[ skill1, skill2 ]"
+                }
+            },
+            "TimeWindow": {
+                "type": "object",
+                "required": false,
+                "description": "Time window for the job",
+                "promptMessageExample": "Customer John Doe can only receive deliveries starting at 2PM",
+                "properties": {
+                    "Start": {
+                        "type": "integer",
+                        "description": "Start time of the time window. seconds from current time to the start time. e.g. 3600 means 1 hour from now",
+                        "example": "7200"
+                    },
+                    "End": {
+                        "type": "integer",
+                        "description": "End time of the time window. seconds from current time to the end time. e.g. 3600 means 1 hour from now.",
+                        "validation": "End time should be greater than the start time",
+                        "example": "10800"
+                    }
+                }
+            }
+        }
+    ],
+    "Reloads": [
+        {
+            "description": "Reloads are locations where vehicles can reload products",
+            "id": {
+                "type": "integer",
+                "description": "Unique identifier for the reload",
+                "example": 1749,
+                "required": true
+            },
+            "Location": {
+                "type": "object",
+                "description": "Location is the geographical location of the reload.",
+                "required": true,
+                "properties": {
+                    "Latitude": {
+                        "type": "number",
+                        "description": "Latitude of the reload location",
+                        "example": 37.7749,
+                        "required": true
+                    },
+                    "Longitude": {
+                        "type": "number",
+                        "description": "Longitude of the reload location",
+                        "example": -122.4194,
+                        "required": true
+                    }
+                }
+            }
+        }
+    ],
+    "Vehicles": [
+        {
+            "id": {
+                "type": "number",
+                "description": "Unique identifier for the vehicle",
+                "example": 1749,
+                "required": true
+            },
+            "products": [
+                {
+                    "id": {
+                        "type": "number",
+                        "description": "Unique identifier for the product",
+                        "example": 1749,
+                        "required": true
+                    },
+                    "capacity": {
+                        "type": "number",
+                        "description": "Capacity of the product that this vehicle can carry. if not specified use the same value as the vehicle's load",
+                        "example": 2500,
+                        "required": true
+                    },
+                    "load": {
+                        "type": "number",
+                        "description": "Current load of the product in the vehicle",
+                        "validation": "load should always be less or equal to the capacity",
+                        "example": 2500,
+                        "required": true
+                    }
+                }
+            ],
+            "start": {
+                "Longitude": {
+                    "type": "number",
+                    "description": "Longitude of the vehicle's starting location",
+                    "example": -122.4194,
+                    "required": true
+                },
+                "Latitude": {
+                    "type": "number",
+                    "description": "Latitude of the vehicle's starting location",
+                    "example": 37.7749,
+                    "required": true
+                },
+                "required": true
+            },
+            "end": {
+                "Longitude": {
+                    "type": "number",
+                    "description": "Longitude of the vehicle's ending location",
+                    "example": -122.4194,
+                    "required": true
+                },
+                "Latitude": {
+                    "type": "number",
+                    "description": "Latitude of the vehicle's ending location",
+                    "example": 37.7749,
+                    "required": true
+                },
+                "description": "this is where we want the vehicle to end its route, do not forget to set the track mode to custom if this is used",
+                "required": false
+            },
+            "trackMode": {
+                "type": "enum ['RoundTripe', 'LastVisit', 'VehicleEnd']",
+                "description": "If not asked do not specify any value To end the route of a vehicle at the starting point End should be set to null and TrackMode to RoundTrip. To end the route of a vehicle at a custom point set the coordinates in End and TrackMode to Custom. To end the route of a vehicle at it's last stop, End should be set to null and TrackMode to LastVisit",
+                "example": "Single",
+                "required": true
+            },
+            "skills": {
+                "type": "array",
+                "description": "Skills array represents the skills of the vehicle.",
+                "items": {
+                    "type": "string",
+                    "example": "[ skill1, skill2 ]"
+                }
+            },
+            "TimeWindow": {
+                "type": "object",
+                "required": false,
+                "description": "Time window for the vehicle",
+                "promptMessageExample": "I want vehicle v1 to start at 8:00 and end at 17:00",
+                "properties": {
+                    "Start": {
+                        "type": "integer",
+                        "description": "Start time of the time window. seconds from current time to the start time. e.g. 3600 means 1 hour from now",
+                        "example": "7200"
+                    },
+                    "End": {
+                        "type": "integer",
+                        "description": "End time of the time window. seconds from current time to the end time. e.g. 3600 means 1 hour from now.",
+                        "validation": "End time should be greater than the start time",
+                        "example": "10800"
+                    }
+                }
+            },
+            "maxDrivingDistance": {
+                "type": "number",
+                "description": "Maximum distance the vehicle can drive in km",
+                "promptMessageExample": "I want vehicle T744 to not drive more than 100km",
+                "example": 250,
+                "required": false
+            },
+            "maxDrivingTime": {
+                "type": "number",
+                "description": "Maximum time the vehicle can drive in seconds",
+                "promptMessageExample": "I want vehicle T744 to not drive more than 2 hours",
+                "example": 7200,
+                "required": false
+            }
+        }
+    ],
+    "Depot": {
+        "Location": {
+            "Latitude": {
+                "type": "number",
+                "description": "Latitude of the depot location",
+                "example": 37.7749,
+                "required": true
+            },
+            "Longitude": {
+                "type": "number",
+                "description": "Longitude of the depot location",
+                "example": -122.4194,
+                "required": true
+            }
+        }
+    },
+    "RoutingOptions": {
+        "profile": {
+            "type": "enum ['Truck', 'Car']",
+            "description": "The routing profile to use for the optimization, use Truck if no profile is specified",
+            "example": "driving-car",
+            "required": true
+        }
+    },
+    "HeuristicParameters": {
+        "firstSolutionStrategy": {
+            "type": "enum ['Unset', 'Automatic', 'PathCheapestArc', 'GlobalCheapestArc', 'LocalCheapestArc', 'AllUnperformed', 'BestInsertion', 'ParallelCheapestInsertion', 'ParallelCheapestInsertion', 'Christofides', 'Savings', 'Sweep', 'FirstUnboundMinValue']",
+            "description": "The first solution strategy to use for the optimization, use PathCheapestArc if no strategy is specified",
+            "example": "PathCheapestArc",
+            "required": true
+        },
+        "metaheuristic": {
+            "type": "enum ['Unset', 'Automatic', 'GreedyDescent', 'GuidedLocalSearch', 'SimulatedAnnealing', 'TabuSearch', 'GenericTabuSearch']", 
+            "description": "The local search metaheuristic to use for the optimization, use GuidedLocalSearch if no metaheuristic is specified",
+            "example": "GuidedLocalSearch",
+            "required": true
+        },
+        "timeLimit": {
+            "type": "number",
+            "description": "The time limit in seconds for the optimization, use 3s if no time limit is specified",
+            "example": 3,
+            "required": true
+        }
+    }
+}
+
