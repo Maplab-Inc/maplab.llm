@@ -9,9 +9,9 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import START, StateGraph
 from langgraph.prebuilt import tools_condition
 from langgraph.prebuilt import ToolNode
-from langchain_community.llms import Modal
-from langchain.chains import LLMChain
 from langchain_core.prompts import PromptTemplate
+from langchain_community.llms import modal
+from langchain.chains import LLMChain
 
 from helpers.openapi_schema_helper import get_local_endpoint_schema
 from helpers.system_message_helper import get_assistant_guidelines
@@ -33,18 +33,19 @@ _set_env("MAPLAB_API_KEY")
 # fine-tuned 4o-mini id: ft:gpt-4o-mini-2024-07-18:maplab::AdljqShw
 # fine-tuned 4o id: ft:gpt-4o-2024-08-06:maplab::AdrJCNPA
 tools = [optimize_routes, direction, isochrone, matrix, overpass, get_local_endpoint_schema]
-llm = ChatOpenAI(model="ft:gpt-4o-2024-08-06:maplab::AdrJCNPA")
-llm_with_tools = llm.bind_tools(tools, parallel_tool_calls=False)
-# modal_llama_8b_endpoint = "https://maplab--example-vllm-openai-compatible-serve.modal.run/v1/chat/completions"
-# llm = Modal(endpoint_url=modal_llama_8b_endpoint)
+endpoint="https://maplab--example-vllm-openai-compatible-serve.modal.run/v1/chat/completions"
+llm = modal.Modal(endpoint_url=endpoint)
+llm.endpoint_url = endpoint
+llm._identifying_params
 
-# template = """Question: {question}
-# Answer: Let's think step by step."""
-# prompt = PromptTemplate.from_template(template)
-# llm_chain = LLMChain(prompt=prompt, llm=llm)
-# question = "What NFL team won the Super Bowl in the year Justin Beiber was born?"
-# llm_chain.run(question)
-# llm_with_tools = llm | tools 
+template = """Question: {question}
+
+Answer: Let's think step by step."""
+
+prompt = PromptTemplate.from_template(template)
+llm_chain = LLMChain(prompt=prompt, llm=llm)
+
+response = llm_chain.invoke("Hi")
 
 sys_msg = SystemMessage(content=get_assistant_guidelines())
 

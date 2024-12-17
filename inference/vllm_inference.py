@@ -1,9 +1,11 @@
 import modal
 from openai import BaseModel
-from modal import Stub
+import fastapi
+
+#modal deploy ./inference/vllm_inference.py
 
 vllm_image = modal.Image.debian_slim(python_version="3.12").pip_install(
-    "vllm==0.6.3post1", "fastapi[standard]==0.115.4"
+    "vllm==0.6.3post1", "fastapi[standard]"
 )
 
 MODELS_DIR = "/llamas"
@@ -15,8 +17,7 @@ try:
 except modal.exception.NotFoundError:
     raise Exception("Download models first with modal run download_llama.py")
 
-stub = Stub("example-vllm-openai-compatible")  
-app = modal.App("example-vllm-openai-compatible")
+app = modal.App("example-vllm-openai-compatible", image=vllm_image)
 
 N_GPU = 1  # tip: for best results, first upgrade to more powerful GPUs, and only then increase GPU count
 TOKEN = "super-secret-token"  # auth token. for production use, replace with a modal.Secret
@@ -26,12 +27,6 @@ HOURS = 60 * MINUTES
 
 class Request(BaseModel):
     prompt: str
-
-@stub.function()
-@modal.web_endpoint(method="POST")
-def web(request: Request):
-    _ = request  # ignore input
-    return {"prompt": "hello world"}
 
 def get_model_config(engine):
     import asyncio
@@ -51,6 +46,36 @@ def get_model_config(engine):
 
     return model_config
 
+# create a fastAPI app that uses vLLM's OpenAI-compatible router
+web_app = fastapi.FastAPI(
+    title=f"OpenAI-compatible {MODEL_NAME} server",
+    description="Run an OpenAI-compatible LLM server with vLLM on modal.com 🚀",
+    version="0.0.1",
+    docs_url="/docs",
+)
+
+@web_app.post("/generate_response")
+async def generate_response(request: Request):
+    from vllm.sampling_params import SamplingParams
+
+    prompt = request.prompt  # Get the prompt from the request
+
+    engine = web_app.state.engine_client
+    
+    params = SamplingParams(
+        temperature=0.5,
+        top_k=50,
+        top_p=0.9,
+        max_tokens=100000,  # Ensure this matches the `max_new_tokens` setting
+    )
+    
+    responses = []
+    async for result in engine.generate(prompt, params, 0):
+        responses.append(result)
+
+    return {"response": responses[-1] if responses else None}
+
+
 @app.function(
     image=vllm_image,
     gpu=modal.gpu.A10G(count=N_GPU),
@@ -61,27 +86,19 @@ def get_model_config(engine):
 )
 @modal.asgi_app()
 def serve():
-    import fastapi
     import vllm.entrypoints.openai.api_server as api_server
     from vllm.engine.arg_utils import AsyncEngineArgs
     from vllm.engine.async_llm_engine import AsyncLLMEngine
     from vllm.entrypoints.logger import RequestLogger
     from vllm.entrypoints.openai.serving_chat import OpenAIServingChat
     from vllm.entrypoints.openai.serving_completion import (
-        OpenAIServingCompletion,
-    )
+            OpenAIServingCompletion,
+            SamplingParams,
+        )
     from vllm.entrypoints.openai.serving_engine import BaseModelPath
     from vllm.usage.usage_lib import UsageContext
 
     volume.reload()  # ensure we have the latest version of the weights
-
-    # create a fastAPI app that uses vLLM's OpenAI-compatible router
-    web_app = fastapi.FastAPI(
-        title=f"OpenAI-compatible {MODEL_NAME} server",
-        description="Run an OpenAI-compatible LLM server with vLLM on modal.com 🚀",
-        version="0.0.1",
-        docs_url="/docs",
-    )
 
     # security: CORS middleware for external requests
     http_bearer = fastapi.security.HTTPBearer(
