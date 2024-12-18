@@ -13,7 +13,7 @@ def optimize_routes(route_optimization_request: str) -> str:
         route_optimization_request: A JSON string containing all necessary data. 
         To get the JSON schema structure that should be followed use the get_route_data_schema with "/api/v1/router/route-optimization" argument.} 
     """
-    url = "http://localhost:5243/v1/optimization/resolve" 
+    url = "https://api.maplab.ai/v1/optimization/resolve" 
 
     try:
         response = requests.post(url, data=route_optimization_request, headers={'Content-Type': 'application/json'})

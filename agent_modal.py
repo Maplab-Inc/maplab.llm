@@ -1,17 +1,14 @@
+import json
 import os, getpass
 
 from flask import Flask, jsonify, request
 
-
-from langchain_openai import ChatOpenAI
+from langchain_openai import ChatOpenAI, OpenAI
 from langgraph.graph import MessagesState
 from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import START, StateGraph
 from langgraph.prebuilt import tools_condition
 from langgraph.prebuilt import ToolNode
-from langchain_core.prompts import PromptTemplate
-from langchain_community.llms import modal
-from langchain.chains import LLMChain
 
 from helpers.openapi_schema_helper import get_local_endpoint_schema
 from helpers.system_message_helper import get_assistant_guidelines
@@ -27,28 +24,21 @@ def _set_env(var: str):
     if not os.environ.get(var):
         os.environ[var] = getpass.getpass(f"{var}: ")
 
-_set_env("OPENAI_API_KEY")
 _set_env("MAPLAB_API_KEY")
 
-# fine-tuned 4o-mini id: ft:gpt-4o-mini-2024-07-18:maplab::AdljqShw
-# fine-tuned 4o id: ft:gpt-4o-2024-08-06:maplab::AdrJCNPA
 tools = [optimize_routes, direction, isochrone, matrix, overpass, get_local_endpoint_schema]
-endpoint="https://maplab--maplab-vllm-serve.modal.run/geoassistant"
-llm = modal.Modal(endpoint_url=endpoint)
-llm.endpoint_url = endpoint
-llm._identifying_params
+endpoint="https://maplab--maplab-vllm-serve.modal.run/v1/"
+llm = ChatOpenAI(
+    base_url=endpoint,
+    model="Meta-Llama-3.1-8B-Instruct-quantized.w4a16"
+)
 
-template = """Question: {question}
-
-Answer: Let's think step by step."""
-
-prompt = PromptTemplate.from_template(template)
-llm_chain = LLMChain(prompt=prompt, llm=llm)
+llm_with_tools = llm.bind_tools(tools, parallel_tool_calls=False)
 
 sys_msg = SystemMessage(content=get_assistant_guidelines())
 
 def assistant(state: MessagesState):
-   return {"messages": [llm_chain.invoke([sys_msg] + state["messages"])]}
+   return {"messages": [llm_with_tools.invoke([sys_msg] + state["messages"])]}
 
 builder = StateGraph(MessagesState)
 
@@ -83,7 +73,9 @@ def invoke_assistant():
                 "response": m.content
             })
     
-    return jsonify(result[-1])
+    response = result[-1]['response']
+    cleaned_data = json.loads(response)
+    return cleaned_data
 
 if __name__ == '__main__': 
     app.run(debug=True)

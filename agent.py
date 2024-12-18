@@ -29,8 +29,9 @@ _set_env("MAPLAB_API_KEY")
 
 tools = [optimize_routes, direction, isochrone, matrix, overpass, get_local_endpoint_schema]
 # fine-tuned 4o-mini id: ft:gpt-4o-mini-2024-07-18:maplab::AdljqShw
-# fine-tuned 4o id: ft:gpt-4o-2024-08-06:maplab::AdrJCNPA
-llm = ChatOpenAI(model="ft:gpt-4o-2024-08-06:maplab::AdrJCNPA")
+# fine-tuned 4o id: ft:gpt-4o-2024-08-06:maplab::AfGjkfSB
+llm = ChatOpenAI(model="ft:gpt-4o-2024-08-06:maplab::AfGjkfSB")
+
 llm_with_tools = llm.bind_tools(tools, parallel_tool_calls=False)
 
 sys_msg = SystemMessage(content=get_assistant_guidelines())

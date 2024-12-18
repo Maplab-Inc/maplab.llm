@@ -1,3 +1,4 @@
+from typing import Any
 import modal
 from openai import BaseModel
 import fastapi
@@ -5,9 +6,7 @@ import fastapi
 #modal deploy ./inference/vllm_inference.py
 
 vllm_image = modal.Image.debian_slim(python_version="3.12").pip_install(
-    "vllm==0.6.3post1", "fastapi[standard]"
-)
-
+    "vllm==0.6.5", "fastapi[standard]")
 MODELS_DIR = "/llamas"
 MODEL_NAME = "neuralmagic/Meta-Llama-3.1-8B-Instruct-quantized.w4a16"
 MODEL_REVISION = "a7c09948d9a632c2c840722f519672cd94af885d"
@@ -54,11 +53,11 @@ web_app = fastapi.FastAPI(
     docs_url="/docs",
 )
 
-@web_app.post("/geoassistant")
-async def generate_response(request: Request):
+@web_app.post("/api/chat")
+async def generate_response(request: Any):
     from vllm.sampling_params import SamplingParams
 
-    prompt = request.prompt  # Get the prompt from the request
+    return request  # Get the prompt from the request
 
     engine = web_app.state.engine_client
     
@@ -72,8 +71,14 @@ async def generate_response(request: Request):
     responses = []
     async for result in engine.generate(prompt, params, 0):
         responses.append(result)
+        
+    # Extracting the output text
+    output_text = responses[-1].outputs[0].text
 
-    return {"response": responses[-1] if responses else None}
+    # Creating the desired output format
+    result = {"prompt": output_text}
+
+    return result if output_text else None
 
 
 @app.function(
@@ -92,8 +97,7 @@ def serve():
     from vllm.entrypoints.logger import RequestLogger
     from vllm.entrypoints.openai.serving_chat import OpenAIServingChat
     from vllm.entrypoints.openai.serving_completion import (
-            OpenAIServingCompletion,
-            SamplingParams,
+            OpenAIServingCompletion
         )
     from vllm.entrypoints.openai.serving_engine import BaseModelPath
     from vllm.usage.usage_lib import UsageContext
@@ -160,6 +164,9 @@ def serve():
         lora_modules=[],
         prompt_adapters=[],
         request_logger=request_logger,
+        enable_auto_tools=True,
+        tool_parser="pythonic",
+        chat_template_content_format="auto",
     )
     api_server.completion = lambda s: OpenAIServingCompletion(
         engine,
