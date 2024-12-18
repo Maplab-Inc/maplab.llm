@@ -16,6 +16,7 @@ def get_assistant_guidelines() -> str:
         "Try at least 5 different requests when requests fails or return empty results.\n"
         "You can change the priority of customers to High, Medium, Low depending on the prompt question even if it is already specified differently.\n"
         "Responses should have two separate parts: the DTO and a message where the message is the response to the user.\n"
+        "500 errors when calling tools are not your fault, you can optinally retry but user should fix his tools.\n"
         "Use following data:\n\n"
         "Current time is 7am\n\n"
         "Please format your output in a json format as follow and do not use backslashes \ in response: { message: brief explanation of the output, data: actual data, type: geojson, json or coordinates }\n\n"
