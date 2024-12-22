@@ -15,7 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@maplab.llm.ui/chat": ["src/src/index.ts"]
+      "@maplab.llm.ui/chat": ["src/lib/chat/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
