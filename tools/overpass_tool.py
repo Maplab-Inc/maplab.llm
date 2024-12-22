@@ -1,10 +1,11 @@
 import os
 from typing import Optional
 from helpers.openapi_schema_helper import get_local_endpoint_schema
-
+from langchain_core.tools import tool
 import requests
 from typing import Optional
 
+@tool
 def overpass(overpass_request: str) -> str:
     """
 Overpass Tool for querying and visualizing OpenStreetMap data. It helps extract specific information from the vast OSM database by writing queries in the Overpass QL query language. 

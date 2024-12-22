@@ -47,7 +47,7 @@ builder.add_node("tools", ToolNode(tools))
 builder.add_edge(START, "assistant")
 builder.add_conditional_edges(
     "assistant",
-    # If the latest message (result) from assistant is a stool call -> tools_condition routes to tools
+    # If the latest message (result) from assistant is a tool call -> tools_condition routes to tools
     # If the latest message (result) from assistant is a not a tool call -> tools_condition routes to END
     tools_condition,
 )
@@ -73,8 +73,7 @@ def invoke_assistant():
             })
     
     response = result[-1]['response']
-    cleaned_data = json.loads(response)
-    return cleaned_data
+    return response
 
 if __name__ == '__main__': 
     app.run(debug=True)

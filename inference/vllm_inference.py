@@ -5,11 +5,14 @@ import fastapi
 
 #modal deploy ./inference/vllm_inference.py
 
+#neuralmagic/Meta-Llama-3.1-8B-Instruct-quantized.w4a16
+#/llamas
+#neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8
+#/llama-70B
 vllm_image = modal.Image.debian_slim(python_version="3.12").pip_install(
     "vllm==0.6.5", "fastapi[standard]")
 MODELS_DIR = "/llamas"
 MODEL_NAME = "neuralmagic/Meta-Llama-3.1-8B-Instruct-quantized.w4a16"
-MODEL_REVISION = "a7c09948d9a632c2c840722f519672cd94af885d"
 
 try:
     volume = modal.Volume.lookup("llamas", create_if_missing=False)
@@ -53,11 +56,9 @@ web_app = fastapi.FastAPI(
     docs_url="/docs",
 )
 
-@web_app.post("/api/chat")
+@web_app.post("v1/api/chat")
 async def generate_response(request: Any):
     from vllm.sampling_params import SamplingParams
-
-    return request  # Get the prompt from the request
 
     engine = web_app.state.engine_client
     
@@ -137,8 +138,8 @@ def serve():
         model=MODELS_DIR + "/" + MODEL_NAME,
         tensor_parallel_size=N_GPU,
         gpu_memory_utilization=0.90,
-        max_model_len=8096,
-        enforce_eager=False,  # capture the graph for faster inference, but slower cold starts (30s > 20s)
+        max_model_len=100000,
+        enforce_eager=True,  # capture the graph for faster inference, but slower cold starts (30s > 20s)
     )
 
     engine = AsyncLLMEngine.from_engine_args(
@@ -159,14 +160,14 @@ def serve():
         engine,
         model_config=model_config,
         base_model_paths=base_model_paths,
-        chat_template=None,
         response_role="assistant",
         lora_modules=[],
         prompt_adapters=[],
         request_logger=request_logger,
         enable_auto_tools=True,
-        tool_parser="pythonic",
         chat_template_content_format="auto",
+        tool_parser="llama3_json",
+        chat_template="tool_chat_template_llama3.2_json.jinja",
     )
     api_server.completion = lambda s: OpenAIServingCompletion(
         engine,

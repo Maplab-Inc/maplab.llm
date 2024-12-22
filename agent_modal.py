@@ -3,7 +3,9 @@ import os, getpass
 
 from flask import Flask, jsonify, request
 
+from langchain_ollama import ChatOllama
 from langchain_openai import ChatOpenAI, OpenAI
+from langchain_groq import ChatGroq
 from langgraph.graph import MessagesState
 from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import START, StateGraph
@@ -26,7 +28,7 @@ def _set_env(var: str):
 
 _set_env("MAPLAB_API_KEY")
 
-tools = [optimize_routes, direction, isochrone, matrix, overpass, get_local_endpoint_schema]
+tools = [optimize_routes, direction, isochrone, matrix, overpass]
 endpoint="https://maplab--maplab-vllm-serve.modal.run/v1/"
 llm = ChatOpenAI(
     base_url=endpoint,
@@ -48,7 +50,7 @@ builder.add_node("tools", ToolNode(tools))
 builder.add_edge(START, "assistant")
 builder.add_conditional_edges(
     "assistant",
-    # If the latest message (result) from assistant is a stool call -> tools_condition routes to tools
+    # If the latest message (result) from assistant is a tool call -> tools_condition routes to tools
     # If the latest message (result) from assistant is a not a tool call -> tools_condition routes to END
     tools_condition,
 )
@@ -74,8 +76,7 @@ def invoke_assistant():
             })
     
     response = result[-1]['response']
-    cleaned_data = json.loads(response)
-    return cleaned_data
+    return response
 
 if __name__ == '__main__': 
     app.run(debug=True)

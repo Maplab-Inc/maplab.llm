@@ -1,10 +1,11 @@
 import os
 from typing import Optional
 from helpers.openapi_schema_helper import get_local_endpoint_schema
-
+from langchain_core.tools import tool
 import requests
 from typing import Optional
 
+@tool
 def matrix(matrix_request: str) -> str:
     """
     Get travel distance/duration matrix between multiple points.

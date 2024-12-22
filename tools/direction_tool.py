@@ -1,10 +1,10 @@
 import os
 from typing import Optional
 from helpers.openapi_schema_helper import get_local_endpoint_schema
-
+from langchain_core.tools import tool
 import requests
-from typing import Optional
 
+@tool
 def direction(direction_request: str) -> str:
     """
     Get direction from point A to point B.

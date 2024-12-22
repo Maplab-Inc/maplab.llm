@@ -1,10 +1,11 @@
 import requests
 from typing import Optional
 from helpers.openapi_schema_helper import get_local_endpoint_schema
-
+from langchain_core.tools import tool
 import requests
 from typing import Optional
 
+@tool
 def optimize_routes(route_optimization_request: str) -> str:
     """
     Route optimization for a given list of vehicles and jobs.

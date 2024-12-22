@@ -6,10 +6,12 @@ import modal
 
 MODELS_DIR = "/llamas"
 
-DEFAULT_NAME = "neuralmagic/Meta-Llama-3.1-8B-Instruct-quantized.w4a16"
+#neuralmagic/Meta-Llama-3.1-8B-Instruct-quantized.w4a16
+#neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8
+DEFAULT_NAME = "neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8"
 DEFAULT_REVISION = "a7c09948d9a632c2c840722f519672cd94af885d"
 
-volume = modal.Volume.from_name("llamas", create_if_missing=True)
+volume = modal.Volume.from_name("llama-70B", create_if_missing=True)
 
 image = (
     modal.Image.debian_slim(python_version="3.10")
@@ -50,7 +52,6 @@ def download_model(model_name, model_revision, force_download=False):
             "*.pth",
             "original/*",
         ],  # Ensure safetensors
-        revision=model_revision,
         force_download=force_download,
     )
 
