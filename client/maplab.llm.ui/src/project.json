@@ -1,8 +1,8 @@
 {
   "name": "chat",
   "$schema": "../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "src/src",
-  "prefix": "lib",
+  "sourceRoot": "src",
+  "prefix": "maplab-chat",
   "projectType": "library",
   "tags": [],
   "targets": {
@@ -10,7 +10,7 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "src/jest.config.ts"
+        "jestConfig": "jest.config.ts"
       }
     },
     "lint": {
