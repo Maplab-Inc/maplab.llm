@@ -2,7 +2,9 @@ import { NgModule } from "@angular/core";
 import { ChatComponent } from "./components/chat.component";
 
 @NgModule({
-    declarations: [ChatComponent],
+    declarations: [
+        ChatComponent
+    ],
     imports: [],
     providers: [],
   })
