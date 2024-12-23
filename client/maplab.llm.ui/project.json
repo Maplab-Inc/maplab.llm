@@ -3,7 +3,7 @@
   "$schema": "node_modules/nx/schemas/project-schema.json",
   "includedScripts": [],
   "projectType": "application",
-  "prefix": "app",
+  "prefix": "maplab-chat",
   "sourceRoot": "./src",
   "tags": [],
   "targets": {
@@ -23,7 +23,7 @@
             "input": "public"
           }
         ],
-        "styles": ["./src/styles.scss"],
+        "styles": ["./styles.scss"],
         "scripts": []
       },
       "configurations": {

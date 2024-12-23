@@ -5,8 +5,7 @@ import { AppComponent } from "./app.component";
     declarations: [
         AppComponent
     ],
-    imports: [
-    ],
+    imports: [],
     providers: [],
     bootstrap: [AppComponent]
 })
