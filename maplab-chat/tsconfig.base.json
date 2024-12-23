@@ -14,7 +14,9 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@maplab-chat/chat": ["apps/maplab-chat/src/libs/src/index.ts"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }
