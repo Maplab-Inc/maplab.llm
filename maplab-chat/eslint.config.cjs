@@ -10,6 +10,7 @@ module.exports = [
   {
     files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
     rules: {
+      '@angular-eslint/prefer-standalone': 'off',
       '@nx/enforce-module-boundaries': [
         'error',
         {

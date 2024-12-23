@@ -1,1 +1,3 @@
-export * from './lib/chat/chat.component';
+export * from './lib/components/chat.component';
+
+export * from './lib/chat.module';

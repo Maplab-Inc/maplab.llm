@@ -2,7 +2,7 @@
   "name": "chat",
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/maplab-chat/src/libs/src",
-  "prefix": "lib",
+  "prefix": "maplab-chat",
   "projectType": "library",
   "tags": [],
   "targets": {
