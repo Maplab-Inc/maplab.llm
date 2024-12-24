@@ -25,6 +25,8 @@ export class ChatComponent implements AfterViewInit {
   private mapIsLoaded!: boolean;
   private initialState = { lng: -73.62, lat: 45.5, zoom: 14 };
   stylesItems: MenuItem[] | undefined;
+  chatWidth: number = 50;
+  mapWidth: number = 50;
 
   constructor() {
     if (localStorage.getItem('MapStyleV2')) {
@@ -44,6 +46,35 @@ export class ChatComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     this.mapContainer.nativeElement.appendChild(this.map._container);
     this.map.resize();
+
+    const resizer = document.querySelector('.resizer') as HTMLElement;
+
+    let isResizing = false;
+
+    resizer.addEventListener('mousedown', (e) => {
+      isResizing = true;
+      document.body.style.cursor = 'col-resize';
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isResizing) return;
+  
+      const containerWidth = document.querySelector('.chat-container')!.clientWidth;
+      const offsetX = e.clientX;
+      const chatWidthPercent = (offsetX / containerWidth) * 100;
+      const mapWidthPercent = 100 - chatWidthPercent;
+  
+      if (chatWidthPercent > 20 && mapWidthPercent > 20) {
+        this.chatWidth = chatWidthPercent;
+        this.mapWidth = mapWidthPercent;
+        console.log(this.chatWidth, this.mapWidth);
+      }
+    });
+
+    document.addEventListener('mouseup', () => {
+      isResizing = false;
+      document.body.style.cursor = 'default';
+    });
   }
 
   sendMessage(): void {

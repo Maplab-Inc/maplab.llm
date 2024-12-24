@@ -1,21 +1,20 @@
-<div class="container">
-    <div class="chat-container">
-        <div class="chat-area">
-            <div *ngFor="let message of messages" class="chat-message"
-                [ngClass]="{'user-message': message.sender === 'user', 'ai-message': message.sender === 'ai'}">
-                <div class="message-content">{{ message.content }}</div>
+<div class="chat-container">
+    <div class="chat-area" [style.width.%]="chatWidth">
+        <div *ngFor="let message of messages" class="chat-message"
+            [ngClass]="{'user-message': message.sender === 'user', 'ai-message': message.sender === 'ai'}">
+            <div class="message-content">{{ message.content }}</div>
+        </div>
+        <div class="chat-prompt">
+            <div class="input-container">
+                <input [(ngModel)]="userInput" (keyup.enter)="sendMessage()" placeholder="Type your message..." />
+                <button (click)="sendMessage()" class="send-button">
+                    <div class="icon-circle">
+                        <i class="pi pi-arrow-up"></i>
+                    </div>
+                </button>
             </div>
         </div>
-        <div class="map-area" #mapContainer></div>
     </div>
-    <div class="chat-prompt">
-        <div class="input-container">
-            <input [(ngModel)]="userInput" (keyup.enter)="sendMessage()" placeholder="Type your message..." />
-            <button (click)="sendMessage()" class="send-button">
-                <div class="icon-circle">
-                    <i class="pi pi-arrow-up"></i>
-                </div>
-            </button>
-        </div>
-    </div>
+    <div class="resizer"></div>
+    <div class="map-area" [style.width.%]="mapWidth" #mapContainer></div>
 </div>
