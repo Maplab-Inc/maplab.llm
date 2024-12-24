@@ -25,8 +25,8 @@ export class ChatComponent implements AfterViewInit {
   private mapIsLoaded!: boolean;
   private initialState = { lng: -73.62, lat: 45.5, zoom: 14 };
   stylesItems: MenuItem[] | undefined;
-  chatWidth: number = 50;
-  mapWidth: number = 50;
+  chatWidth: number = 30;
+  mapWidth: number = 70;
 
   constructor() {
     if (localStorage.getItem('MapStyleV2')) {

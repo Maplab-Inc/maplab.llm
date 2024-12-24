@@ -21,6 +21,16 @@
   overflow: auto;
 }
 
+.message-area {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  height: 85%;
+  background-color: #1e1b1b;
+  overflow: auto;
+}
+
 .map-area {
   background-color: #454545;
   overflow: hidden;
@@ -52,6 +62,24 @@
   margin-top: 10px;
   margin-bottom: 10px;
   max-width: 100%;
+}
+
+
+.icon-container {
+  margin-right: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.message-wrapper {
+  display: flex;
+  align-items: flex-start;
+}
+
+.ai-icon {
+  width: 30px; 
+  height: 30px;
+  object-fit: contain;
 }
 
 .chat-prompt {
@@ -129,5 +157,17 @@
 }
 
 .resizer:hover {
-  background: #555;
+  background: rgb(31, 113, 255);
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+  overflow-y: scroll;
+  background: black;
+  box-shadow: inset 0 0 4px #707070;
+}
+
+::-webkit-scrollbar-thumb {
+  background: grey;
+  border-radius: 10px;
 }

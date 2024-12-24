@@ -1,8 +1,15 @@
 <div class="chat-container">
     <div class="chat-area" [style.width.%]="chatWidth">
-        <div *ngFor="let message of messages" class="chat-message"
-            [ngClass]="{'user-message': message.sender === 'user', 'ai-message': message.sender === 'ai'}">
-            <div class="message-content">{{ message.content }}</div>
+        <div class="message-area">
+            <div *ngFor="let message of messages" class="chat-message"
+                [ngClass]="{'user-message': message.sender === 'user', 'ai-message': message.sender === 'ai'}">
+                <div class="message-wrapper">
+                    <div *ngIf="message.sender === 'ai'" class="icon-container">
+                        <img src="/maplab-logo.png" alt="Maplab Logo" class="ai-icon" />
+                    </div>
+                    <div class="message-content">{{ message.content }}</div>
+                </div>
+            </div>
         </div>
         <div class="chat-prompt">
             <div class="input-container">
