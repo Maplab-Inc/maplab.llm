@@ -17,8 +17,10 @@ from tools.isochrone_tool import isochrone
 from tools.matrix_tool import matrix
 from tools.overpass_tool import overpass
 from tools.route_optimization_tool import optimize_routes
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 def _set_env(var: str):
     if not os.environ.get(var):

@@ -2,7 +2,6 @@ import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { ChatActions } from './chat.actions';
 import { exhaustMap, map, tap } from 'rxjs';
-import { MessageService } from 'primeng/api';
 import { AssistantCompletion } from '../models/assistant-completion';
 import { ChatService } from '../services/chat.service';
 

@@ -13,8 +13,9 @@
         </div>
         <div class="chat-prompt">
             <div class="input-container">
-                <input [(ngModel)]="userInput" (keyup.enter)="sendMessage()" placeholder="Type your message..." />
-                <button (click)="sendMessage()" class="send-button">
+                <input [(ngModel)]="userInput" [disabled]="(chatFacade.chatLoading$ | async) ?? false" (keyup.enter)="sendMessage()"
+                    placeholder="Type your message..." />
+                <button (click)="sendMessage()" class="send-button" [disabled]="(chatFacade.chatLoading$ | async) ?? false">
                     <div class="icon-circle">
                         <i class="pi pi-arrow-up"></i>
                     </div>

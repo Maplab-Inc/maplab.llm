@@ -9,6 +9,7 @@ import {
 import { FullscreenControl, Map, MapMouseEvent } from 'maplibre-gl';
 import { MenuItem } from 'primeng/api';
 import { ChatFacade } from '../+state/chat.facade';
+import { AssistantCompletion } from '../models/assistant-completion';
 
 interface IStyle {
   style: string;
@@ -35,8 +36,16 @@ export class ChatComponent implements AfterViewInit {
   stylesItems: MenuItem[] | undefined;
   chatWidth: number = 30;
   mapWidth: number = 70;
+  private colors = [
+    '#f54242',
+    '#f542ce',
+    '#c542f5',
+    '#7b42f5',
+    '#2f47fa',
+    '#2fa9fa',
+  ];
 
-  constructor(private chatFacade: ChatFacade) {
+  constructor(public chatFacade: ChatFacade) {
     if (localStorage.getItem('MapStyleV2')) {
       this.currentStyle = JSON.parse(
         localStorage.getItem('MapStyleV2') as string
@@ -50,6 +59,58 @@ export class ChatComponent implements AfterViewInit {
     }
     this.initMap();
     this.initStylesMenu();
+
+    this.chatFacade.chat$.subscribe({
+      next: (response: AssistantCompletion | null) => {
+        debugger
+        if (response) {
+          // Add AI response to the chat
+          this.messages.push({
+            content: response.message || 'No response from AI.',
+            sender: 'ai',
+          });
+
+          this.map.addSource('isochroneSource', {
+            type: 'geojson',
+            data: response.data,
+          });
+
+          this.map.addLayer({
+            id: 'isochroneLayer',
+            type: 'fill',
+            source: 'isochroneSource',
+            paint: {
+              ['fill-color']: [
+                'match',
+                ['get', 'value'],
+                200,
+                this.colors[0],
+                400,
+                this.colors[1],
+                600,
+                this.colors[2],
+                800,
+                this.colors[3],
+                1000,
+                this.colors[4],
+                1200,
+                this.colors[5],
+                this.currentStyle.type === 'dark' ? '#ffffff' : '#000000',
+              ],
+              ['fill-outline-color']: 'rgb(255, 255, 255)',
+              ['fill-opacity']: 0.3,
+            },
+          });
+        }
+      },
+      error: (error: any) => {
+        console.error('Error:', error);
+        this.messages.push({
+          content: 'Failed to fetch response from server.',
+          sender: 'ai',
+        });
+      },
+    });
   }
 
   ngAfterViewInit(): void {
@@ -88,23 +149,13 @@ export class ChatComponent implements AfterViewInit {
   }
 
   sendMessage(): void {
-    if (this.userInput.trim()) {
-      this.messages.push({ content: this.userInput, sender: 'user' });
+    if (!this.userInput.trim()) return;
+    this.messages.push({ content: this.userInput, sender: 'user' });
 
-      // Clear user input
-      this.userInput = '';
+    this.chatFacade.getCompletion({ user: this.userInput });
 
-      this.chatFacade.getCompletion({ user: this.userInput });
-
-      // Simulate AI response after a short delay
-      setTimeout(() => {
-        this.messages.push({
-          content:
-            'This is a long GIS AI response that can also plot some data on the map. ',
-          sender: 'ai',
-        });
-      }, 500);
-    }
+    // Clear user input
+    this.userInput = '';
   }
 
   private initMap(): void {
