@@ -8,7 +8,7 @@ import { AssistantCompletion } from '../models/assistant-completion';
 import { ChatSelectors } from './chat.selectors';
 
 @Injectable()
-export class ApiKeyFacade {
+export class ChatFacade {
   state$: Observable<reducer.State>;
   chat$: Observable<AssistantCompletion | null>;
   chatLoading$: Observable<boolean>;

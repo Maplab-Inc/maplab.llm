@@ -25,7 +25,7 @@ export const reducer = createReducer(
 
     on(ChatActions.getCompletionSuccess, (state, action) => ({
         ...state,
-        tenant: action.tenant,
+        completion: action.completion,
         loading: false,
         loaded: true
     })),

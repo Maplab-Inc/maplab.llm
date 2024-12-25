@@ -15,6 +15,7 @@
     "@angular/router": "~19.0.0",
     "@ngrx/effects": "^19.0.0",
     "@ngrx/store": "^19.0.0",
+    "@ngrx/store-devtools": "^19.0.0",
     "maplibre-gl": "^4.7.1",
     "primeicons": "^7.0.0",
     "primeng": "^19.0.1",

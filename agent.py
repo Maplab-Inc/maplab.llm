@@ -57,7 +57,7 @@ react_graph = builder.compile()
 
 @app.route('/assistant', methods=['POST']) 
 def invoke_assistant(): 
-    content = request.json.get('content') 
+    content = request.json.get('user') 
     if not content: 
         return jsonify({"error": "Content is required"}), 400
 

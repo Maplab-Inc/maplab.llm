@@ -1,6 +1,14 @@
-import { AfterViewInit, Component, ElementRef, EventEmitter, Output, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  EventEmitter,
+  Output,
+  ViewChild,
+} from '@angular/core';
 import { FullscreenControl, Map, MapMouseEvent } from 'maplibre-gl';
 import { MenuItem } from 'primeng/api';
+import { ChatFacade } from '../+state/chat.facade';
 
 interface IStyle {
   style: string;
@@ -28,14 +36,15 @@ export class ChatComponent implements AfterViewInit {
   chatWidth: number = 30;
   mapWidth: number = 70;
 
-  constructor() {
+  constructor(private chatFacade: ChatFacade) {
     if (localStorage.getItem('MapStyleV2')) {
       this.currentStyle = JSON.parse(
-        localStorage.getItem('MapStyleV2') as string,
+        localStorage.getItem('MapStyleV2') as string
       ) as IStyle;
     } else {
       this.currentStyle = {
-        style: 'https://tiles.maplab.ai/styles/osm_liberty/style.json?key=LX.EHWNMgxtK7sH05CiZTjRGWMuRa-618h9z_x93EoH3e0',
+        style:
+          'https://tiles.maplab.ai/styles/osm_liberty/style.json?key=LX.EHWNMgxtK7sH05CiZTjRGWMuRa-618h9z_x93EoH3e0',
         type: 'dark',
       };
     }
@@ -58,12 +67,13 @@ export class ChatComponent implements AfterViewInit {
 
     document.addEventListener('mousemove', (e) => {
       if (!isResizing) return;
-  
-      const containerWidth = document.querySelector('.chat-container')!.clientWidth;
+
+      const containerWidth =
+        document.querySelector('.chat-container')!.clientWidth;
       const offsetX = e.clientX;
       const chatWidthPercent = (offsetX / containerWidth) * 100;
       const mapWidthPercent = 100 - chatWidthPercent;
-  
+
       if (chatWidthPercent > 20 && mapWidthPercent > 20) {
         this.chatWidth = chatWidthPercent;
         this.mapWidth = mapWidthPercent;
@@ -81,6 +91,11 @@ export class ChatComponent implements AfterViewInit {
     if (this.userInput.trim()) {
       this.messages.push({ content: this.userInput, sender: 'user' });
 
+      // Clear user input
+      this.userInput = '';
+
+      this.chatFacade.getCompletion({ user: this.userInput });
+
       // Simulate AI response after a short delay
       setTimeout(() => {
         this.messages.push({
@@ -89,9 +104,6 @@ export class ChatComponent implements AfterViewInit {
           sender: 'ai',
         });
       }, 500);
-
-      // Clear user input
-      this.userInput = '';
     }
   }
 
@@ -111,7 +123,6 @@ export class ChatComponent implements AfterViewInit {
     this.initCursorPointer();
     this.map.addControl(new FullscreenControl());
     this.map.on('load', () => {
-
       this.map.addSource('empty', {
         type: 'geojson',
         data: { type: 'FeatureCollection', features: [] },
@@ -150,7 +161,7 @@ export class ChatComponent implements AfterViewInit {
             command: () => {
               this.changeMapStyle(
                 'https://tiles.maplab.ai/styles/basic-preview/style.json',
-                'light',
+                'light'
               );
             },
           },
@@ -160,7 +171,7 @@ export class ChatComponent implements AfterViewInit {
             command: () => {
               this.changeMapStyle(
                 'https://tiles.maplab.ai/styles/dark-matter-gl-style/style.json',
-                'dark',
+                'dark'
               );
             },
           },
@@ -170,7 +181,7 @@ export class ChatComponent implements AfterViewInit {
             command: () => {
               this.changeMapStyle(
                 'https://tiles.maplab.ai/styles/maplab/style.json',
-                'dark',
+                'dark'
               );
             },
           },
@@ -180,7 +191,7 @@ export class ChatComponent implements AfterViewInit {
             command: () => {
               this.changeMapStyle(
                 'https://tiles.maplab.ai/styles/osm_bright/style.json',
-                'light',
+                'light'
               );
             },
           },
@@ -190,7 +201,7 @@ export class ChatComponent implements AfterViewInit {
             command: () => {
               this.changeMapStyle(
                 'https://tiles.maplab.ai/styles/osm_bright/style.json',
-                'light',
+                'light'
               );
             },
           },
@@ -200,7 +211,7 @@ export class ChatComponent implements AfterViewInit {
             command: () => {
               this.changeMapStyle(
                 'https://tiles.maplab.ai/styles/positron/style.json',
-                'light',
+                'light'
               );
             },
           },
@@ -218,8 +229,7 @@ export class ChatComponent implements AfterViewInit {
   private changeStyle(): void {
     this.map.setStyle(this.currentStyle.style);
     localStorage.setItem('MapStyle', JSON.stringify(this.currentStyle));
-    setTimeout(() => {
-    }, 500);
+    setTimeout(() => {}, 500);
   }
 
   private initCursorPointer(): void {
