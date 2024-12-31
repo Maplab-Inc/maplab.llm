@@ -1,0 +1,54 @@
+<div class="create-request-container">
+    <div class="form-container card">
+        <div class="form-content">
+            <maplab-chat-form-field-wrapper [label]="'Request name'">
+                <input type="text" pInputText [(ngModel)]="newDeliveryRequest.shipToAccount.name" />
+            </maplab-chat-form-field-wrapper>
+
+            <maplab-chat-form-field-wrapper [label]="'longitude'">
+                <p-inputNumber [(ngModel)]="newDeliveryRequest.shipToAccount.longitude" [maxFractionDigits]="8"
+                    mode="decimal" (ngModelChange)="coordinateChange()">
+                </p-inputNumber>
+            </maplab-chat-form-field-wrapper>
+
+            <maplab-chat-form-field-wrapper [label]="'latitude'">
+                <p-inputNumber [(ngModel)]="newDeliveryRequest.shipToAccount.latitude" [maxFractionDigits]="8"
+                    mode="decimal" (ngModelChange)="coordinateChange()">
+                </p-inputNumber>
+            </maplab-chat-form-field-wrapper>
+
+            <ng-container *ngFor="let item of newDeliveryRequest.destinationContainers; let index = index">
+
+                <maplab-chat-panel-child [title]="newDeliveryRequest.destinationContainers[index].product.name">
+
+                    <maplab-chat-form-field-wrapper [label]="'Requested Amount'">
+                        <p-inputNumber [(ngModel)]="newDeliveryRequest.destinationContainers[index].requestedAmount"
+                            [maxFractionDigits]="8" mode="decimal">
+                        </p-inputNumber>
+                    </maplab-chat-form-field-wrapper>
+                </maplab-chat-panel-child>
+            </ng-container>
+        </div>
+        <div class="form-footer">
+
+            <button pButton pRipple
+                [disabled]="loading || !(newDeliveryRequest.shipToAccount.longitude && newDeliveryRequest.shipToAccount.latitude && newDeliveryRequest.purchaseOrder)"
+                type="button" class="p-button-success" [disabled]="" (click)="onCreate()">
+                Create
+                <i class="pi pi-spin pi-spinner ml-1" *ngIf="loading"></i>
+            </button>
+
+            <button pButton pRipple
+                [disabled]="loading || !(newDeliveryRequest.shipToAccount.longitude && newDeliveryRequest.shipToAccount.latitude && newDeliveryRequest.purchaseOrder)"
+                type="button" class="p-button-success" [disabled]="" (click)="onCreate(true)">
+                Create and close
+                <i class="pi pi-spin pi-spinner ml-1" *ngIf="loading"></i>
+            </button>
+        </div>
+    </div>
+    <div class="card map-view">
+        <maplab-chat-maps [height]="'75vh'" [markersFromTo]="markerFromTo" [cursorPointer]="true"
+            (mapClick)="onMapClick($event)" />
+    </div>
+</div>
+<p-toast />

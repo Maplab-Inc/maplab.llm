@@ -1,0 +1,9 @@
+<div class="card select-container">
+    <maplab-chat-maps [height]="'75vh'" [markersFromTo]="markerFromTo" [cursorPointer]="true"
+        (mapClick)="onMapClick($event)" />
+    <div class="select-footer">
+        <p-button label="Change {{returnValueInCancel}} to VehicleLocation" severity="secondary"
+            (onClick)="onCancel()" />
+        <p-button label="Save" [disabled]="coordinate.latitude === 0" (onClick)="onSave()" />
+    </div>
+</div>

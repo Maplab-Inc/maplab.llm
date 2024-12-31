@@ -1,6 +1,7 @@
 import {
   AfterViewInit,
   Component,
+  DestroyRef,
   ElementRef,
   EventEmitter,
   Inject,
@@ -31,6 +32,10 @@ import { GradientColors } from '../utils/gradient-colors';
 import { IVehicle } from '../models/vehicle';
 import { Coordinate } from '../models/coordinate';
 import { TrackMode } from '../models/enums/track-mode';
+import { DialogService } from 'primeng/dynamicdialog';
+import { ActivatedRoute, Router } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ContextContainerComponent } from '../modals/context-container/context-container.component';
 
 interface IStyle {
   style: string;
@@ -52,7 +57,6 @@ export class ChatComponent implements AfterViewInit {
   private map!: Map;
   public currentStyle!: IStyle;
   private cursorPointerValue = false;
-  private mapIsLoaded!: boolean;
   private initialState = { lng: -73.62, lat: 45.5, zoom: 14 };
   stylesItems: MenuItem[] | undefined;
   chatWidth: number = 30;
@@ -110,6 +114,10 @@ export class ChatComponent implements AfterViewInit {
   constructor(
     public chatFacade: ChatFacade,
     private http: HttpClient,
+    private dialogService: DialogService,
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
+    private destroyRef: DestroyRef,
     @Inject(DIRECTIONS_API_URL) private directionsApiUrl: string
   ) {
     if (localStorage.getItem('MapStyleV2')) {
@@ -251,7 +259,6 @@ export class ChatComponent implements AfterViewInit {
         },
         'z-index-1'
       );
-      this.mapIsLoaded = true;
     });
 
     this.map.on('click', (event) => {
@@ -560,5 +567,23 @@ export class ChatComponent implements AfterViewInit {
         }
       });
     }
+  }
+
+  openDemoModal(): void {
+    const dialogRef = this.dialogService.open(ContextContainerComponent, {
+      header: 'Apps Demo',
+      width: '95%',
+      height: '95%',
+      contentStyle: {
+        ['overflow-y']: 'visible',
+        ['background-color']: 'var(--surface-ground)',
+      },
+      style: { ['max-height']: '95%' },
+    });
+
+    dialogRef.onClose.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+
+      void this.router.navigate(['../'], { relativeTo: this.activatedRoute })
+    })
   }
 }

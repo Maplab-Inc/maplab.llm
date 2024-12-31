@@ -1,0 +1,10 @@
+.select-container {
+    display: flex;
+    flex-direction: column;
+
+    .select-footer {
+        display: flex;
+        padding-top: 15px;
+        justify-content: space-between;
+    }
+}

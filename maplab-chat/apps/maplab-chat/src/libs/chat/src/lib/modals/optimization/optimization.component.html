@@ -1,0 +1,11 @@
+<div class="dispatch-container">
+  <maplab-chat-optimization-form [dispatchForm]="dispatchForm" [formSubmitted]="dispatchFormSubmitted" />
+  <maplab-chat-optimization-request-list (selectedRequestsEvent)="selectedRequests = $event" />
+</div>
+<div class="dispatch-footer">
+  <button pButton pRipple type="button" class="p-button-secondary" (click)="closeDialog()">Cancel</button>
+  @if (selectedDeliveriesFeatures.length && !loading) {
+  <button pButton pRipple type="button" class="p-button-success" (click)="returnTo()" [label]="'Return to list'">
+  </button>
+  }
+</div>

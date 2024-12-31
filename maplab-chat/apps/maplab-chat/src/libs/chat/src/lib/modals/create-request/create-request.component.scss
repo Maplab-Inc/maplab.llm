@@ -1,0 +1,44 @@
+.create-request-container {
+    margin-top: 1.5rem;
+    display: flex;
+    max-height: 78vh;
+}
+
+.map-view {
+    width: 75%;
+}
+
+.form-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: auto;
+    width: 25%;
+    margin-bottom: 0;
+    margin-right: 15px;
+
+    .form-content {
+        overflow: auto;
+        display: grid;
+        grid-template-columns: repeat(1, 1fr);
+        grid-column-gap: 1rem;
+        row-gap: 10px;
+        grid-auto-rows: max-content;
+        margin-bottom: 10px;
+        padding-bottom: 5px;
+        padding-right: 10px;
+
+        .label {
+            margin: 0;
+        }
+    }
+
+    .form-footer {
+        text-align: end;
+
+        &>:first-child {
+            margin-right: 14px;
+        }
+    }
+
+}

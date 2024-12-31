@@ -1,0 +1,59 @@
+<div class="card">
+    <form [formGroup]="dispatchForm" class="grid-form" *ngIf="dispatchForm">
+        <p-button icon="pi pi-plus" (click)="openCreateTrunkModal()" label="Add new vehicle" [text]="true" />
+        <ng-container formArrayName="models">
+            <p-panel [toggleable]="true" *ngFor="let model of dispatchForm.controls.models.controls; let i = index"
+                [collapsed]="false" [formGroupName]="i">
+                <ng-template pTemplate="header">
+                    <p-checkbox formControlName="isOptimize" [binary]="true"></p-checkbox>
+                    <b class="truck-title">{{ model.controls.title.value }}</b>
+                </ng-template>
+                <ng-template pTemplate="icons">
+                    <button class="p-panel-header-icon p-link mr-2" (click)="removeTrunk(i, model)">
+                        <span class="pi pi-trash"></span>
+                    </button>
+                </ng-template>
+                <maplab-chat-panel-child title="Vehicle Constraints">
+                    <div class="grid-form">
+                        <maplab-chat-form-field-wrapper [label]="'Track mode'" [required]="true">
+                            <p-dropdown [options]="trackModeOptions" formControlName="trackMode" [optionLabel]="'name'"
+                                [optionValue]="'code'" inputId="track-mode"
+                                (onChange)="onTrackModeChanged(model)"></p-dropdown>
+                        </maplab-chat-form-field-wrapper>
+                        <maplab-chat-form-field-wrapper [label]="'Start location'" [required]="true">
+                            <p-dropdown [options]="knownLocationOptions" formControlName="start" [optionLabel]="'name'"
+                                [optionValue]="'code'" (onChange)="onStartPositionChanged(model)"
+                                inputId="start-location-mode"></p-dropdown>
+                        </maplab-chat-form-field-wrapper>
+
+                        <maplab-chat-form-field-wrapper [label]="'End location'">
+                            <p-dropdown [options]="knownLocationOptions" formControlName="end" [optionLabel]="'name'"
+                                [optionValue]="'code'" (onChange)="onEndPositionChanged(model)"
+                                inputId="end-location-mode"></p-dropdown>
+                        </maplab-chat-form-field-wrapper>
+                    </div>
+                </maplab-chat-panel-child>
+                <maplab-chat-panel-child title="Container's Constraints">
+                    <div class="grid-form">
+                        <maplab-chat-form-field-wrapper [label]="'Capacity Mode'" [required]="true">
+                            <p-dropdown [options]="capacityModeOptions" formControlName="capacity"
+                                [optionLabel]="'name'" [optionValue]="'code'" inputId="capacity-mode"
+                                [class]="model.controls.capacity.invalid && formSubmitted ? 'ng-dirty ng-invalid' : ''"></p-dropdown>
+                        </maplab-chat-form-field-wrapper>
+                        <ng-container formArrayName="compartments">
+                            <ng-container *ngFor="let item of model.controls.compartments.controls; let j = index"
+                                [formGroupName]="j">
+                                <maplab-chat-form-field-wrapper
+                                    [label]="'Compartment '+(j+1) + ' (' +item.controls.product.controls.name.value+')'">
+                                    <p-inputNumber formControlName="load" inputId="mile"
+                                        suffix="/{{ item.controls.capacity.value }}">
+                                    </p-inputNumber>
+                                </maplab-chat-form-field-wrapper>
+                            </ng-container>
+                        </ng-container>
+                    </div>
+                </maplab-chat-panel-child>
+            </p-panel>
+        </ng-container>
+    </form>
+</div>

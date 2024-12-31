@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { ChatComponent } from './components/chat.component';
 import { RouterModule, Routes } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
@@ -12,6 +12,25 @@ import { HttpClientModule } from '@angular/common/http';
 import { ChatFacade } from './+state/chat.facade';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ButtonModule } from 'primeng/button';
+import { ToastModule } from 'primeng/toast';
+import { ContextContainerComponent } from './modals/context-container/context-container.component';
+import { OptimizationComponent } from './modals/optimization/optimization.component';
+import { OptimizationFormComponent } from './modals/optimization-form/optimization-form.component';
+import { OptimizationRequestListComponent } from './modals/optimization-request-list/optimization-request-list.component';
+import { SelectPositionComponent } from './modals/select-position/select-position.component';
+import { PanelChildComponent } from './modals/panel-child/panel-child.component';
+import { CreateRequestComponent } from './modals/create-request/create-request.component';
+import { MapsComponent } from './modals/maps/maps.component';
+import { PanelModule } from 'primeng/panel';
+import { TableModule } from 'primeng/table';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { DropdownModule } from 'primeng/dropdown';
+import { CheckboxModule } from 'primeng/checkbox';
+import { AvatarModule } from 'primeng/avatar';
+import { MenuModule } from 'primeng/menu';
+import { FormFieldWrapperComponent } from './modals/form-field-wrapper/form-field-wrapper.component';
+import { CreateTruckComponent } from './modals/create-trunk/create-truck.component';
+import { DialogService } from 'primeng/dynamicdialog';
 
 const routes: Routes = [
   {
@@ -26,15 +45,33 @@ const routes: Routes = [
     CommonModule,
     ProgressSpinnerModule,
     ButtonModule,
+    ToastModule,
+    PanelModule,
+    TableModule,
+    CheckboxModule,
+    InputNumberModule,
+    AvatarModule,
+    DropdownModule,
+    MenuModule,
+    ReactiveFormsModule,
+    FormFieldWrapperComponent,
     HttpClientModule,
     RouterModule.forChild(routes),
     StoreModule.forFeature('chat', reducer),
     EffectsModule.forFeature([ChatEffects]),
   ],
-  declarations: [ChatComponent],
-  providers: [
-    ChatService,
-    ChatFacade
-  ]
+  declarations: [
+    ChatComponent,
+    OptimizationComponent,
+    ContextContainerComponent,
+    OptimizationFormComponent,
+    OptimizationRequestListComponent,
+    SelectPositionComponent,
+    PanelChildComponent,
+    CreateRequestComponent,
+    CreateTruckComponent,
+    MapsComponent,
+  ],
+  providers: [ChatService, ChatFacade, DialogService],
 })
 export class ChatModule {}

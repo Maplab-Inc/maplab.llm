@@ -1,0 +1,19 @@
+<div class="map-container" [style]="{ height: height }" #mapContainer></div>
+<button pButton pRipple type="button" class="p-button-success style-button" (click)="menu.toggle($event)"
+    [label]="'Change map style '">
+</button>
+<div class="loading-map" [style]="{ height: height }" *ngIf="loading">
+    <p-progressSpinner ariaLabel="loading" />
+</div>
+
+<p-menu #menu [model]="stylesItems" styleClass="menu-position" [popup]="true">
+    <ng-template pTemplate="item" let-item>
+        <button pRipple
+            class="relative overflow-hidden w-full p-link flex align-items-center p-2 pl-3 text-color hover:surface-200 border-noround">
+            <p-avatar [image]="item.shortcut" class="mr-2" shape="circle" />
+            <span class="inline-flex flex-column">
+                <span class="font-bold">{{item.label}}</span>
+            </span>
+        </button>
+    </ng-template>
+</p-menu>

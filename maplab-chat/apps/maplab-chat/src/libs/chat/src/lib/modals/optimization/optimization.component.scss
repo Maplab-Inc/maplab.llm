@@ -1,0 +1,26 @@
+.dispatch-footer {
+    display: flex;
+    justify-content: space-between;
+}
+
+.dispatch-container {
+    margin: 1.5rem 0;
+    display: flex;
+    max-height: 72vh;
+    height: 72vh;
+}
+
+.timeline-container {
+    overflow: auto;
+    width: 25%;
+    margin-bottom: 0;
+    margin-right: 15px;
+
+    &>:first-child {
+        margin: 0 14px 14px 14px;
+    }
+}
+
+.map-view {
+    width: 75%;
+}

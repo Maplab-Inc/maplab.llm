@@ -1,0 +1,36 @@
+:host {
+    position: relative;
+
+    .map-container {
+        width: 100%;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+
+    .style-button {
+        position: absolute;
+        left: 20px;
+        top: 10px;
+    }
+
+    .loading-map {
+        position: absolute;
+        z-index: 999;
+        width: 100%;
+        background-color: white;
+        opacity: 0.5;
+        display: flex;
+        align-items: center;
+        padding: 14px;
+        justify-content: center;
+        top: 0;
+    }
+
+}
+
+:host ::ng-deep {
+    .menu-position {
+        left: 20px !important;
+        top: 47px !important;
+    }
+}

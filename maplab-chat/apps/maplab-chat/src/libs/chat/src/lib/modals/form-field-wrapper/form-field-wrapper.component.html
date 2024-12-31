@@ -1,0 +1,10 @@
+<div class="p-fluid">
+  <div class="label" [style]="'margin-bottom:'+labelSpace+'px'">
+    {{ label }}
+
+    <span class="mandatory" aria-hidden="true" *ngIf="required">*</span>
+  </div>
+  <ng-container #content>
+    <ng-content></ng-content>
+  </ng-container>
+</div>
