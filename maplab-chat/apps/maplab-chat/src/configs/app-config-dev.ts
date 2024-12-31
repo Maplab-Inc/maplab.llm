@@ -7,5 +7,6 @@ export const APP_CONFIG_DEV: AppConfig = {
   environmentName: 'dev',
   production: false,
   assistantApiUrl: 'http://127.0.0.1:5000',
+  directionsApiUrl: 'http://localhost:5243/v1/',
   showDevFeature: true,
 };

@@ -10,6 +10,8 @@ import { reducer } from './+state/chat.reducer';
 import { ChatService } from './services/chat.service';
 import { HttpClientModule } from '@angular/common/http';
 import { ChatFacade } from './+state/chat.facade';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { ButtonModule } from 'primeng/button';
 
 const routes: Routes = [
   {
@@ -22,6 +24,8 @@ const routes: Routes = [
   imports: [
     FormsModule,
     CommonModule,
+    ProgressSpinnerModule,
+    ButtonModule,
     HttpClientModule,
     RouterModule.forChild(routes),
     StoreModule.forFeature('chat', reducer),

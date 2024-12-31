@@ -1,5 +1,5 @@
 export interface AssistantCompletion {
     message: string;
-    data: string;
+    data: unknown;
     type: string;
 }

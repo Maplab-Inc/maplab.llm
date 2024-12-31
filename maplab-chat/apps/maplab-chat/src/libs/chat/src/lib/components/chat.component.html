@@ -2,25 +2,34 @@
     <div class="chat-area" [style.width.%]="chatWidth">
         <div class="message-area">
             <div *ngFor="let message of messages" class="chat-message"
-                [ngClass]="{'user-message': message.sender === 'user', 'ai-message': message.sender === 'ai'}">
+                [ngClass]="{'user-message': message.sender === 'user', 'ai-message': message.sender === 'ai', 'loader-message': message.sender === 'loader'}">
                 <div class="message-wrapper">
                     <div *ngIf="message.sender === 'ai'" class="icon-container">
                         <img src="/maplab-logo.png" alt="Maplab Logo" class="ai-icon" />
                     </div>
-                    <div class="message-content">{{ message.content }}</div>
+                    <div *ngIf="message.sender === 'loader'" style="margin-right: 15px;">
+                        <p-progress-spinner strokeWidth="10" fill="transparent" animationDuration=".5s"
+                            [style]="{ width: '18px', height: '18px' }" />
+                    </div>
+                    <div>
+                        {{ message.content }}
+                    </div>
                 </div>
             </div>
         </div>
         <div class="chat-prompt">
             <div class="input-container">
-                <input [(ngModel)]="userInput" [disabled]="(chatFacade.chatLoading$ | async) ?? false" (keyup.enter)="sendMessage()"
-                    placeholder="Type your message..." />
-                <button (click)="sendMessage()" class="send-button" [disabled]="(chatFacade.chatLoading$ | async) ?? false">
+                <input [(ngModel)]="userInput" [disabled]="(chatFacade.chatLoading$ | async) ?? false"
+                    (keyup.enter)="sendMessage()" placeholder="Type your message..." />
+                <button (click)="sendMessage()" class="send-button"
+                    [disabled]="(chatFacade.chatLoading$ | async) ?? false">
                     <div class="icon-circle">
                         <i class="pi pi-arrow-up"></i>
                     </div>
                 </button>
             </div>
+            <p-button class="context-menu" label="Manage context" icon="pi pi-book" badge="2" badgeSeverity="contrast"
+                [outlined]="true" />
         </div>
     </div>
     <div class="resizer"></div>

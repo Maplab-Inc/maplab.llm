@@ -7,5 +7,6 @@ export const APP_CONFIG_PROD: AppConfig = {
   environmentName: 'prod',
   production: true,
   assistantApiUrl: 'https://portal.api.maplab.ai/api',
+  directionsApiUrl: 'http://localhost:5243/v1/',
   showDevFeature: false,
 };

@@ -3,8 +3,11 @@ import { CommonModule } from '@angular/common';
 import { BrowserModule } from '@angular/platform-browser';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app.routes';
-import { ASSISTANT_API_URL } from '../libs/common/tokens/api-tokens';
-import { getAssistantApiUrl } from '../configs/app-config';
+import {
+  ASSISTANT_API_URL,
+  DIRECTIONS_API_URL,
+} from '../libs/common/tokens/api-tokens';
+import { getAssistantApiUrl, getDirectionsApiUrl } from '../configs/app-config';
 import { AppConfigService } from '../configs/app-config.service';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
@@ -12,14 +15,20 @@ import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { environment } from '../environments/environment.prod';
 import { MessageService } from 'primeng/api';
 import { ChatModule } from '@maplab-chat/chat';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { providePrimeNG } from 'primeng/config';
+import Aura from '@primeng/themes/aura';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 @NgModule({
   declarations: [AppComponent],
   imports: [
     CommonModule,
-    ChatModule,
     BrowserModule,
     AppRoutingModule,
+    ProgressSpinnerModule,
+    ChatModule,
+
     StoreModule.forRoot({}),
     EffectsModule.forRoot({}),
     StoreDevtoolsModule.instrument({
@@ -30,13 +39,25 @@ import { ChatModule } from '@maplab-chat/chat';
   ],
   providers: [
     AppConfigService,
+    provideAnimationsAsync(),
+    providePrimeNG({
+      theme: {
+        preset: Aura
+      },
+    }),
     {
       provide: ASSISTANT_API_URL,
       useFactory: getAssistantApiUrl,
       multi: false,
       deps: [AppConfigService],
     },
-    MessageService
+    {
+      provide: DIRECTIONS_API_URL,
+      useFactory: getDirectionsApiUrl,
+      multi: false,
+      deps: [AppConfigService],
+    },
+    MessageService,
   ],
   bootstrap: [AppComponent],
 })

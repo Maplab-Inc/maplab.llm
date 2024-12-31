@@ -1,5 +1,6 @@
 export interface CommonAppConfig {
   assistantApiUrl: string;
+  directionsApiUrl: string;
   production: boolean;
 }
 

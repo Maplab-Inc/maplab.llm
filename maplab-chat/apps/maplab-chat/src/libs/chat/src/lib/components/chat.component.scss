@@ -64,11 +64,27 @@
   max-width: 100%;
 }
 
+.loader-message {
+  background-color: #2c2c2c;
+  color: #fff;
+  align-self: flex-start;
+  text-align: left;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  max-width: 100%;
+}
 
 .icon-container {
   margin-right: 8px;
   display: flex;
   align-items: center;
+}
+
+.message-loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
 }
 
 .message-wrapper {
@@ -85,7 +101,7 @@
 .chat-prompt {
   position: absolute;
   border-color: transparent;
-  bottom: 35px;
+  bottom: 10px;
   z-index: 10;
   width: 95%; 
 }
@@ -96,6 +112,11 @@
   background-color: #2c2c2c;
   border-radius: 20px;
   height: 80px;
+}
+
+.chat-prompt .context-menu {
+  display: flex;
+  margin: 1rem 0rem 0rem 1rem;
 }
 
 .chat-prompt input {

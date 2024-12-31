@@ -9,7 +9,13 @@ export const getConfig = <T>(appConfig: IAppConfigService<T>): T => {
 };
 
 export const getAssistantApiUrl = (
-  appConfig: IAppConfigService<CommonAppConfig>,
+  appConfig: IAppConfigService<CommonAppConfig>
 ): string | undefined => {
   return appConfig.getConfig().assistantApiUrl;
+};
+
+export const getDirectionsApiUrl = (
+  appConfig: IAppConfigService<CommonAppConfig>,
+): string | undefined => {
+  return appConfig.getConfig().directionsApiUrl;
 };
