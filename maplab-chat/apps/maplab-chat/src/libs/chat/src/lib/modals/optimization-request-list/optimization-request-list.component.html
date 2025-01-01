@@ -10,13 +10,13 @@
         [metaKeySelection]="false" dataKey="id">
         <ng-template pTemplate="caption">
             <div class="flex align-items-center">
-                <button pButton class="p-button-outlined mr-5" icon="pi pi-filter-slash" (click)="clear(tableList)"
-                    label="Clear"></button>
                 <button pButton class="p-button-outlined mr-5" icon="pi pi-plus" (click)="openCreateTrunkModal()"
-                    label="Add"></button>
+                    label="Add"  severity="contrast"></button>
                 <button pButton class="p-button-outlined" icon="pi pi-trash" (click)="removeSelectedRequest()"
                     label="Remove"></button>
-        
+                <button pButton class="p-button-outlined mr-5" icon="pi pi-filter-slash" (click)="clear(tableList)"
+                    label="Clear"></button>
+
                 <span class="ml-auto flex align-items-center search-container">
                     <span class="pi pi-search search-icon"></span>
                     <input pInputText type="text"
@@ -25,8 +25,8 @@
                 </span>
             </div>
         </ng-template>
-        
-        
+
+
         <ng-template pTemplate="header">
             <tr>
                 <th style="width: 3rem">

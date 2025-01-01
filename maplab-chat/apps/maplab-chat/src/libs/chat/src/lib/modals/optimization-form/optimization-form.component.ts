@@ -10,7 +10,7 @@ import { Coordinate } from '../../models/coordinate';
 import { CapacityMode } from '../../models/enums/capacity-mode';
 import { IDefaultSelectListItem } from '../../models/forms/select-list-item';
 import { SelectPositionComponent } from '../select-position/select-position.component';
-import { CreateTruckComponent } from '../create-trunk/create-truck.component';
+import { CreateVehicleComponent } from '../create-vehicle/create-vehicle.component';
 @Component({
     selector: 'maplab-chat-optimization-form',
     templateUrl: './optimization-form.component.html',
@@ -35,8 +35,8 @@ export class OptimizationFormComponent implements OnInit {
     }
 
     openCreateTrunkModal(): void {
-        this.dialogService.open(CreateTruckComponent, {
-            header: 'Create vehicle',
+        this.dialogService.open(CreateVehicleComponent, {
+            header: 'Create Vehicle',
             width: '70%',
             height: '95%',
             modal: true,

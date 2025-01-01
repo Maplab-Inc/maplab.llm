@@ -1,16 +1,12 @@
-.create-request-container {
-  margin: 1.5rem;
+.create-vehicle-container {
+  margin-top: 1.5rem;
   padding: 1.5rem 0rem;
   display: flex;
   height: 100%;
 }
 
 .map-view {
-  width: 75%;
-}
-
-maplab-chat-panel-child {
-  width: 100%;
+  width: 70%;
 }
 
 .form-container {
@@ -18,7 +14,7 @@ maplab-chat-panel-child {
   flex-direction: column;
   justify-content: space-between;
   overflow: auto;
-  width: 25%;
+  width: 30%;
   margin-bottom: 0;
   margin-right: 15px;
 
@@ -45,4 +41,8 @@ maplab-chat-panel-child {
       margin-right: 14px;
     }
   }
+}
+
+maplab-chat-panel-child {
+  width: 100%;
 }

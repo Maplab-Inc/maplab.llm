@@ -8,12 +8,12 @@ import { IProduct } from '../../models/product';
 import { OPTIMIZATION_PRODUCTS } from '../../constants/products.constants';
 
 @Component({
-  selector: 'maplab-chat-create-trunk',
-  templateUrl: './create-truck.component.html',
-  styleUrl: './create-truck.component.scss',
+  selector: 'maplab-chat-create-vehicle',
+  templateUrl: './create-vehicle.component.html',
+  styleUrl: './create-vehicle.component.scss',
   standalone: false
 })
-export class CreateTruckComponent {
+export class CreateVehicleComponent {
   markerFromTo: Marker[] = []
   loading!: boolean;
 

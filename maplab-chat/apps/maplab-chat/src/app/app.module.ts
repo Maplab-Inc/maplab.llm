@@ -17,8 +17,8 @@ import { MessageService } from 'primeng/api';
 import { ChatModule } from '@maplab-chat/chat';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { providePrimeNG } from 'primeng/config';
-import Aura from '@primeng/themes/aura';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { AppPreset } from './app.preset';
 
 @NgModule({
   declarations: [AppComponent],
@@ -42,7 +42,8 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
     provideAnimationsAsync(),
     providePrimeNG({
       theme: {
-        preset: Aura
+        preset: AppPreset,
+        
       },
     }),
     {

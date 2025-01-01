@@ -283,7 +283,7 @@ export class ChatComponent implements AfterViewInit {
           },
           {
             label: 'Dark Matter',
-            shortcut: 'assets/demo/dark-matter.png',
+            shortcut: 'assets/dark-matter.png',
             command: () => {
               this.changeMapStyle(
                 'https://tiles.maplab.ai/styles/dark-matter-gl-style/style.json',
@@ -293,7 +293,7 @@ export class ChatComponent implements AfterViewInit {
           },
           {
             label: 'Maplab - Night',
-            shortcut: 'assets/demo/Maplab-Night.png',
+            shortcut: 'assets/Maplab-Night.png',
             command: () => {
               this.changeMapStyle(
                 'https://tiles.maplab.ai/styles/maplab/style.json',
@@ -303,7 +303,7 @@ export class ChatComponent implements AfterViewInit {
           },
           {
             label: 'OSM Bright',
-            shortcut: 'assets/demo/OSM-Bright.png',
+            shortcut: 'assets/OSM-Bright.png',
             command: () => {
               this.changeMapStyle(
                 'https://tiles.maplab.ai/styles/osm_bright/style.json',
@@ -313,7 +313,7 @@ export class ChatComponent implements AfterViewInit {
           },
           {
             label: 'OSM Liberty',
-            shortcut: 'assets/demo/OSM-Liberty.png',
+            shortcut: 'assets/OSM-Liberty.png',
             command: () => {
               this.changeMapStyle(
                 'https://tiles.maplab.ai/styles/osm_bright/style.json',
@@ -323,7 +323,7 @@ export class ChatComponent implements AfterViewInit {
           },
           {
             label: 'Positron',
-            shortcut: 'assets/demo/Positron.png',
+            shortcut: 'assets/Positron.png',
             command: () => {
               this.changeMapStyle(
                 'https://tiles.maplab.ai/styles/positron/style.json',
@@ -571,9 +571,9 @@ export class ChatComponent implements AfterViewInit {
 
   openDemoModal(): void {
     const dialogRef = this.dialogService.open(ContextContainerComponent, {
-      header: 'Apps Demo',
+      header: 'Route Optimization Context',
       width: '70%',
-      height: '95%',
+      height: '100%',
       contentStyle: {
         ['overflow-y']: 'visible',
         ['background-color']: 'var(--surface-ground)',

@@ -33,15 +33,15 @@
 
             <button pButton pRipple
                 [disabled]="loading || !(newDeliveryRequest.shipToAccount.longitude && newDeliveryRequest.shipToAccount.latitude && newDeliveryRequest.purchaseOrder)"
-                type="button" class="p-button-success" [disabled]="" (click)="onCreate()">
-                Create
+                type="button" [disabled]="" (click)="onCreate()" severity="contrast">
+                Add
                 <i class="pi pi-spin pi-spinner ml-1" *ngIf="loading"></i>
             </button>
 
             <button pButton pRipple
                 [disabled]="loading || !(newDeliveryRequest.shipToAccount.longitude && newDeliveryRequest.shipToAccount.latitude && newDeliveryRequest.purchaseOrder)"
-                type="button" class="p-button-success" [disabled]="" (click)="onCreate(true)">
-                Create and close
+                type="button" class="p-button-success" [disabled]="" (click)="onCreate(true)" severity="contrast">
+                Save
                 <i class="pi pi-spin pi-spinner ml-1" *ngIf="loading"></i>
             </button>
         </div>

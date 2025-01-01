@@ -29,7 +29,7 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { AvatarModule } from 'primeng/avatar';
 import { MenuModule } from 'primeng/menu';
 import { FormFieldWrapperComponent } from './modals/form-field-wrapper/form-field-wrapper.component';
-import { CreateTruckComponent } from './modals/create-trunk/create-truck.component';
+import { CreateVehicleComponent } from './modals/create-vehicle/create-vehicle.component';
 import { DialogService } from 'primeng/dynamicdialog';
 import { InputTextModule } from 'primeng/inputtext';
 
@@ -71,7 +71,7 @@ const routes: Routes = [
     SelectPositionComponent,
     PanelChildComponent,
     CreateRequestComponent,
-    CreateTruckComponent,
+    CreateVehicleComponent,
     MapsComponent,
   ],
   providers: [ChatService, ChatFacade, DialogService],
