@@ -1,8 +1,3 @@
-<maplab-chat-form-field-wrapper style="width: 25%;">
-    <p-dropdown [options]="options" [optionLabel]="'appName'" [(ngModel)]="selectedApp" [optionValue]="'appId'"
-        inputId="apps"></p-dropdown>
-</maplab-chat-form-field-wrapper>
-
 @switch (selectedApp) {
 @case (appCode.optimization) {
 <maplab-chat-optimization />

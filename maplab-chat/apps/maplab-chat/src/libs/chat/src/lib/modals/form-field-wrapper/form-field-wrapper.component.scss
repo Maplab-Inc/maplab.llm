@@ -3,8 +3,13 @@
 }
 
 .label {
-
     .mandatory {
         color: var(--red-700);
     }
+}
+
+.p-fluid {
+    width: 100%;
+    max-width: 500px;
+    box-sizing: border-box;
 }

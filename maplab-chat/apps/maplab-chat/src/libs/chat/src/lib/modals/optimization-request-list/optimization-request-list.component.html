@@ -9,22 +9,24 @@
         (onFilter)="emitSelectedRequest()" [globalFilterFields]="['purchaseOrder', 'shipToAccount.name']"
         [metaKeySelection]="false" dataKey="id">
         <ng-template pTemplate="caption">
-            <div class="flex">
-                <button pButton class="p-button-outlined mr-15" icon="pi pi-filter-slash" (click)="clear(tableList)"
+            <div class="flex align-items-center">
+                <button pButton class="p-button-outlined mr-5" icon="pi pi-filter-slash" (click)="clear(tableList)"
                     label="Clear"></button>
-                <button pButton class="p-button-outlined mr-15" icon="pi pi-plus" (click)="openCreateTrunkModal()"
+                <button pButton class="p-button-outlined mr-5" icon="pi pi-plus" (click)="openCreateTrunkModal()"
                     label="Add"></button>
                 <button pButton class="p-button-outlined" icon="pi pi-trash" (click)="removeSelectedRequest()"
                     label="Remove"></button>
-
-                <span class="p-input-icon-left ml-auto">
-                    <i class="pi pi-search"></i>
+        
+                <span class="ml-auto flex align-items-center search-container">
+                    <span class="pi pi-search search-icon"></span>
                     <input pInputText type="text"
                         (input)="tableList.filterGlobal($any($event.target).value, 'contains')"
                         placeholder="Search deliveries" />
                 </span>
             </div>
         </ng-template>
+        
+        
         <ng-template pTemplate="header">
             <tr>
                 <th style="width: 3rem">

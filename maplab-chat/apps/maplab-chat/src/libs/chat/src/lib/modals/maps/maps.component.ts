@@ -115,7 +115,7 @@ export class MapsComponent implements AfterViewInit {
       ) as IStyle;
     } else {
       this.currentStyle = {
-        style: 'https://tiles.maplab.ai/styles/maplab/style.json',
+        style: 'https://tiles.maplab.ai/styles/maplab/style.json?key=LX.EHWNMgxtK7sH05CiZTjRGWMuRa-618h9z_x93EoH3e0',
         type: 'dark',
       };
     }

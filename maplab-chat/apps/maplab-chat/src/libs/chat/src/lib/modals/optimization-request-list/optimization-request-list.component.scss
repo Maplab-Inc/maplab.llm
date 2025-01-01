@@ -10,6 +10,37 @@
 
 }
 
+.mr-5 {
+    margin-right: 5px;
+}
+
 .mr-15 {
     margin-right: 15px;
+}
+
+.flex {
+    display: flex;
+    align-items: center;
+}
+
+.ml-auto {
+    margin-left: auto;
+}
+
+.search-container {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.search-container .search-icon {
+    position: absolute;
+    left: 8px;
+    color: #888;
+    pointer-events: none; /* Prevent the icon from blocking input events */
+    z-index: 1;
+}
+
+.search-container input {
+    padding-left: 30px; /* Adjust to make space for the icon */
 }

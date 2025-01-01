@@ -61,7 +61,7 @@ export class OptimizationRequestListComponent implements OnInit {
     openCreateTrunkModal(): void {
         this.dialogService.open(CreateRequestComponent, {
             header: 'Create Request',
-            width: '95%',
+            width: '70%',
             height: '95%',
             contentStyle: { ['overflow-y']: 'visible', ['background-color']: 'var(--surface-ground)' },
             style: { ['max-height']: '95%' },

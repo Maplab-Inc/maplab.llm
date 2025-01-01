@@ -37,8 +37,9 @@ export class OptimizationFormComponent implements OnInit {
     openCreateTrunkModal(): void {
         this.dialogService.open(CreateTruckComponent, {
             header: 'Create vehicle',
-            width: '95%',
+            width: '70%',
             height: '95%',
+            modal: true,
             contentStyle: { ['overflow-y']: 'visible', ['background-color']: 'var(--surface-ground)' },
             style: { ['max-height']: '95%' },
         });

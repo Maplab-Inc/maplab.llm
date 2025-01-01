@@ -572,7 +572,7 @@ export class ChatComponent implements AfterViewInit {
   openDemoModal(): void {
     const dialogRef = this.dialogService.open(ContextContainerComponent, {
       header: 'Apps Demo',
-      width: '95%',
+      width: '70%',
       height: '95%',
       contentStyle: {
         ['overflow-y']: 'visible',

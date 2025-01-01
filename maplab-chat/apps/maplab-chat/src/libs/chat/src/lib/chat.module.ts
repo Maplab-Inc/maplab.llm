@@ -31,6 +31,7 @@ import { MenuModule } from 'primeng/menu';
 import { FormFieldWrapperComponent } from './modals/form-field-wrapper/form-field-wrapper.component';
 import { CreateTruckComponent } from './modals/create-trunk/create-truck.component';
 import { DialogService } from 'primeng/dynamicdialog';
+import { InputTextModule } from 'primeng/inputtext';
 
 const routes: Routes = [
   {
@@ -50,6 +51,7 @@ const routes: Routes = [
     TableModule,
     CheckboxModule,
     InputNumberModule,
+    InputTextModule,
     AvatarModule,
     DropdownModule,
     MenuModule,

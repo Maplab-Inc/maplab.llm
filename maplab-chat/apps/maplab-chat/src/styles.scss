@@ -17,6 +17,21 @@ body {
   background: light-dark(var(--p-surface-0), var(--p-surface-950));
 }
 
+p {
+  margin: 0 0 1rem;
+  line-height: 1.5;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+input,
+p-inputNumber {
+  width: 80%;
+  box-sizing: border-box;
+}
+
 :host ::ng-deep .p-button {
   font-size: 5px;
 }
