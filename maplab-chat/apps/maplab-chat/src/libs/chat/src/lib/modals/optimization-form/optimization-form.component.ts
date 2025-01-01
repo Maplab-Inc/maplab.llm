@@ -36,10 +36,10 @@ export class OptimizationFormComponent implements OnInit {
 
     openCreateTrunkModal(): void {
         this.dialogService.open(CreateVehicleComponent, {
-            header: 'Create Vehicle',
+            header: 'Create Vehicles',
             width: '70%',
             height: '95%',
-            modal: true,
+            closable: true,
             contentStyle: { ['overflow-y']: 'visible', ['background-color']: 'var(--surface-ground)' },
             style: { ['max-height']: '95%' },
         });

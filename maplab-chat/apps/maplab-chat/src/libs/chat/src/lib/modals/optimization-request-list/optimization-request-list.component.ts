@@ -58,11 +58,12 @@ export class OptimizationRequestListComponent implements OnInit {
         this.selectedRequestsEvent.emit(this.selectedRequests);
     }
 
-    openCreateTrunkModal(): void {
+    openCreateTruckModal(): void {
         this.dialogService.open(CreateRequestComponent, {
-            header: 'Create Request',
+            header: 'Create Customer Requests',
             width: '70%',
             height: '95%',
+            closable: true,
             contentStyle: { ['overflow-y']: 'visible', ['background-color']: 'var(--surface-ground)' },
             style: { ['max-height']: '95%' },
         });

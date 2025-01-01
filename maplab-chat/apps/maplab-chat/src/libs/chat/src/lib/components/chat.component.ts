@@ -273,7 +273,7 @@ export class ChatComponent implements AfterViewInit {
         items: [
           {
             label: 'Basic preview',
-            shortcut: 'assets/demo/Basic-preview.png',
+            shortcut: 'assets/Basic-preview.png',
             command: () => {
               this.changeMapStyle(
                 'https://tiles.maplab.ai/styles/basic-preview/style.json',
@@ -574,6 +574,7 @@ export class ChatComponent implements AfterViewInit {
       header: 'Route Optimization Context',
       width: '70%',
       height: '100%',
+      closable: true,
       contentStyle: {
         ['overflow-y']: 'visible',
         ['background-color']: 'var(--surface-ground)',

@@ -10,7 +10,7 @@
         [metaKeySelection]="false" dataKey="id">
         <ng-template pTemplate="caption">
             <div class="flex align-items-center">
-                <button pButton class="p-button-outlined mr-5" icon="pi pi-plus" (click)="openCreateTrunkModal()"
+                <button pButton class="p-button-outlined" icon="pi pi-plus" (click)="openCreateTruckModal()"
                     label="Add"  severity="contrast"></button>
                 <button pButton class="p-button-outlined" icon="pi pi-trash" (click)="removeSelectedRequest()"
                     label="Remove"></button>
@@ -37,22 +37,15 @@
                     <div *ngSwitchCase="'shipToAccount'" class="table-column-header">
                         <div>Account</div>
                         <p-sortIcon class="sort" field="{{ col.sortCol }}"></p-sortIcon>
-                        <p-columnFilter field="shipToAccount" type="text" [matchModeOptions]="accountFilterModeOptions"
-                            [showOperator]="true" [showAddButton]="true" display="menu">
-                        </p-columnFilter>
                     </div>
                     <div *ngSwitchCase="'product'" class="table-column-header">
                         <div>Product</div>
                         <p-sortIcon field="{{ col.sortCol }}"></p-sortIcon>
-                        <p-columnFilter field="{{ col.sortCol }}" type="numeric" [showOperator]="true"
-                            [showAddButton]="true" display="menu"></p-columnFilter>
                     </div>
                     <div *ngSwitchDefault>
                         <div class="table-column-header">
                             <div>{{ col.header }}</div>
                             <p-sortIcon field="{{ col.field }}"></p-sortIcon>
-                            <p-columnFilter type="{{ col.filterType }}" field="{{ col.field }}"
-                                display="menu"></p-columnFilter>
                         </div>
                     </div>
                 </th>

@@ -24,7 +24,8 @@
             </maplab-chat-form-field-wrapper>
             <div class="flex">
                 <p-menu #menu id="config_menu" [model]="items" [popup]="true" />
-                <p-button icon="pi pi-plus" (click)="newTrunk.compartments.length< 3 ? menu.toggle($event):''"
+                <p-button icon="pi pi-plus" 
+                (click)="newTrunk.compartments.length< 3 ? menu.toggle($event):''"
                     label="Add Compartment" [text]="true" pTooltip="Maximum 3" tooltipPosition="top" />
             </div>
             <ng-container *ngFor="let item of newTrunk.compartments; let index = index">
@@ -54,14 +55,18 @@
 
             <button pButton pRipple
                 [disabled]="loading || !(newTrunk.longitude && newTrunk.latitude && newTrunk.name) || !newTrunk.compartments.length "
-                type="button" severity="contrast" (click)="onCreate()">
+                severity="contrast" 
+                class="p-button-outlined"
+                (click)="onCreate()">
                 Add
                 <i class="pi pi-spin pi-spinner ml-1" *ngIf="loading"></i>
             </button>
 
             <button pButton pRipple
                 [disabled]="loading || !(newTrunk.longitude && newTrunk.latitude && newTrunk.name)|| !newTrunk.compartments.length"
-                type="button" severity="contrast" (click)="onCreate(true)">
+                severity="contrast" 
+                class="p-button-outlined"
+                (click)="onCreate(true)">
                 Save
                 <i class="pi pi-spin pi-spinner ml-1" *ngIf="loading"></i>
             </button>

@@ -44,3 +44,13 @@
 .search-container input {
     padding-left: 30px; /* Adjust to make space for the icon */
 }
+
+.table-column-header {
+    display: flex;
+    align-items: center; /* Ensures vertical alignment */
+    gap: 8px; /* Optional, adds space between the column name and icon */
+}
+
+.column-header-text {
+    font-weight: bold; /* Optional, for styling the header text */
+}

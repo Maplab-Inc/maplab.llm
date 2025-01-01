@@ -32,6 +32,7 @@ import { FormFieldWrapperComponent } from './modals/form-field-wrapper/form-fiel
 import { CreateVehicleComponent } from './modals/create-vehicle/create-vehicle.component';
 import { DialogService } from 'primeng/dynamicdialog';
 import { InputTextModule } from 'primeng/inputtext';
+import { DynamicDialogModule } from 'primeng/dynamicdialog';
 
 const routes: Routes = [
   {
@@ -53,6 +54,7 @@ const routes: Routes = [
     InputNumberModule,
     InputTextModule,
     AvatarModule,
+    DynamicDialogModule,
     DropdownModule,
     MenuModule,
     ReactiveFormsModule,

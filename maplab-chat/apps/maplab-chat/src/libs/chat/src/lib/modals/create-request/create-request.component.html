@@ -31,16 +31,20 @@
         </div>
         <div class="form-footer">
 
-            <button pButton pRipple
+            <button pButton
+                class="p-button-outlined mr-5"
                 [disabled]="loading || !(newDeliveryRequest.shipToAccount.longitude && newDeliveryRequest.shipToAccount.latitude && newDeliveryRequest.purchaseOrder)"
-                type="button" [disabled]="" (click)="onCreate()" severity="contrast">
+                (click)="onCreate()" 
+                severity="contrast">
                 Add
                 <i class="pi pi-spin pi-spinner ml-1" *ngIf="loading"></i>
             </button>
 
-            <button pButton pRipple
+            <button pButton
                 [disabled]="loading || !(newDeliveryRequest.shipToAccount.longitude && newDeliveryRequest.shipToAccount.latitude && newDeliveryRequest.purchaseOrder)"
-                type="button" class="p-button-success" [disabled]="" (click)="onCreate(true)" severity="contrast">
+                class="p-button-outlined" 
+                (click)="onCreate(true)" 
+                severity="contrast">
                 Save
                 <i class="pi pi-spin pi-spinner ml-1" *ngIf="loading"></i>
             </button>
