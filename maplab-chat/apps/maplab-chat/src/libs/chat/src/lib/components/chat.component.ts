@@ -11,6 +11,7 @@ import {
 import { Feature, GeoJsonProperties, Geometry, Point, Polygon } from 'geojson';
 import {
   FullscreenControl,
+  GeoJSONSource,
   LayerSpecification,
   LngLatBounds,
   Map,
@@ -36,10 +37,17 @@ import { DialogService } from 'primeng/dynamicdialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ContextContainerComponent } from '../modals/context-container/context-container.component';
+import { MapMarkerTagType } from '../utils/map-to-marker';
 
 interface IStyle {
   style: string;
   type: 'dark' | 'light';
+}
+
+enum MarkerIcon {
+  truck = 'truck-icon',
+  delivery = 'delivery-icon',
+  marker = 'marker-icon',
 }
 
 @Component({
@@ -50,13 +58,18 @@ interface IStyle {
 })
 export class ChatComponent implements AfterViewInit {
   userInput: string = '';
-  messages: { content: string; sender: 'user' | 'ai' | 'loader'}[] = [];
+  messages: { content: string; sender: 'user' | 'ai' | 'loader' }[] = [];
   @ViewChild('mapContainer') private mapContainer!: ElementRef<HTMLElement>;
   @Output() mapClick = new EventEmitter<MapMouseEvent & Object>();
 
-  private map!: Map;
   public currentStyle!: IStyle;
+  public height = '100vh';
+  private map!: Map;
   private cursorPointerValue = false;
+  private currentMarkersLayers: string[] = [];
+  public markersFeatures!: Feature<Point, GeoJsonProperties>[];
+  private padding = 0.1;
+  private mapIsLoaded!: boolean;
   private initialState = { lng: -73.62, lat: 45.5, zoom: 14 };
   stylesItems: MenuItem[] | undefined;
   chatWidth: number = 30;
@@ -120,19 +133,13 @@ export class ChatComponent implements AfterViewInit {
     private destroyRef: DestroyRef,
     @Inject(DIRECTIONS_API_URL) private directionsApiUrl: string
   ) {
-    if (localStorage.getItem('MapStyleV2')) {
-      this.currentStyle = JSON.parse(
-        localStorage.getItem('MapStyleV2') as string
-      ) as IStyle;
-    } else {
-      this.currentStyle = {
-        style:
-          'https://tiles.maplab.ai/styles/osm_liberty/style.json?key=LX.EHWNMgxtK7sH05CiZTjRGWMuRa-618h9z_x93EoH3e0',
-        type: 'dark',
-      };
-    }
+    this.currentStyle = {
+      style:
+        'https://tiles.maplab.ai/styles/osm_liberty/style.json?key=LX.EHWNMgxtK7sH05CiZTjRGWMuRa-618h9z_x93EoH3e0',
+      type: 'dark',
+    };
     this.initMap();
-    this.initStylesMenu();
+    // this.initStylesMenu();
 
     this.chatFacade.chat$.subscribe({
       next: (response: AssistantCompletion | null) => {
@@ -153,12 +160,14 @@ export class ChatComponent implements AfterViewInit {
               console.error('Invalid JSON string:', e);
             }
           }
-          
+
           // Now safely cast to IVrpAssignment
           let vrpAssignment = responseData as IVrpAssignment;
           let directionsRequests = this.createDirections(vrpAssignment);
           forkJoin(
-            directionsRequests.map((directionsRequest) => this.getDirections(directionsRequest))
+            directionsRequests.map((directionsRequest) =>
+              this.getDirections(directionsRequest)
+            )
           ).subscribe({
             next: (results: Feature<Geometry, GeoJsonProperties>[]) => {
               this.onRoutes(results);
@@ -235,30 +244,32 @@ export class ChatComponent implements AfterViewInit {
       style: this.currentStyle.style,
       zoom: this.initialState.zoom,
       center: [-73.58216736, 45.49726821],
-      attributionControl: false,
     });
-    this.initCursorPointer();
-    this.map.addControl(new FullscreenControl());
+    // this.initCursorPointer();
+    // this.map.addControl(new FullscreenControl());
+
     this.map.on('load', () => {
-      this.map.addSource('empty', {
-        type: 'geojson',
-        data: { type: 'FeatureCollection', features: [] },
-      });
+      // this.map.addSource('empty', {
+      //   type: 'geojson',
+      //   data: { type: 'FeatureCollection', features: [] },
+      // });
 
-      this.map.addLayer({
-        id: 'z-index-1',
-        type: 'symbol',
-        source: 'empty',
-      });
+      // this.map.addLayer({
+      //   id: 'z-index-1',
+      //   type: 'symbol',
+      //   source: 'empty',
+      // });
 
-      this.map.addLayer(
-        {
-          id: 'z-index-0',
-          type: 'symbol',
-          source: 'empty',
-        },
-        'z-index-1'
-      );
+      // this.map.addLayer(
+      //   {
+      //     id: 'z-index-0',
+      //     type: 'symbol',
+      //     source: 'empty',
+      //   },
+      //   'z-index-1',
+      // );
+      // this.mapIsLoaded = true;
+      // this.changeMarkers(this.markersFeatures);
     });
 
     this.map.on('click', (event) => {
@@ -356,6 +367,138 @@ export class ChatComponent implements AfterViewInit {
     }
   }
 
+  private changeMarkers(
+    markersFeatures: Feature<Point, GeoJsonProperties>[]
+  ): void {
+    if (this.mapIsLoaded) {
+      this.currentMarkersLayers.forEach((l: string) => {
+        if (this.map.getLayer(l)) {
+          this.map.removeLayer(l);
+        }
+      });
+      this.currentMarkersLayers = [];
+
+      if (markersFeatures?.length > 0) {
+        const markers: GeoJSON.GeoJSON = {
+          type: 'FeatureCollection',
+          features: markersFeatures,
+          bbox: [
+            Math.max(
+              ...markersFeatures.map(
+                (x: Feature<Point, GeoJsonProperties>) =>
+                  x.geometry.coordinates[0]
+              )
+            ) + this.padding,
+            Math.max(
+              ...markersFeatures.map(
+                (x: Feature<Point, GeoJsonProperties>) =>
+                  x.geometry.coordinates[1]
+              )
+            ) + this.padding,
+            Math.min(
+              ...markersFeatures.map(
+                (x: Feature<Point, GeoJsonProperties>) =>
+                  x.geometry.coordinates[0]
+              )
+            ) - this.padding,
+            Math.min(
+              ...markersFeatures.map(
+                (x: Feature<Point, GeoJsonProperties>) =>
+                  x.geometry.coordinates[1]
+              )
+            ) - this.padding,
+          ],
+        };
+
+        const sourceName = `mapMarkers_source`;
+        const source = this.map.getSource(sourceName) as GeoJSONSource;
+        if (source) {
+          source.setData(markers);
+        } else {
+          this.map.addSource(sourceName, {
+            type: 'geojson',
+            data: markers,
+          });
+        }
+
+        markers.features.forEach(
+          (feature: Feature<Geometry, GeoJsonProperties>) => {
+            const symbol =
+              feature.properties !== null ? feature.properties['symbol'] : '';
+            const id =
+              feature.properties !== null ? feature.properties['id'] : '';
+            const tag =
+              feature.properties !== null ? feature.properties['tag'] : '';
+            const layerID = 'tag-' + symbol + '-' + id;
+
+            if (!this.map.getLayer(layerID)) {
+              const iconImage: MarkerIcon = this.getMarkerIcon(tag);
+              this.map.addLayer(
+                {
+                  id: layerID,
+                  type: 'symbol',
+                  source: sourceName,
+                  layout: {
+                    // 'text-allow-overlap': true,
+                    // 'text-ignore-placement': true,
+                    // 'icon-allow-overlap': true,
+                    // 'icon-ignore-placement': true,
+                    ['icon-image']: iconImage,
+                    ['icon-overlap']: 'always',
+                    ['text-field']: symbol,
+                    ['text-font']: ['Open Sans Bold', 'Arial Unicode MS Bold'],
+                    ['text-size']: 11,
+                    ['text-transform']: 'uppercase',
+                    ['text-letter-spacing']: 0.05,
+                    ['text-offset']: [0, 1.5],
+                  },
+                  paint: {
+                    ['text-color']: '#202',
+                    ['text-halo-color']: '#fff',
+                    ['text-halo-width']: 2,
+                  },
+                  filter: ['==', 'symbol', symbol],
+                },
+                'z-index-1'
+              );
+              this.currentMarkersLayers.push(layerID);
+            }
+          }
+        );
+
+        if (markers.bbox) {
+          var bounds = new LngLatBounds();
+          markersFeatures.forEach((coord) =>
+            bounds.extend({
+              lng: coord.geometry.coordinates[0],
+              lat: coord.geometry.coordinates[1],
+            })
+          );
+          this.map.fitBounds(bounds, { padding: this.padding });
+        }
+      } else {
+        const sourceName = `mapMarkers_source`;
+        const source = this.map.getSource(sourceName);
+        if (source) {
+          this.map.removeSource(sourceName);
+        }
+      }
+    }
+  }
+
+  private getMarkerIcon(marker: MapMarkerTagType): MarkerIcon {
+    switch (marker) {
+      case MapMarkerTagType.marker:
+        return MarkerIcon.marker;
+      case MapMarkerTagType.delivery:
+        return MarkerIcon.delivery;
+      case MapMarkerTagType.truck:
+        return MarkerIcon.truck;
+      default:
+        return MarkerIcon.marker;
+    }
+  }
+
   createDirections(result: IVrpAssignment): IDirectionRequestDto[] {
     const request: IDirectionRequestDto[] = [];
     const colors = GradientColors.generateDegradationColors(
@@ -384,7 +527,7 @@ export class ChatComponent implements AfterViewInit {
               geometry: true,
               routeResponseOptions: {
                 responseFromat: ResponseFormat.Geojson,
-              }
+              },
             },
             description: `${vehicle?.id} (${1})`,
             lineColor,
@@ -407,7 +550,7 @@ export class ChatComponent implements AfterViewInit {
               geometry: true,
               routeResponseOptions: {
                 responseFromat: ResponseFormat.Geojson,
-              }
+              },
             },
             description: `${vehicle?.id} (${index + 1})`,
             lineColor,
@@ -582,9 +725,10 @@ export class ChatComponent implements AfterViewInit {
       style: { ['max-height']: '95%' },
     });
 
-    dialogRef.onClose.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-
-      void this.router.navigate(['../'], { relativeTo: this.activatedRoute })
-    })
+    dialogRef.onClose
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        void this.router.navigate(['../'], { relativeTo: this.activatedRoute });
+      });
   }
 }

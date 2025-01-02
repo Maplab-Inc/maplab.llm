@@ -1,37 +1,56 @@
-<div class="chat-container">
-    <div class="chat-area" [style.width.%]="chatWidth">
-        <div class="message-area">
-            <div *ngFor="let message of messages" class="chat-message"
-                [ngClass]="{'user-message': message.sender === 'user', 'ai-message': message.sender === 'ai', 'loader-message': message.sender === 'loader'}">
-                <div class="message-wrapper">
-                    <div *ngIf="message.sender === 'ai'" class="icon-container">
-                        <img src="/maplab-logo.png" alt="Maplab Logo" class="ai-icon" />
-                    </div>
-                    <div *ngIf="message.sender === 'loader'" style="margin-right: 15px;">
-                        <p-progress-spinner strokeWidth="10" fill="transparent" animationDuration=".5s"
-                            [style]="{ width: '18px', height: '18px' }" />
-                    </div>
-                    <div>
-                        {{ message.content }}
+<div class="main-container">
+    <div class="sidebar">
+        <img class="logo" src="/maplab-logo.png" alt="Maplab Logo">
+        <div class="side-menu">
+            <div class="menu-item">
+                <i class="pi pi-box" style="font-size: 2.3rem"></i>
+            </div>
+            <div class="menu-item">
+                <i class="pi pi-map" style="font-size: 2.3rem"></i>
+            </div>
+            <div class="menu-item">
+                <i class="pi pi-cog" style="font-size: 2.3rem"></i>
+            </div>
+            <div class="menu-item user">
+                <i class="pi pi-user" style="font-size: 2.5rem"></i>
+            </div>
+        </div>
+    </div>
+    <div class="chat-container">
+        <div class="chat-area" [style.width.%]="chatWidth">
+            <div class="message-area">
+                <div *ngFor="let message of messages" class="chat-message"
+                    [ngClass]="{'user-message': message.sender === 'user', 'ai-message': message.sender === 'ai', 'loader-message': message.sender === 'loader'}">
+                    <div class="message-wrapper">
+                        <div *ngIf="message.sender === 'ai'" class="icon-container">
+                            <img src="/maplab-logo.png" alt="Maplab Logo" class="ai-icon" />
+                        </div>
+                        <div *ngIf="message.sender === 'loader'" style="margin-right: 15px;">
+                            <p-progress-spinner strokeWidth="10" fill="transparent" animationDuration=".5s"
+                                [style]="{ width: '18px', height: '18px' }" />
+                        </div>
+                        <div>
+                            {{ message.content }}
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="chat-prompt">
-            <div class="input-container">
-                <input [(ngModel)]="userInput" [disabled]="(chatFacade.chatLoading$ | async) ?? false"
-                    (keyup.enter)="sendMessage()" placeholder="Type your message..." />
-                <button (click)="sendMessage()" class="send-button"
-                    [disabled]="(chatFacade.chatLoading$ | async) ?? false">
-                    <div class="icon-circle">
-                        <i class="pi pi-arrow-up"></i>
-                    </div>
-                </button>
+            <div class="chat-prompt">
+                <div class="input-container">
+                    <input [(ngModel)]="userInput" [disabled]="(chatFacade.chatLoading$ | async) ?? false"
+                        (keyup.enter)="sendMessage()" placeholder="Type your message..." />
+                    <button (click)="sendMessage()" class="send-button"
+                        [disabled]="(chatFacade.chatLoading$ | async) ?? false">
+                        <div class="icon-circle">
+                            <i class="pi pi-chevron-right"></i>
+                        </div>
+                    </button>
+                </div>
+                <p-button class="context-menu" label="Manage contexts" icon="pi pi-cog" badge="2"
+                    badgeSeverity="contrast" [outlined]="true" (click)="openDemoModal()" />
             </div>
-            <p-button class="context-menu" label="Manage context" icon="pi pi-book" badge="2" badgeSeverity="contrast"
-                [outlined]="true" (click)="openDemoModal()" />
         </div>
+        <div class="resizer"></div>
+        <maplab-chat-maps [height]="'100vh'" [cursorPointer]="true" />
     </div>
-    <div class="resizer"></div>
-    <div class="map-area" [style.width.%]="mapWidth" #mapContainer></div>
 </div>
