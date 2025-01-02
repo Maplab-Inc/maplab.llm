@@ -1,6 +1,6 @@
 import { createAction, props } from '@ngrx/store';
-import { CompletionRequest } from '../models/completion-request';
-import { AssistantCompletion } from '../models/assistant-completion';
+import { CompletionRequest } from '../../models/completion-request';
+import { AssistantCompletion } from '../../models/assistant-completion';
 
 const NAMESPACE = '[CHAT]';
 

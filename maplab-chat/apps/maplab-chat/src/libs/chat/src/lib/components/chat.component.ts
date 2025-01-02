@@ -22,7 +22,7 @@ import {
   TerrainControl,
 } from 'maplibre-gl';
 import { MenuItem } from 'primeng/api';
-import { ChatFacade } from '../+state/chat.facade';
+import { ChatFacade } from '../+state/chat/chat.facade';
 import { AssistantCompletion } from '../models/assistant-completion';
 import { IVehicleRoute, IVrpAssignment } from '../models/vrp-assignment';
 import {

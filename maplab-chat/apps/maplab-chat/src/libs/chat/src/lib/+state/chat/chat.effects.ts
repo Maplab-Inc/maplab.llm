@@ -2,8 +2,8 @@ import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { ChatActions } from './chat.actions';
 import { exhaustMap, map, tap } from 'rxjs';
-import { AssistantCompletion } from '../models/assistant-completion';
-import { ChatService } from '../services/chat.service';
+import { AssistantCompletion } from '../../models/assistant-completion';
+import { ChatService } from '../../services/chat.service';
 
 @Injectable()
 export class ChatEffects {

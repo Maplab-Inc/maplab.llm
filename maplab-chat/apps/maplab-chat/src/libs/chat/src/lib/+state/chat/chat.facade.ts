@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import * as reducer from './chat.reducer';
 import { Observable } from 'rxjs';
-import { CompletionRequest } from '../models/completion-request';
 import { ChatActions } from './chat.actions';
-import { AssistantCompletion } from '../models/assistant-completion';
 import { ChatSelectors } from './chat.selectors';
+import { CompletionRequest } from '../../models/completion-request';
+import { AssistantCompletion } from '../../models/assistant-completion';
 
 @Injectable()
 export class ChatFacade {

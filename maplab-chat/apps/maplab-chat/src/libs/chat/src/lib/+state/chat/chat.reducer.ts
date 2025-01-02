@@ -1,6 +1,6 @@
 import { createReducer, on } from "@ngrx/store";
-import { AssistantCompletion } from "../models/assistant-completion";
 import { ChatActions } from "./chat.actions";
+import { AssistantCompletion } from "../../models/assistant-completion";
 
 export interface State {
     completion: AssistantCompletion | null;
