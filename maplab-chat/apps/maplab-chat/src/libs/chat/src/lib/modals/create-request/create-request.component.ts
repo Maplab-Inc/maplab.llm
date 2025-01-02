@@ -69,7 +69,7 @@ export class CreateRequestComponent {
   }
 
   onCreate(close?: boolean): void {
-    this.deliveryRequestService.addDeliveryRequest(this.newDeliveryRequest)
+    this.deliveryRequestService.addDeliveryRequest(this.newDeliveryRequest);
     this.messageService.add({ severity: 'success', summary: 'Request added' });
     if (close) {
       this.dialogRef.close();

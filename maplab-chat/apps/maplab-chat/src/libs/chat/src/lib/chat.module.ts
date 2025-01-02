@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 import { ChatEffects } from './+state/chat/chat.effects';
-import { reducer  as chatReducer} from './+state/chat/chat.reducer';
+import { reducer as chatReducer } from './+state/chat/chat.reducer';
 import { reducer as contextReducer } from './+state/context/context.reducer';
 import { ChatService } from './services/chat.service';
 import { HttpClientModule } from '@angular/common/http';
@@ -34,6 +34,7 @@ import { CreateVehicleComponent } from './modals/create-vehicle/create-vehicle.c
 import { DialogService } from 'primeng/dynamicdialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { DynamicDialogModule } from 'primeng/dynamicdialog';
+import { ContextFacade } from './+state/context/context.facade';
 
 const routes: Routes = [
   {
@@ -78,6 +79,6 @@ const routes: Routes = [
     CreateVehicleComponent,
     MapsComponent,
   ],
-  providers: [ChatService, ChatFacade, DialogService],
+  providers: [ChatService, ChatFacade, ContextFacade, DialogService],
 })
 export class ChatModule {}

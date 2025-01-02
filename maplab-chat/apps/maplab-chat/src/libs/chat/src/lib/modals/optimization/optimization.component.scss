@@ -1,10 +1,12 @@
 .context-container {
-    padding: 1rem 0rem 3rem 0rem;
+    padding: 0rem 0rem 5rem 0rem;
     margin: 1.5rem 0;
     display: flex;
     height: 100%;
 }
 
-.map-view {
-    width: 75%;
+.save-context {
+    position: absolute;
+    bottom: 2rem;
+    right: 2rem;
 }

@@ -1,16 +1,23 @@
 import { createAction, props } from '@ngrx/store';
-import { RouteOptimizationContext } from '../../models/route-optimization-context';
+import { IJob } from '../../models/job';
+import { IVehicle } from '../../models/vehicle';
 
 const NAMESPACE = '[CONTEXT]';
 
-const editContext = createAction(
-  `${NAMESPACE} Edit`,
-  props<{ routeOptimizationContext: RouteOptimizationContext }>()
+const updateRouteOptimizationJobs = createAction(
+  `${NAMESPACE} Update Route Optimization Jobs`,
+  props<{ jobs: IJob[] }>()
+);
+
+const updateRouteOptimizationVehicles = createAction(
+  `${NAMESPACE} Update Route Optimization Vehicles`,
+  props<{ vehicles: IVehicle[] }>()
 );
 
 const err = createAction(`${NAMESPACE} Error`, props<{ errMsg: string }>());
 
 export const ContextActions = {
-  editContext,
+  updateRouteOptimizationJobs,
+  updateRouteOptimizationVehicles,
   err
 };

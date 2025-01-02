@@ -20,6 +20,7 @@ import { IJob } from '../../models/job';
 import { CapacityMode } from '../../models/enums/capacity-mode';
 import { ICompartment } from '../../models/compartment';
 import { IProduct } from '../../models/product';
+import { ContextFacade } from '../../+state/context/context.facade';
 
 @Component({
   selector: 'maplab-chat-optimization',
@@ -40,10 +41,8 @@ export class OptimizationComponent implements OnInit {
   constructor(
     private trucksService: TrucksService,
     private dialogRef: DynamicDialogRef,
-    private messageService: MessageService,
-    private deliveryRequestService: DeliveryRequestService,
     private destroyRef: DestroyRef,
-    private dialogService: DialogService,
+    private contextFacade: ContextFacade,
   ) { }
 
   ngOnInit(): void {
@@ -172,5 +171,15 @@ export class OptimizationComponent implements OnInit {
         demands: demands,
       };
     });
+  }
+
+  public saveContext(): void {
+    const vehicles: IVehicle[] = this.mapToIVehicle();
+    const jobs: IJob[] = this.mapToIJob();
+
+    this.contextFacade.updateRouteOptimizationVehicles(vehicles);
+    this.contextFacade.updateRouteOptimizationJobs(jobs);
+
+    this.closeDialog();
   }
 }

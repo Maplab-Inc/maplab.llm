@@ -13,9 +13,22 @@ export const initialState: State = {
 export const reducer = createReducer(
     initialState,
 
-    on(ContextActions.editContext, (state, action) => ({
+    on(ContextActions.updateRouteOptimizationJobs, (state, action) => ({
         ...state,
-        routeOptimization: action.routeOptimizationContext
+        routeOptimization: {
+            ...state.routeOptimization,
+            vehicles: state.routeOptimization?.vehicles ?? [],
+            jobs: action.jobs
+        }
+    })),
+
+    on(ContextActions.updateRouteOptimizationVehicles, (state, action) => ({
+        ...state,
+        routeOptimization: {
+            ...state.routeOptimization,
+            jobs: state.routeOptimization?.jobs ?? [],
+            vehicles: action.vehicles
+        }
     })),
 
     on(ContextActions.err, (state) => ({
