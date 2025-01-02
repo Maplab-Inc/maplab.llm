@@ -6,7 +6,8 @@ import { CommonModule } from '@angular/common';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 import { ChatEffects } from './+state/chat/chat.effects';
-import { reducer } from './+state/chat/chat.reducer';
+import { reducer  as chatReducer} from './+state/chat/chat.reducer';
+import { reducer as contextReducer } from './+state/context/context.reducer';
 import { ChatService } from './services/chat.service';
 import { HttpClientModule } from '@angular/common/http';
 import { ChatFacade } from './+state/chat/chat.facade';
@@ -61,7 +62,8 @@ const routes: Routes = [
     FormFieldWrapperComponent,
     HttpClientModule,
     RouterModule.forChild(routes),
-    StoreModule.forFeature('chat', reducer),
+    StoreModule.forFeature('chat', chatReducer),
+    StoreModule.forFeature('context', contextReducer),
     EffectsModule.forFeature([ChatEffects]),
   ],
   declarations: [

@@ -3,15 +3,15 @@ import { createFeatureSelector, createSelector } from '@ngrx/store';
 
 export const selectState = createFeatureSelector<reducer.State>('chat');
 
-const selectTenant = createSelector(selectState, reducer.getCompletion);
+const selectCompletion = createSelector(selectState, reducer.getCompletion);
 
 const selectLoading = createSelector(selectState, reducer.getLoading);
 
 const selectLoaded = createSelector(selectState, reducer.getLoaded);
 
 export const ChatSelectors = {
+  selectCompletion,
   selectState,
-  selectTenant,
   selectLoading,
   selectLoaded,
 };

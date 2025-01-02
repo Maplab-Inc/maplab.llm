@@ -16,7 +16,7 @@ export class ChatFacade {
 
   constructor(private readonly store: Store<reducer.State>) {
     this.state$ = this.store.select(ChatSelectors.selectState);
-    this.chat$ = this.store.select(ChatSelectors.selectTenant);
+    this.chat$ = this.store.select(ChatSelectors.selectCompletion);
     this.chatLoading$ = this.store.select(ChatSelectors.selectLoading);
     this.chatLoaded$ = this.store.select(ChatSelectors.selectLoaded);
   }
