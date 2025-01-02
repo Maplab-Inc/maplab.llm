@@ -12,10 +12,14 @@ import { Feature, GeoJsonProperties, Geometry, Point, Polygon } from 'geojson';
 import {
   FullscreenControl,
   GeoJSONSource,
+  GeolocateControl,
   LayerSpecification,
   LngLatBounds,
   Map,
   MapMouseEvent,
+  NavigationControl,
+  ScaleControl,
+  TerrainControl,
 } from 'maplibre-gl';
 import { MenuItem } from 'primeng/api';
 import { ChatFacade } from '../+state/chat.facade';
@@ -139,7 +143,7 @@ export class ChatComponent implements AfterViewInit {
       type: 'dark',
     };
     this.initMap();
-    // this.initStylesMenu();
+    this.initStylesMenu();
 
     this.chatFacade.chat$.subscribe({
       next: (response: AssistantCompletion | null) => {
@@ -245,31 +249,48 @@ export class ChatComponent implements AfterViewInit {
       zoom: this.initialState.zoom,
       center: [-73.58216736, 45.49726821],
     });
-    // this.initCursorPointer();
-    // this.map.addControl(new FullscreenControl());
+    this.initCursorPointer();
+    this.map.addControl(new FullscreenControl());
+    this.map.addControl(new ScaleControl());
+    this.map.addControl(
+      new GeolocateControl({
+        positionOptions: {
+          enableHighAccuracy: true,
+        },
+        trackUserLocation: true,
+      }),
+      'bottom-right'
+    );
+    this.map.addControl(
+      new NavigationControl({
+        visualizePitch: true,
+        showZoom: true,
+        showCompass: true,
+      })
+    );
 
     this.map.on('load', () => {
-      // this.map.addSource('empty', {
-      //   type: 'geojson',
-      //   data: { type: 'FeatureCollection', features: [] },
-      // });
+      this.map.addSource('empty', {
+        type: 'geojson',
+        data: { type: 'FeatureCollection', features: [] },
+      });
 
-      // this.map.addLayer({
-      //   id: 'z-index-1',
-      //   type: 'symbol',
-      //   source: 'empty',
-      // });
+      this.map.addLayer({
+        id: 'z-index-1',
+        type: 'symbol',
+        source: 'empty',
+      });
 
-      // this.map.addLayer(
-      //   {
-      //     id: 'z-index-0',
-      //     type: 'symbol',
-      //     source: 'empty',
-      //   },
-      //   'z-index-1',
-      // );
-      // this.mapIsLoaded = true;
-      // this.changeMarkers(this.markersFeatures);
+      this.map.addLayer(
+        {
+          id: 'z-index-0',
+          type: 'symbol',
+          source: 'empty',
+        },
+        'z-index-1'
+      );
+      this.mapIsLoaded = true;
+      this.changeMarkers(this.markersFeatures);
     });
 
     this.map.on('click', (event) => {
