@@ -22,6 +22,7 @@ export class ChatFacade {
   }
 
   getCompletion(request: CompletionRequest): void {
+    debugger;
     this.store.dispatch(ChatActions.getCompletion({ request }));
   }
 }

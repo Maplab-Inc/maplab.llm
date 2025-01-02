@@ -31,7 +31,6 @@ import {
 } from '../models/directions-request';
 import { forkJoin, map, Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import { DIRECTIONS_API_URL } from '@maplab-chat/tokens';
 import { IResponseError } from '../models/response-error';
 import { GradientColors } from '../utils/gradient-colors';
 import { IVehicle } from '../models/vehicle';
@@ -42,6 +41,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ContextContainerComponent } from '../modals/context-container/context-container.component';
 import { MapMarkerTagType } from '../utils/map-to-marker';
+import { DIRECTIONS_API_URL } from '@maplab-chat/tokens';
+import { ContextFacade } from '../+state/context/context.facade';
 
 interface IStyle {
   style: string;
@@ -61,33 +62,6 @@ enum MarkerIcon {
   standalone: false,
 })
 export class ChatComponent implements AfterViewInit {
-  userInput: string = '';
-  messages: { content: string; sender: 'user' | 'ai' | 'loader' }[] = [];
-  @ViewChild('mapContainer') private mapContainer!: ElementRef<HTMLElement>;
-  @Output() mapClick = new EventEmitter<MapMouseEvent & Object>();
-
-  public currentStyle!: IStyle;
-  public height = '100vh';
-  private map!: Map;
-  private cursorPointerValue = false;
-  private currentMarkersLayers: string[] = [];
-  public markersFeatures!: Feature<Point, GeoJsonProperties>[];
-  private padding = 0.1;
-  private mapIsLoaded!: boolean;
-  private initialState = { lng: -73.62, lat: 45.5, zoom: 14 };
-  stylesItems: MenuItem[] | undefined;
-  chatWidth: number = 30;
-  mapWidth: number = 70;
-  private colors = [
-    '#f54242',
-    '#f542ce',
-    '#c542f5',
-    '#7b42f5',
-    '#2f47fa',
-    '#2fa9fa',
-  ];
-
-  // For testing purposes, context will be added.
   vehicles: IVehicle[] = [
     {
       id: 1,
@@ -128,6 +102,32 @@ export class ChatComponent implements AfterViewInit {
     },
   ];
 
+  userInput: string = '';
+  messages: { content: string; sender: 'user' | 'ai' | 'loader' }[] = [];
+  @ViewChild('mapContainer') private mapContainer!: ElementRef<HTMLElement>;
+  @Output() mapClick = new EventEmitter<MapMouseEvent & Object>();
+
+  public currentStyle!: IStyle;
+  public height = '100vh';
+  private map!: Map;
+  private cursorPointerValue = false;
+  private currentMarkersLayers: string[] = [];
+  public markersFeatures!: Feature<Point, GeoJsonProperties>[];
+  private padding = 0.1;
+  private mapIsLoaded!: boolean;
+  private initialState = { lng: -73.62, lat: 45.5, zoom: 14 };
+  stylesItems: MenuItem[] | undefined;
+  chatWidth: number = 30;
+  mapWidth: number = 70;
+  private colors = [
+    '#f54242',
+    '#f542ce',
+    '#c542f5',
+    '#7b42f5',
+    '#2f47fa',
+    '#2fa9fa',
+  ];
+
   constructor(
     public chatFacade: ChatFacade,
     private http: HttpClient,
@@ -135,6 +135,7 @@ export class ChatComponent implements AfterViewInit {
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private destroyRef: DestroyRef,
+    private contextFacade: ContextFacade,
     @Inject(DIRECTIONS_API_URL) private directionsApiUrl: string
   ) {
     this.currentStyle = {
@@ -231,8 +232,23 @@ export class ChatComponent implements AfterViewInit {
     this.messages.push({ content: this.userInput, sender: 'user' });
     this.messages.push({ content: 'thinking...', sender: 'loader' });
 
-    this.chatFacade.getCompletion({ user: this.userInput });
-
+    this.contextFacade.routeOptimizationContext$
+      .pipe(
+        map((routeOptimizationContext) => {
+          debugger;
+          if (routeOptimizationContext) {
+            this.chatFacade.getCompletion({
+              user: this.userInput,
+              system: JSON.stringify(routeOptimizationContext),
+            });
+          } else {
+            this.chatFacade.getCompletion({
+              user: this.userInput,
+            });
+          }
+        })
+      )
+      .subscribe();
     // Clear user input
     this.userInput = '';
   }

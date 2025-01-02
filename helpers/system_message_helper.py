@@ -20,12 +20,5 @@ def get_assistant_guidelines() -> str:
         "Use following data:\n\n"
         "Current time is 7am\n\n"
         "Please format your output in a json format as follow and do not use backslashes \ in response: { message: brief explanation of the output, data: actual data, type: geojson, json or coordinates }\n\n"
-        "Vehicle=1;Equipment=High Speed Pump;longitude=-73.58600425999558;latitude=45.498870952285614;Load=6000 liters of gas and 3000 liters of furnace\n\n"
-        "Vehicle=2;longitude=-73.44073664;latitude=45.59886575;Load=5000 liters of product gas and 8000 of product diesel\n\n"
-        "Vehicle=3;longitude=-73.43386911;latitude=45.36413691;Load=5000 liters of product gas and 4400 of product furnace\n\n"
-        "Vehicle=4;longitude=-73.58033876;latitude=45.5024504;Load=10000 liters of product gas and 5000 of product furnace and 5000 of product diesel\n\n"
-        "Customer=C1;id=11474;Priority=High;longitude=-73.60950763800484;latitude=45.61997845928107;Demand=500 liters of product gas\n\n"
-        "Customer=C2;id=55474;Priority=Low;longitude=-73.63554749793641;latitude=45.45069012897066;Demand=100 liters of product gas and 1000 liters of product furnace\n\n"
-        "Customer=C3;id=55474;Priority=Low;longitude=-73.79861343871389;latitude=45.504563581701404, ;Demand=5000 liters of product gas and 3000 liters of product furnace\n\n"
     )
     return message
