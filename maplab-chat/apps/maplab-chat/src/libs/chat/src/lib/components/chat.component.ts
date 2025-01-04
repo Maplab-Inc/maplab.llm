@@ -43,16 +43,12 @@ import { ContextContainerComponent } from '../modals/context-container/context-c
 import { MapMarkerTagType } from '../utils/map-to-marker';
 import { DIRECTIONS_API_URL } from '@maplab-chat/tokens';
 import { ContextFacade } from '../+state/context/context.facade';
+import { DeliveryRequestService } from '../services/context-services/delivery-request-service';
+import { TrucksService } from '../services/context-services/trucks-service';
 
 interface IStyle {
   style: string;
   type: 'dark' | 'light';
-}
-
-enum MarkerIcon {
-  truck = 'truck-icon',
-  delivery = 'delivery-icon',
-  marker = 'marker-icon',
 }
 
 @Component({
@@ -62,46 +58,6 @@ enum MarkerIcon {
   standalone: false,
 })
 export class ChatComponent implements AfterViewInit {
-  vehicles: IVehicle[] = [
-    {
-      id: 1,
-      products: [
-        { id: 1, capacity: 6000, load: 6000 }, // Gas
-        { id: 2, capacity: 3000, load: 3000 }, // Furnace
-      ],
-      start: new Coordinate(-73.58600425999558, 45.498870952285614),
-      trackMode: TrackMode.RoundTrip,
-    },
-    {
-      id: 2,
-      products: [
-        { id: 3, capacity: 5000, load: 5000 }, // Gas
-        { id: 4, capacity: 8000, load: 8000 }, // Diesel
-      ],
-      start: new Coordinate(-73.44073664, 45.59886575),
-      trackMode: TrackMode.LastVisit,
-    },
-    {
-      id: 3,
-      products: [
-        { id: 5, capacity: 5000, load: 5000 }, // Gas
-        { id: 6, capacity: 4400, load: 4400 }, // Furnace
-      ],
-      start: new Coordinate(-73.43386911, 45.36413691),
-      trackMode: TrackMode.ReturnTo,
-    },
-    {
-      id: 4,
-      products: [
-        { id: 7, capacity: 10000, load: 10000 }, // Gas
-        { id: 8, capacity: 5000, load: 5000 }, // Furnace
-        { id: 9, capacity: 5000, load: 5000 }, // Diesel
-      ],
-      start: new Coordinate(-73.58033876, 45.5024504),
-      trackMode: TrackMode.RoundTrip,
-    },
-  ];
-
   userInput: string = '';
   messages: { content: string; sender: 'user' | 'ai' | 'loader' }[] = [];
   @ViewChild('mapContainer') private mapContainer!: ElementRef<HTMLElement>;
@@ -112,21 +68,16 @@ export class ChatComponent implements AfterViewInit {
   private map!: Map;
   private cursorPointerValue = false;
   private currentMarkersLayers: string[] = [];
-  public markersFeatures!: Feature<Point, GeoJsonProperties>[];
   private padding = 0.1;
   private mapIsLoaded!: boolean;
   private initialState = { lng: -73.62, lat: 45.5, zoom: 14 };
   stylesItems: MenuItem[] | undefined;
   chatWidth: number = 30;
   mapWidth: number = 70;
-  private colors = [
-    '#f54242',
-    '#f542ce',
-    '#c542f5',
-    '#7b42f5',
-    '#2f47fa',
-    '#2fa9fa',
-  ];
+
+  imageDelivery!: HTMLImageElement;
+  imageTruck!: HTMLImageElement;
+  imageMarker!: HTMLImageElement;
 
   constructor(
     public chatFacade: ChatFacade,
@@ -136,6 +87,8 @@ export class ChatComponent implements AfterViewInit {
     private activatedRoute: ActivatedRoute,
     private destroyRef: DestroyRef,
     private contextFacade: ContextFacade,
+    private deliveryRequestService: DeliveryRequestService,
+    private trucksService: TrucksService,
     @Inject(DIRECTIONS_API_URL) private directionsApiUrl: string
   ) {
     this.currentStyle = {
@@ -149,6 +102,9 @@ export class ChatComponent implements AfterViewInit {
     this.chatFacade.chat$.subscribe({
       next: (response: AssistantCompletion | null) => {
         if (response) {
+          // Remove loader message
+          this.messages.pop();
+
           // Add AI response to the chat
           this.messages.push({
             content: response.message || 'No response from AI.',
@@ -235,7 +191,6 @@ export class ChatComponent implements AfterViewInit {
     this.contextFacade.routeOptimizationContext$
       .pipe(
         map((routeOptimizationContext) => {
-          debugger;
           if (routeOptimizationContext) {
             this.chatFacade.getCompletion({
               user: this.userInput,
@@ -258,6 +213,21 @@ export class ChatComponent implements AfterViewInit {
     mapContainer.classList.add('map');
     mapContainer.style.width = '100%';
     mapContainer.style.height = '100vh';
+
+    this.imageDelivery = document.createElement('img');
+    this.imageDelivery.width = 25;
+    this.imageDelivery.height = 25;
+    this.imageDelivery.src = '/assets/delivery.png';
+
+    this.imageTruck = document.createElement('img');
+    this.imageTruck.width = 25;
+    this.imageTruck.height = 25;
+    this.imageTruck.src ='/assets/truck.svg';
+
+    this.imageMarker = document.createElement('img');
+    this.imageMarker.width = 25;
+    this.imageMarker.height = 40;
+    this.imageMarker.src = '/assets/blue_marker.png';
 
     this.map = new Map({
       container: mapContainer,
@@ -286,6 +256,18 @@ export class ChatComponent implements AfterViewInit {
     );
 
     this.map.on('load', () => {
+      if (!this.map.hasImage(MapMarkerTagType.delivery)) {
+        this.map.addImage(MapMarkerTagType.delivery, this.imageDelivery);
+      }
+
+      if (!this.map.hasImage(MapMarkerTagType.truck)) {
+        this.map.addImage(MapMarkerTagType.truck, this.imageTruck);
+      }
+
+      if (!this.map.hasImage(MapMarkerTagType.marker)) {
+        this.map.addImage(MapMarkerTagType.marker, this.imageMarker);
+      }
+
       this.map.addSource('empty', {
         type: 'geojson',
         data: { type: 'FeatureCollection', features: [] },
@@ -303,10 +285,35 @@ export class ChatComponent implements AfterViewInit {
           type: 'symbol',
           source: 'empty',
         },
-        'z-index-1'
+        'z-index-1',
       );
+
       this.mapIsLoaded = true;
-      this.changeMarkers(this.markersFeatures);
+
+      // Add vehicles and delivery requests markers
+      this.contextFacade.routeOptimizationContext$
+        .pipe()
+        .subscribe((routeOptimizationContext: any) => {
+          if (routeOptimizationContext) {
+            let markersFeatures: Feature<Point, GeoJsonProperties>[] = [];
+            if (routeOptimizationContext.vehicles.length > 0) {
+              markersFeatures = [
+                ...this.trucksService.mapToGeoJson(routeOptimizationContext.vehicles),
+              ];
+            }
+
+            if (routeOptimizationContext.jobs.length > 0) {
+              markersFeatures = [
+                ...markersFeatures,
+                ...this.deliveryRequestService.mapToGeoJson(routeOptimizationContext.jobs),
+              ];
+            }
+
+            if (markersFeatures.length > 0) {
+              this.changeMarkers(markersFeatures);
+            }
+          }
+        });
     });
 
     this.map.on('click', (event) => {
@@ -469,7 +476,7 @@ export class ChatComponent implements AfterViewInit {
             const layerID = 'tag-' + symbol + '-' + id;
 
             if (!this.map.getLayer(layerID)) {
-              const iconImage: MarkerIcon = this.getMarkerIcon(tag);
+              const iconImage: MapMarkerTagType = tag;
               this.map.addLayer(
                 {
                   id: layerID,
@@ -523,19 +530,6 @@ export class ChatComponent implements AfterViewInit {
     }
   }
 
-  private getMarkerIcon(marker: MapMarkerTagType): MarkerIcon {
-    switch (marker) {
-      case MapMarkerTagType.marker:
-        return MarkerIcon.marker;
-      case MapMarkerTagType.delivery:
-        return MarkerIcon.delivery;
-      case MapMarkerTagType.truck:
-        return MarkerIcon.truck;
-      default:
-        return MarkerIcon.marker;
-    }
-  }
-
   createDirections(result: IVrpAssignment): IDirectionRequestDto[] {
     const request: IDirectionRequestDto[] = [];
     const colors = GradientColors.generateDegradationColors(
@@ -543,56 +537,63 @@ export class ChatComponent implements AfterViewInit {
     );
     result.vehicleRoutes.forEach(
       (vehicleRoute: IVehicleRoute, index: number) => {
-        const vehicle = this.vehicles.find(
-          (vehicle: IVehicle) => vehicle.id === vehicleRoute.vehicleId
-        );
-        const lineColor = colors[index];
-        // Vehicle START position
-        if (vehicleRoute.visits.length && vehicle) {
-          request.push({
-            direction: {
-              coordinates: [
-                [
-                  (vehicle.start as Coordinate).longitude,
-                  (vehicle.start as Coordinate)?.latitude,
-                ],
-                [
-                  vehicleRoute.visits[0].nodeLocation.longitude,
-                  vehicleRoute.visits[0].nodeLocation.latitude,
-                ],
-              ],
-              geometry: true,
-              routeResponseOptions: {
-                responseFromat: ResponseFormat.Geojson,
-              },
-            },
-            description: `${vehicle?.id} (${1})`,
-            lineColor,
+        this.contextFacade.routeOptimizationContext$
+          .pipe()
+          .subscribe((routeOptimizationContext: any) => {
+            if (routeOptimizationContext) {
+              let vehicle = routeOptimizationContext.vehicles.find(
+                (vehicle: IVehicle) => vehicle.id === vehicleRoute.vehicleId
+              );
+
+              const lineColor = colors[index];
+              // Vehicle START position
+              if (vehicleRoute.visits.length && vehicle) {
+                request.push({
+                  direction: {
+                    coordinates: [
+                      [
+                        (vehicle.start as Coordinate).longitude,
+                        (vehicle.start as Coordinate)?.latitude,
+                      ],
+                      [
+                        vehicleRoute.visits[0].nodeLocation.longitude,
+                        vehicleRoute.visits[0].nodeLocation.latitude,
+                      ],
+                    ],
+                    geometry: true,
+                    routeResponseOptions: {
+                      responseFromat: ResponseFormat.Geojson,
+                    },
+                  },
+                  description: `${vehicle?.id} (${1})`,
+                  lineColor,
+                });
+              }
+              // Request position
+              for (let index = 1; index < vehicleRoute.visits.length; index++) {
+                request.push({
+                  direction: {
+                    coordinates: [
+                      [
+                        vehicleRoute.visits[index - 1].nodeLocation.longitude,
+                        vehicleRoute.visits[index - 1].nodeLocation.latitude,
+                      ],
+                      [
+                        vehicleRoute.visits[index].nodeLocation.longitude,
+                        vehicleRoute.visits[index].nodeLocation.latitude,
+                      ],
+                    ],
+                    geometry: true,
+                    routeResponseOptions: {
+                      responseFromat: ResponseFormat.Geojson,
+                    },
+                  },
+                  description: `${vehicle?.id} (${index + 1})`,
+                  lineColor,
+                });
+              }
+            }
           });
-        }
-        // Request position
-        for (let index = 1; index < vehicleRoute.visits.length; index++) {
-          request.push({
-            direction: {
-              coordinates: [
-                [
-                  vehicleRoute.visits[index - 1].nodeLocation.longitude,
-                  vehicleRoute.visits[index - 1].nodeLocation.latitude,
-                ],
-                [
-                  vehicleRoute.visits[index].nodeLocation.longitude,
-                  vehicleRoute.visits[index].nodeLocation.latitude,
-                ],
-              ],
-              geometry: true,
-              routeResponseOptions: {
-                responseFromat: ResponseFormat.Geojson,
-              },
-            },
-            description: `${vehicle?.id} (${index + 1})`,
-            lineColor,
-          });
-        }
       }
     );
 
@@ -761,11 +762,5 @@ export class ChatComponent implements AfterViewInit {
       },
       style: { ['max-height']: '95%' },
     });
-
-    dialogRef.onClose
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => {
-        void this.router.navigate(['../'], { relativeTo: this.activatedRoute });
-      });
   }
 }

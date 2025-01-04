@@ -1,71 +1,63 @@
 import { Injectable } from '@angular/core';
 import { Feature, GeoJsonProperties, Point } from 'geojson';
-import { BehaviorSubject, Observable, Subject, map, take } from 'rxjs';
+import { Observable, Subject, map, take } from 'rxjs';
 import { IDeliveryRequest } from '../../models/delivery-request';
 import { MapMarkerTagType, MappingMaps } from '../../utils/map-to-marker';
+import { IJob } from '../../models/job';
 @Injectable({
   providedIn: 'root',
 })
 export class DeliveryRequestService {
-  private selectedRequests$ = new BehaviorSubject<IDeliveryRequest[]>([]);
   private newDeliveryRequest$ = new Subject<IDeliveryRequest>();
   private deliveryRequests: IDeliveryRequest[] = [];
-
-  constructor() {
-    if (localStorage.getItem("DeliveryRequests")) {
-      this.deliveryRequests = JSON.parse(localStorage.getItem("DeliveryRequests") as string) as IDeliveryRequest[];
-    }
-  }
 
   getDeliveryRequests(): IDeliveryRequest[] {
     return this.deliveryRequests;
   }
 
-  addDeliveryRequest(truck: IDeliveryRequest): void {
-    truck.lowestContainer = truck.destinationContainers.reduce((acc, value) => {
+  addDeliveryRequest(request: IDeliveryRequest): void {
+    request.lowestContainer = request.destinationContainers.reduce((acc, value) => {
       return (acc = acc.requestedAmount > value.requestedAmount ? acc : value);
-    }, truck.destinationContainers[0]);
-    this.deliveryRequests.push(truck);
-    localStorage.setItem("DeliveryRequests", JSON.stringify(this.deliveryRequests))
-    this.newDeliveryRequest$.next(truck);
+    }, request.destinationContainers[0]);
+    this.deliveryRequests.push(request);
+    this.newDeliveryRequest$.next(request);
   }
 
   getNewDeliveryRequest(): Observable<IDeliveryRequest> {
     return this.newDeliveryRequest$.asObservable();
   }
 
-  getSelectedRequests(): Observable<IDeliveryRequest[]> {
-    return this.selectedRequests$.asObservable();
+  getRequests(): IDeliveryRequest[] {
+    return this.deliveryRequests;
   }
 
-  getSelectedRequestsValue(): IDeliveryRequest[] {
-    return this.selectedRequests$.getValue();
+  addRequest(request: IDeliveryRequest): void {
+    if (this.deliveryRequests.find((item: IDeliveryRequest) => item.id === request.id)) {
+      return;
+    }
+    
+    this.deliveryRequests.push(request);
   }
 
-  addSelectedRequest(request: IDeliveryRequest): void {
-    this.selectedRequests$.next([request, ...this.selectedRequests$.value]);
+  removeRequest(request: IDeliveryRequest): void {
+    this.deliveryRequests = this.deliveryRequests.filter((item: IDeliveryRequest) => item.id !== request.id);
   }
 
-  removeRequest(requests: IDeliveryRequest[]): void {
-    this.deliveryRequests = requests;
-    localStorage.setItem("DeliveryRequests", JSON.stringify(this.deliveryRequests))
+  updateRequests(request: IDeliveryRequest[]): void {
+    this.deliveryRequests = request;
   }
 
-  changeSelectedRequests(request: IDeliveryRequest[]): void {
-    this.selectedRequests$.next(request);
+  removeAllRequests(): void {
+    this.deliveryRequests = [];
   }
 
-  removeAllRequestsFromSelection(): void {
-    this.selectedRequests$.next([]);
-  }
-
-  mapToGeoJson(requests: IDeliveryRequest[]): Feature<Point, GeoJsonProperties>[] {
-    return requests.map((request: IDeliveryRequest) =>
+  mapToGeoJson(requests: IJob[]): Feature<Point, GeoJsonProperties>[] {
+    return requests.map((request: IJob) =>
       MappingMaps.convertToMarker(
         MapMarkerTagType.delivery,
-        request.purchaseOrder.toString(),
-        request.shipToAccount.longitude,
-        request.shipToAccount.latitude,
+        request.id.toString(),
+        request.location.longitude,
+        request.location.latitude,
       ),
     );
   }

@@ -20,8 +20,6 @@ export class AppConfigService {
         break;
       case 'portal.maplab.ai':
         this._appConfig = APP_CONFIG_PROD;
-
-        console.log('AppConfigService: ', this._appConfig);
         break;
       default:
         this._appConfig = APP_CONFIG_DEV;

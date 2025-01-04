@@ -1,18 +1,16 @@
 <div class="card">
-    <p-table #tableList dataKey="id" [value]="deliveryRequests" [columns]="allColumns" [paginator]="true" [rows]="14"
-        [resizableColumns]="true" [reorderableColumns]="true" [showCurrentPageReport]="true"
-        styleClass="p-datatable-striped p-datatable-sm" responsiveLayout="scroll"
+    <p-table #tableList dataKey="id" [value]="deliveryRequests" [(selection)]="selectedRequests" [columns]="allColumns"
+        [paginator]="true" [rows]="14" [resizableColumns]="true" [reorderableColumns]="true"
+        [showCurrentPageReport]="true" styleClass="p-datatable-striped p-datatable-sm" responsiveLayout="scroll"
         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-        [rowsPerPageOptions]="[14, 30, 50]" selectionMode="multiple" [(selection)]="selectedRequests"
-        (onRowSelect)="emitSelectedRequest()" (onRowUnselect)="emitSelectedRequest()"
-        (onHeaderCheckboxToggle)="emitSelectedRequest()" sortMode="single" scrollHeight="flex" [scrollable]="true"
-        (onFilter)="emitSelectedRequest()" [globalFilterFields]="['purchaseOrder', 'shipToAccount.name']"
-        [metaKeySelection]="false" dataKey="id">
+        [rowsPerPageOptions]="[14, 30, 50]" selectionMode="multiple" (onRowUnselect)="unSelectedRequest($event)"
+        (onRowSelect)="addSelectedRequest($event)" sortMode="single" scrollHeight="flex" [scrollable]="true"
+        [globalFilterFields]="['purchaseOrder', 'shipToAccount.name']" [metaKeySelection]="false" dataKey="id">
         <ng-template pTemplate="caption">
             <div class="flex align-items-center">
-                <button pButton class="p-button-outlined" icon="pi pi-plus" (click)="openCreateTruckModal()"
-                    label="Add"  severity="contrast"></button>
-                <button pButton class="p-button-outlined" icon="pi pi-trash" (click)="removeSelectedRequest()"
+                <button pButton class="p-button-outlined" icon="pi pi-plus" (click)="openCreateTruckModal()" label="Add"
+                    severity="contrast"></button>
+                <button pButton class="p-button-outlined" icon="pi pi-trash" (click)="removeSelectedRequests()"
                     label="Remove"></button>
                 <button pButton class="p-button-outlined mr-5" icon="pi pi-filter-slash" (click)="clear(tableList)"
                     label="Clear"></button>

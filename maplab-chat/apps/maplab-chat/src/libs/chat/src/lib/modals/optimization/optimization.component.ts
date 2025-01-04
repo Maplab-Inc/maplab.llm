@@ -1,14 +1,12 @@
 import { Component, DestroyRef, OnInit } from '@angular/core';
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Feature, GeoJsonProperties, Geometry, Point } from 'geojson';
-import { MessageService } from 'primeng/api';
-import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { DynamicDialogRef } from 'primeng/dynamicdialog';
 import { ICompartmentForm, IDispatchSaveForm, IRoutingModelForm } from '../../models/forms/dispatch-form';
 import { TModelForm } from '../../models/forms/model-form';
 import { IDeliveryRequest } from '../../models/delivery-request';
 import { ITruck } from '../../models/truck';
 import { TrucksService } from '../../services/context-services/trucks-service';
-import { DeliveryRequestService } from '../../services/context-services/delivery-request-service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Coordinate } from '../../models/coordinate';
 import { KnownLocation } from '../../models/forms/vrp-request-form';
@@ -21,6 +19,7 @@ import { CapacityMode } from '../../models/enums/capacity-mode';
 import { ICompartment } from '../../models/compartment';
 import { IProduct } from '../../models/product';
 import { ContextFacade } from '../../+state/context/context.facade';
+import { DeliveryRequestService } from '../../services/context-services/delivery-request-service';
 
 @Component({
   selector: 'maplab-chat-optimization',
@@ -43,6 +42,7 @@ export class OptimizationComponent implements OnInit {
     private dialogRef: DynamicDialogRef,
     private destroyRef: DestroyRef,
     private contextFacade: ContextFacade,
+    private deliveryRequestsService: DeliveryRequestService
   ) { }
 
   ngOnInit(): void {
@@ -119,15 +119,12 @@ export class OptimizationComponent implements OnInit {
       .getRawValue()
       .models.filter((value: IRoutingModelForm) => value.isOptimize)
       .map((routingModel: IRoutingModelForm) => {
-        let start: Coordinate | undefined = undefined;
+        let start: Coordinate;
         if (routingModel.start === KnownLocation.VehicleLocation) {
           start = new Coordinate(routingModel.truck.longitude ?? 0, routingModel.truck.latitude ?? 0);
-        } else if (routingModel.start === KnownLocation.Custom) {
+        } else {
           start = new Coordinate(routingModel.customStart?.longitude ?? 0, routingModel.customStart?.latitude ?? 0);
         }
-
-        // TODO see it with Yasser because is not initial
-        // : x.truck.truckConstraints?.startLocationCoordinate;
 
         let end: Coordinate | undefined = undefined;
         if (routingModel.trackMode === TrackMode.ReturnTo) {
@@ -138,15 +135,12 @@ export class OptimizationComponent implements OnInit {
           }
         }
 
-        // TODO see it with Yasser because is not initial
-        // : x.truckConstraints?.endLocationCoordinate;
-
         const products: IVehicleProduct[] = routingModel.compartments.map((compartment: ICompartmentForm) => ({
           id: compartment.product.id as number, capacity: compartment.capacity, load: compartment.load
         }))
 
         return {
-          id: routingModel.truck.number,
+          id: routingModel.truck.number ?? 1,
           products,
           start,
           end,
@@ -156,7 +150,7 @@ export class OptimizationComponent implements OnInit {
   }
 
   private mapToIJob(): IJob[] {
-    return this.selectedRequests.map((request: IDeliveryRequest) => {
+    return this.deliveryRequestsService.getDeliveryRequests().map((request: IDeliveryRequest) => {
       const demands: IDemand[] = request.destinationContainers.map((container: IContainer) => ({
         productId: container.product.id,
         quantity: container.requestedAmount

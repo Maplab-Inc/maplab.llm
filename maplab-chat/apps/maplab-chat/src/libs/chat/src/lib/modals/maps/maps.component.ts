@@ -283,10 +283,7 @@ export class MapsComponent implements AfterViewInit {
     this.imageTruck = document.createElement('img');
     this.imageTruck.width = 25;
     this.imageTruck.height = 25;
-    this.imageTruck.src =
-      this.currentStyle.type === 'dark'
-        ? '/assets/truck_light.png'
-        : '/assets/truck.png';
+    this.imageTruck.src = '/assets/truck.svg';
 
     this.imageMarker = document.createElement('img');
     this.imageMarker.width = 25;

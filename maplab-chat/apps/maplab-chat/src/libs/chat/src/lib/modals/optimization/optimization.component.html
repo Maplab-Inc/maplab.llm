@@ -1,6 +1,6 @@
 <div class="context-container">
   <maplab-chat-optimization-form [dispatchForm]="dispatchForm" [formSubmitted]="dispatchFormSubmitted" />
-  <maplab-chat-optimization-request-list (selectedRequestsEvent)="selectedRequests = $event" />
+  <maplab-chat-optimization-request-list />
   <button pButton class="p-button-outlined save-context" (click)="saveContext()"
   label="Save" severity="contrast"></button>
 </div>

@@ -8,9 +8,9 @@ export interface IVehicleProduct {
 }
 
 export interface IVehicle {
-  id?: number;
+  id: number;
   products: IVehicleProduct[];
-  start?: Coordinate;
+  start: Coordinate;
   end?: Coordinate;
   trackMode: TrackMode;
   skills?: number[];
