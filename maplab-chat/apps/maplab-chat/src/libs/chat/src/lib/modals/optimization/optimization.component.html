@@ -1,6 +1,10 @@
 <div class="context-container">
   <maplab-chat-optimization-form [dispatchForm]="dispatchForm" [formSubmitted]="dispatchFormSubmitted" />
   <maplab-chat-optimization-request-list />
-  <button pButton class="p-button-outlined save-context" (click)="saveContext()"
-  label="Save" severity="contrast"></button>
+  <div>
+    <button pButton class="p-button-outlined save-context" (click)="saveContext()" label="Save"
+      severity="contrast"></button>
+    <button pButton class="p-button-outlined generate-context" icon="pi pi-bolt" (click)="generateContext()" label="Auto Generate"
+      severity="contrast"></button>
+  </div>
 </div>

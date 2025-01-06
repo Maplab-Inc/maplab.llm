@@ -113,6 +113,7 @@ export class ChatComponent implements AfterViewInit {
 
           // Draw routes on the map
           let responseData = response.data;
+          debugger
           if (typeof response.data === 'string') {
             try {
               // If it's a string, try to parse it as JSON

@@ -1,8 +1,12 @@
 import { Component, DestroyRef, OnInit } from '@angular/core';
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Feature, GeoJsonProperties, Geometry, Point } from 'geojson';
-import { DynamicDialogRef } from 'primeng/dynamicdialog';
-import { ICompartmentForm, IDispatchSaveForm, IRoutingModelForm } from '../../models/forms/dispatch-form';
+import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import {
+  ICompartmentForm,
+  IDispatchSaveForm,
+  IRoutingModelForm,
+} from '../../models/forms/dispatch-form';
 import { TModelForm } from '../../models/forms/model-form';
 import { IDeliveryRequest } from '../../models/delivery-request';
 import { ITruck } from '../../models/truck';
@@ -20,6 +24,7 @@ import { ICompartment } from '../../models/compartment';
 import { IProduct } from '../../models/product';
 import { ContextFacade } from '../../+state/context/context.facade';
 import { DeliveryRequestService } from '../../services/context-services/delivery-request-service';
+import { OptimizationGeneratorComponent } from '../optimization-generator/optimization-generator.component';
 
 @Component({
   selector: 'maplab-chat-optimization',
@@ -42,8 +47,9 @@ export class OptimizationComponent implements OnInit {
     private dialogRef: DynamicDialogRef,
     private destroyRef: DestroyRef,
     private contextFacade: ContextFacade,
-    private deliveryRequestsService: DeliveryRequestService
-  ) { }
+    private deliveryRequestsService: DeliveryRequestService,
+    private dialogService: DialogService
+  ) {}
 
   ngOnInit(): void {
     this.getTruck();
@@ -60,17 +66,20 @@ export class OptimizationComponent implements OnInit {
   }
 
   private getTruck(): void {
-    this.trucks = this.trucksService.getTrucks()
+    this.trucks = this.trucksService.getTrucks();
     this.initForm(this.trucks);
   }
 
   private genNewTruck(): void {
-    this.trucksService.getNewTruck().pipe(takeUntilDestroyed(this.destroyRef)).subscribe((newTruck: ITruck) => {
-      this.trucks.push(newTruck);
+    this.trucksService
+      .getNewTruck()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((newTruck: ITruck) => {
+        this.trucks.push(newTruck);
 
-      const newTruckFormGroup = this.createIRoutingModelForm(newTruck)
-      this.dispatchForm.controls.models.push(newTruckFormGroup);
-    })
+        const newTruckFormGroup = this.createIRoutingModelForm(newTruck);
+        this.dispatchForm.controls.models.push(newTruckFormGroup);
+      });
   }
 
   private initForm(trucks: ITruck[]): void {
@@ -78,38 +87,65 @@ export class OptimizationComponent implements OnInit {
       models: new FormArray<FormGroup<TModelForm<IRoutingModelForm>>>(
         trucks.map((truck: ITruck) => {
           return this.createIRoutingModelForm(truck);
-        }),
+        })
       ),
     });
   }
 
-  private createIRoutingModelForm(truck: ITruck): FormGroup<TModelForm<IRoutingModelForm>> {
+  private createIRoutingModelForm(
+    truck: ITruck
+  ): FormGroup<TModelForm<IRoutingModelForm>> {
     return new FormGroup<TModelForm<IRoutingModelForm>>({
       truck: new FormGroup<TModelForm<Partial<ITruck>>>({
         number: new FormControl<number>(truck.number, { nonNullable: true }),
-        longitude: new FormControl<number>(truck.longitude, { nonNullable: true }),
-        latitude: new FormControl<number>(truck.latitude, { nonNullable: true }),
+        longitude: new FormControl<number>(truck.longitude, {
+          nonNullable: true,
+        }),
+        latitude: new FormControl<number>(truck.latitude, {
+          nonNullable: true,
+        }),
       }),
       isOptimize: new FormControl<boolean>(true, { nonNullable: true }),
-      title: new FormControl<string>(truck.name + ' # ' + truck.number + '(0)', { nonNullable: true }),
-      trackMode: new FormControl<TrackMode>(TrackMode.ReturnTo, { nonNullable: true }),
-      start: new FormControl<KnownLocation>(KnownLocation.VehicleLocation, { nonNullable: true }),
+      title: new FormControl<string>(
+        truck.name + ' # ' + truck.number + '(0)',
+        { nonNullable: true }
+      ),
+      trackMode: new FormControl<TrackMode>(TrackMode.ReturnTo, {
+        nonNullable: true,
+      }),
+      start: new FormControl<KnownLocation>(KnownLocation.VehicleLocation, {
+        nonNullable: true,
+      }),
       customEnd: new FormControl<Coordinate | null>(null),
       customStart: new FormControl<Coordinate | null>(null),
-      end: new FormControl<KnownLocation>(KnownLocation.VehicleLocation, { nonNullable: true }),
-      capacity: new FormControl<CapacityMode>(CapacityMode.TruckLoad, { validators: [Validators.required] }),
+      end: new FormControl<KnownLocation>(KnownLocation.VehicleLocation, {
+        nonNullable: true,
+      }),
+      capacity: new FormControl<CapacityMode>(CapacityMode.TruckLoad, {
+        validators: [Validators.required],
+      }),
       compartments: new FormArray(
         truck.compartments.map((compartment: ICompartment) => {
           return new FormGroup<TModelForm<ICompartmentForm>>({
-            capacity: new FormControl<number>(compartment.capacity, { nonNullable: true }),
-            load: new FormControl<number>(compartment.load, { nonNullable: true }),
+            capacity: new FormControl<number>(compartment.capacity, {
+              nonNullable: true,
+            }),
+            load: new FormControl<number>(compartment.load, {
+              nonNullable: true,
+            }),
             product: new FormGroup<TModelForm<IProduct>>({
-              id: new FormControl<number>(compartment.product.id, { nonNullable: true }),
-              name: new FormControl<string>(compartment.product.name, { nonNullable: true }),
-              number: new FormControl<number>(compartment.product.number, { nonNullable: true }),
+              id: new FormControl<number>(compartment.product.id, {
+                nonNullable: true,
+              }),
+              name: new FormControl<string>(compartment.product.name, {
+                nonNullable: true,
+              }),
+              number: new FormControl<number>(compartment.product.number, {
+                nonNullable: true,
+              }),
             }),
           });
-        }),
+        })
       ),
     });
   }
@@ -121,23 +157,39 @@ export class OptimizationComponent implements OnInit {
       .map((routingModel: IRoutingModelForm) => {
         let start: Coordinate;
         if (routingModel.start === KnownLocation.VehicleLocation) {
-          start = new Coordinate(routingModel.truck.longitude ?? 0, routingModel.truck.latitude ?? 0);
+          start = new Coordinate(
+            routingModel.truck.longitude ?? 0,
+            routingModel.truck.latitude ?? 0
+          );
         } else {
-          start = new Coordinate(routingModel.customStart?.longitude ?? 0, routingModel.customStart?.latitude ?? 0);
+          start = new Coordinate(
+            routingModel.customStart?.longitude ?? 0,
+            routingModel.customStart?.latitude ?? 0
+          );
         }
 
         let end: Coordinate | undefined = undefined;
         if (routingModel.trackMode === TrackMode.ReturnTo) {
           if (routingModel.end === KnownLocation.VehicleLocation) {
-            end = new Coordinate(routingModel.truck.longitude ?? 0, routingModel.truck.latitude ?? 0);
+            end = new Coordinate(
+              routingModel.truck.longitude ?? 0,
+              routingModel.truck.latitude ?? 0
+            );
           } else if (routingModel.end === KnownLocation.Custom) {
-            end = new Coordinate(routingModel.customEnd?.longitude ?? 0, routingModel.customEnd?.latitude ?? 0);
+            end = new Coordinate(
+              routingModel.customEnd?.longitude ?? 0,
+              routingModel.customEnd?.latitude ?? 0
+            );
           }
         }
 
-        const products: IVehicleProduct[] = routingModel.compartments.map((compartment: ICompartmentForm) => ({
-          id: compartment.product.id as number, capacity: compartment.capacity, load: compartment.load
-        }))
+        const products: IVehicleProduct[] = routingModel.compartments.map(
+          (compartment: ICompartmentForm) => ({
+            id: compartment.product.id as number,
+            capacity: compartment.capacity,
+            load: compartment.load,
+          })
+        );
 
         return {
           id: routingModel.truck.number ?? 1,
@@ -150,21 +202,25 @@ export class OptimizationComponent implements OnInit {
   }
 
   private mapToIJob(): IJob[] {
-    return this.deliveryRequestsService.getDeliveryRequests().map((request: IDeliveryRequest) => {
-      const demands: IDemand[] = request.destinationContainers.map((container: IContainer) => ({
-        productId: container.product.id,
-        quantity: container.requestedAmount
-      }))
+    return this.deliveryRequestsService
+      .getDeliveryRequests()
+      .map((request: IDeliveryRequest) => {
+        const demands: IDemand[] = request.destinationContainers.map(
+          (container: IContainer) => ({
+            productId: container.product.id,
+            quantity: container.requestedAmount,
+          })
+        );
 
-      return {
-        id: request.purchaseOrder,
-        location: {
-          longitude: request.shipToAccount.longitude,
-          latitude: request.shipToAccount.latitude,
-        },
-        demands: demands,
-      };
-    });
+        return {
+          id: request.purchaseOrder,
+          location: {
+            longitude: request.shipToAccount.longitude,
+            latitude: request.shipToAccount.latitude,
+          },
+          demands: demands,
+        };
+      });
   }
 
   public saveContext(): void {
@@ -175,5 +231,19 @@ export class OptimizationComponent implements OnInit {
     this.contextFacade.updateRouteOptimizationJobs(jobs);
 
     this.closeDialog();
+  }
+
+  public generateContext(): void {
+    this.dialogService.open(OptimizationGeneratorComponent, {
+      header: 'Route Optimization Context Generator',
+      width: '40%',
+      height: '73%',
+      closable: true,
+      contentStyle: {
+        ['overflow-y']: 'visible',
+        ['background-color']: 'var(--surface-ground)',
+      },
+      style: { ['max-height']: '95%' },
+    });
   }
 }

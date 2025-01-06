@@ -13,6 +13,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { ChatFacade } from './+state/chat/chat.facade';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ButtonModule } from 'primeng/button';
+import { SliderModule } from 'primeng/slider';
 import { ToastModule } from 'primeng/toast';
 import { ContextContainerComponent } from './modals/context-container/context-container.component';
 import { OptimizationComponent } from './modals/optimization/optimization.component';
@@ -23,8 +24,10 @@ import { PanelChildComponent } from './modals/panel-child/panel-child.component'
 import { CreateRequestComponent } from './modals/create-request/create-request.component';
 import { MapsComponent } from './modals/maps/maps.component';
 import { PanelModule } from 'primeng/panel';
+import { DividerModule } from 'primeng/divider';
 import { TableModule } from 'primeng/table';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { SelectModule } from 'primeng/select';
 import { DropdownModule } from 'primeng/dropdown';
 import { CheckboxModule } from 'primeng/checkbox';
 import { AvatarModule } from 'primeng/avatar';
@@ -35,6 +38,7 @@ import { DialogService } from 'primeng/dynamicdialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { DynamicDialogModule } from 'primeng/dynamicdialog';
 import { ContextFacade } from './+state/context/context.facade';
+import { OptimizationGeneratorComponent } from './modals/optimization-generator/optimization-generator.component';
 
 const routes: Routes = [
   {
@@ -49,6 +53,7 @@ const routes: Routes = [
     CommonModule,
     ProgressSpinnerModule,
     ButtonModule,
+    SliderModule,
     ToastModule,
     PanelModule,
     TableModule,
@@ -56,7 +61,9 @@ const routes: Routes = [
     InputNumberModule,
     InputTextModule,
     AvatarModule,
+    DividerModule,
     DynamicDialogModule,
+    SelectModule,
     DropdownModule,
     MenuModule,
     ReactiveFormsModule,
@@ -78,6 +85,7 @@ const routes: Routes = [
     CreateRequestComponent,
     CreateVehicleComponent,
     MapsComponent,
+    OptimizationGeneratorComponent
   ],
   providers: [ChatService, ChatFacade, ContextFacade, DialogService],
 })

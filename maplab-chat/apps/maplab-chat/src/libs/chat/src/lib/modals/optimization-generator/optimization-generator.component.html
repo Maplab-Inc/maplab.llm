@@ -1,0 +1,45 @@
+<form #Form="ngForm" class="form-container card">
+    <div class="form-content">
+        <p>
+            generate random vehicles and delivery requests based on defined region, vehicle count, and request
+            count, enabling quick route optimization simulations.
+        </p>
+
+        <div>
+            <p>Region</p>
+            <p-select [options]="regions" [(ngModel)]="selectedRegion" optionLabel="name" placeholder="Select a Region"
+                name="region" />
+        </div>
+        <p-divider align="center" type="dotted">
+            <b>Requests</b>
+        </p-divider>
+        <div>
+            <div class="gen-enabler">
+                <p-checkbox binary="true" [(ngModel)]="genDeliveryRequest" name="genDeliveriesContext"></p-checkbox>
+                <p>Generate Delivery Requests</p>
+            </div>
+            <p>Requests Count</p>
+            <input type="number" pInputText [(ngModel)]="requestGenCount" name="genDeliveriesCount"
+                [disabled]="!genDeliveryRequest" />
+            <p-slider [(ngModel)]="requestGenCount" styleClass="w-14rem" name="genDeliveriesCount" />
+        </div>
+        <p-divider align="center" type="dotted">
+            <b>Vehicles</b>
+        </p-divider>
+        <div>
+            <div class="gen-enabler">
+                <p-checkbox binary="true" [(ngModel)]="genVehicles" name="genVehiclesContext"></p-checkbox>
+                <p>Generate Vehicles</p>
+            </div>
+            <p>Vehicles Count</p>
+            <input type="number" pInputText [(ngModel)]="vehicleGenCount" name="genVehiclesCount"
+                [disabled]="!genVehicles" />
+            <p-slider [(ngModel)]="vehicleGenCount" styleClass="w-14rem" name="genVehiclesCount" />
+        </div>
+    </div>
+    <div class="form-footer">
+        <button pButton pRipple type="button" class="p-button-success smart-btn" icon="pi pi-bolt"
+            label="Generate Context">
+        </button>
+    </div>
+</form>
