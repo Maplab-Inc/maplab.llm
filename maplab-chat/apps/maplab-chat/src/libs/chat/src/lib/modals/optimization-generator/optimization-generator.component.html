@@ -1,4 +1,7 @@
 <form #Form="ngForm" class="form-container card">
+    <div class="spinner-overlay" *ngIf="loading">
+        <p-progressSpinner></p-progressSpinner>
+    </div>
     <div class="form-content">
         <p>
             generate random vehicles and delivery requests based on defined region, vehicle count, and request
@@ -39,7 +42,7 @@
     </div>
     <div class="form-footer">
         <button pButton pRipple type="button" class="p-button-success smart-btn" icon="pi pi-bolt"
-            label="Generate Context">
+            label="Generate Context" (click)="generateContext()" [disabled]="!Form.valid">
         </button>
     </div>
 </form>

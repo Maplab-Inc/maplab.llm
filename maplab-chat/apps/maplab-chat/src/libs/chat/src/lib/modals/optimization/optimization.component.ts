@@ -23,7 +23,7 @@ import { CapacityMode } from '../../models/enums/capacity-mode';
 import { ICompartment } from '../../models/compartment';
 import { IProduct } from '../../models/product';
 import { ContextFacade } from '../../+state/context/context.facade';
-import { DeliveryRequestService } from '../../services/context-services/delivery-request-service';
+import { DeliveryRequestService } from '../../services/context-services/delivery-request.service';
 import { OptimizationGeneratorComponent } from '../optimization-generator/optimization-generator.component';
 
 @Component({
@@ -234,16 +234,22 @@ export class OptimizationComponent implements OnInit {
   }
 
   public generateContext(): void {
-    this.dialogService.open(OptimizationGeneratorComponent, {
+    const ref: DynamicDialogRef = this.dialogService.open(OptimizationGeneratorComponent, {
       header: 'Route Optimization Context Generator',
       width: '40%',
-      height: '73%',
+      height: '75%',
       closable: true,
       contentStyle: {
         ['overflow-y']: 'visible',
         ['background-color']: 'var(--surface-ground)',
       },
       style: { ['max-height']: '95%' },
+    });
+
+    ref.onClose.subscribe((result) => {
+      if (result) {
+
+      } 
     });
   }
 }

@@ -43,7 +43,7 @@ import { ContextContainerComponent } from '../modals/context-container/context-c
 import { MapMarkerTagType } from '../utils/map-to-marker';
 import { DIRECTIONS_API_URL } from '@maplab-chat/tokens';
 import { ContextFacade } from '../+state/context/context.facade';
-import { DeliveryRequestService } from '../services/context-services/delivery-request-service';
+import { DeliveryRequestService } from '../services/context-services/delivery-request.service';
 import { TrucksService } from '../services/context-services/trucks-service';
 
 interface IStyle {

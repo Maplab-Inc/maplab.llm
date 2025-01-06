@@ -19,3 +19,9 @@ export const getDirectionsApiUrl = (
 ): string | undefined => {
   return appConfig.getConfig().directionsApiUrl;
 };
+
+export const getSystemApiUrl = (
+  appConfig: IAppConfigService<CommonAppConfig>,
+): string | undefined => {
+  return appConfig.getConfig().systemApiUrl;
+};

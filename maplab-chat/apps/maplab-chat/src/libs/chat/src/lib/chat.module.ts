@@ -39,6 +39,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { DynamicDialogModule } from 'primeng/dynamicdialog';
 import { ContextFacade } from './+state/context/context.facade';
 import { OptimizationGeneratorComponent } from './modals/optimization-generator/optimization-generator.component';
+import { RouteOptimizationGenerationService } from './services/context-services/route-optimization-generation.service';
 
 const routes: Routes = [
   {
@@ -87,6 +88,6 @@ const routes: Routes = [
     MapsComponent,
     OptimizationGeneratorComponent
   ],
-  providers: [ChatService, ChatFacade, ContextFacade, DialogService],
+  providers: [ChatService, RouteOptimizationGenerationService, ChatFacade, ContextFacade, DialogService],
 })
 export class ChatModule {}

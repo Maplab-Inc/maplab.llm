@@ -3,7 +3,7 @@ import { LngLat, MapMouseEvent, Marker } from 'maplibre-gl';
 import { MessageService } from 'primeng/api';
 import { DynamicDialogRef } from 'primeng/dynamicdialog';
 import { IDeliveryRequest } from '../../models/delivery-request';
-import { DeliveryRequestService } from '../../services/context-services/delivery-request-service';
+import { DeliveryRequestService } from '../../services/context-services/delivery-request.service';
 import { OPTIMIZATION_PRODUCTS } from '../../constants/products.constants';
 
 @Component({

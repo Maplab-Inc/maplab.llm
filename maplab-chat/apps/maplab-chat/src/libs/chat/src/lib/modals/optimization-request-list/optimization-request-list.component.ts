@@ -13,7 +13,7 @@ import {
 } from 'primeng/table';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { IDeliveryRequest } from '../../models/delivery-request';
-import { DeliveryRequestService } from '../../services/context-services/delivery-request-service';
+import { DeliveryRequestService } from '../../services/context-services/delivery-request.service';
 import { DialogService } from 'primeng/dynamicdialog';
 import { IAccount } from '../../models/account';
 import { IContainer } from '../../models/container';

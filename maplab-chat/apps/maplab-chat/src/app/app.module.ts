@@ -6,8 +6,9 @@ import { AppRoutingModule } from './app.routes';
 import {
   ASSISTANT_API_URL,
   DIRECTIONS_API_URL,
+  SYSTEM_API_URL,
 } from '../libs/common/tokens/api-tokens';
-import { getAssistantApiUrl, getDirectionsApiUrl } from '../configs/app-config';
+import { getAssistantApiUrl, getDirectionsApiUrl, getSystemApiUrl } from '../configs/app-config';
 import { AppConfigService } from '../configs/app-config.service';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
@@ -55,6 +56,12 @@ import { AppPreset } from './app.preset';
     {
       provide: DIRECTIONS_API_URL,
       useFactory: getDirectionsApiUrl,
+      multi: false,
+      deps: [AppConfigService],
+    },
+    {
+      provide: SYSTEM_API_URL,
+      useFactory: getSystemApiUrl,
       multi: false,
       deps: [AppConfigService],
     },
