@@ -45,7 +45,6 @@ export class OptimizationComponent implements OnInit {
   constructor(
     private trucksService: TrucksService,
     private dialogRef: DynamicDialogRef,
-    private destroyRef: DestroyRef,
     private contextFacade: ContextFacade,
     private deliveryRequestsService: DeliveryRequestService,
     private dialogService: DialogService
@@ -53,7 +52,11 @@ export class OptimizationComponent implements OnInit {
 
   ngOnInit(): void {
     this.getTruck();
-    this.genNewTruck();
+
+    this.trucksService.getTruckSubject$().subscribe((requests) => {
+      this.trucks = requests;
+      this.initForm(this.trucks);
+    });
   }
 
   closeDialog(): void {
@@ -68,18 +71,6 @@ export class OptimizationComponent implements OnInit {
   private getTruck(): void {
     this.trucks = this.trucksService.getTrucks();
     this.initForm(this.trucks);
-  }
-
-  private genNewTruck(): void {
-    this.trucksService
-      .getNewTruck()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((newTruck: ITruck) => {
-        this.trucks.push(newTruck);
-
-        const newTruckFormGroup = this.createIRoutingModelForm(newTruck);
-        this.dispatchForm.controls.models.push(newTruckFormGroup);
-      });
   }
 
   private initForm(trucks: ITruck[]): void {
@@ -234,23 +225,32 @@ export class OptimizationComponent implements OnInit {
   }
 
   public generateContext(): void {
-    const ref: DynamicDialogRef = this.dialogService.open(OptimizationGeneratorComponent, {
-      header: 'Route Optimization Context Generator',
-      width: '40%',
-      height: '75%',
-      closable: true,
-      contentStyle: {
-        ['overflow-y']: 'visible',
-        ['background-color']: 'var(--surface-ground)',
-      },
-      style: { ['max-height']: '95%' },
-    });
+    const ref: DynamicDialogRef = this.dialogService.open(
+      OptimizationGeneratorComponent,
+      {
+        header: 'Route Optimization Context Generator',
+        width: '30%',
+        height: '75%',
+        closable: true,
+        contentStyle: {
+          ['overflow-y']: 'visible',
+          ['background-color']: 'var(--surface-ground)',
+        },
+        style: { ['max-height']: '95%' },
+      }
+    );
 
     ref.onClose.subscribe((result) => {
       if (result) {
-        debugger
-        this.deliveryRequestsService.updateRequests(result.generatedDeliveryRequests);
-      } 
+        if (result.generatedVehicles) {
+          this.trucksService.updateTrucks(result.generatedVehicles);
+        }
+        if (result.generatedDeliveryRequests) {
+          this.deliveryRequestsService.updateRequests(
+            result.generatedDeliveryRequests
+          );
+        }
+      }
     });
   }
 }

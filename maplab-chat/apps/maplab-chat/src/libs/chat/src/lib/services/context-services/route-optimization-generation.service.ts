@@ -21,7 +21,7 @@ export class RouteOptimizationGenerationService {
 
   generateOptimizationVehicles(request: OptimizationGenerationRequest): Observable<ITruck[]> {
     return this.http.get<ITruck[]>(
-      `${this.apiUrl}demo/deliveries?count=${request.count}`
+      `${this.apiUrl}demo/trucks?count=${request.count}`
     );
   }
 }

@@ -57,7 +57,6 @@ export class OptimizationRequestListComponent implements OnInit {
 
     this.deliveryRequestService.getDeliveryRequestsSubject$()
       .subscribe((requests) => {
-        debugger
         this.deliveryRequests = requests;
       });
   }
