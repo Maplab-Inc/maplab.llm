@@ -51,10 +51,15 @@ export class OptimizationRequestListComponent implements OnInit {
       ...this.deliveryRequestService.getDeliveryRequests(),
     ];
 
-    this.genNewDeliveryRequest();
     this.initColumns();
     this.filterRegister();
     this.initColumnMatchModeOptions();
+
+    this.deliveryRequestService.getDeliveryRequestsSubject$()
+      .subscribe((requests) => {
+        debugger
+        this.deliveryRequests = requests;
+      });
   }
 
   clear(table: Table): void {
@@ -95,16 +100,6 @@ export class OptimizationRequestListComponent implements OnInit {
     );
 
     this.deliveryRequestService.removeAllRequests();
-  }
-
-  private genNewDeliveryRequest(): void {
-    this.deliveryRequestService
-      .getNewDeliveryRequest()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((deliveryRequest: IDeliveryRequest) => {
-        this.deliveryRequests.push(deliveryRequest);
-        this.selectedRequests = [...this.selectedRequests, deliveryRequest];
-      });
   }
 
   private initColumns(): void {

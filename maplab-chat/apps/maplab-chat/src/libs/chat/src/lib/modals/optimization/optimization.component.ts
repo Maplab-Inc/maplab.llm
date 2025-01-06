@@ -248,7 +248,8 @@ export class OptimizationComponent implements OnInit {
 
     ref.onClose.subscribe((result) => {
       if (result) {
-
+        debugger
+        this.deliveryRequestsService.updateRequests(result.generatedDeliveryRequests);
       } 
     });
   }
