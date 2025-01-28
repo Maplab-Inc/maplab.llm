@@ -1,34 +1,36 @@
-from typing import Any
+from typing import Any, List, Literal, Union
+from pydantic import Field
 import modal
 from openai import BaseModel
 import fastapi
 
 #modal deploy ./inference/vllm_inference.py
 
-#neuralmagic/Meta-Llama-3.1-8B-Instruct-quantized.w4a16
-#/llamas
-#neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8
-#/llama-70B
 vllm_image = modal.Image.debian_slim(python_version="3.12").pip_install(
-    "vllm==0.6.5", "fastapi[standard]")
-MODELS_DIR = "/llamas"
-MODEL_NAME = "neuralmagic/Meta-Llama-3.1-8B-Instruct-quantized.w4a16"
+    "vllm==0.6.6.post1", "fastapi[standard]")
+MODELS_DIR = "/llama-70B"
+MODEL_NAME = "meta-llama/Llama-3.3-70B-Instruct"
 
 try:
-    volume = modal.Volume.lookup("llamas", create_if_missing=False)
+    volume = modal.Volume.lookup("llama-70B", create_if_missing=False)
 except modal.exception.NotFoundError:
     raise Exception("Download models first with modal run download_llama.py")
 
 app = modal.App("maplab-vllm", image=vllm_image)
 
-N_GPU = 1  # tip: for best results, first upgrade to more powerful GPUs, and only then increase GPU count
+N_GPU = 2  # tip: for best results, first upgrade to more powerful GPUs, and only then increase GPU count
 TOKEN = "super-secret-token"  # auth token. for production use, replace with a modal.Secret
 
 MINUTES = 60  # seconds
 HOURS = 60 * MINUTES
 
-class Request(BaseModel):
-    prompt: str
+class Message(BaseModel):
+    role: Union[Literal["system"], Literal["user"], Literal["assistant"]]
+    content: str
+class ChatRequest(BaseModel):
+    model: str
+    messages: List[Message]
+    stream: bool = Field(default=False)
 
 def get_model_config(engine):
     import asyncio
@@ -56,35 +58,9 @@ web_app = fastapi.FastAPI(
     docs_url="/docs",
 )
 
-@web_app.post("v1/api/chat")
-async def generate_response(request: Any):
-    from vllm.sampling_params import SamplingParams
-
-    engine = web_app.state.engine_client
-    
-    params = SamplingParams(
-        temperature=0.3,
-        top_k=50,
-        top_p=0.9,
-        max_tokens=100,  # Ensure this matches the `max_new_tokens` setting
-    )
-    
-    responses = []
-    async for result in engine.generate(prompt, params, 0):
-        responses.append(result)
-        
-    # Extracting the output text
-    output_text = responses[-1].outputs[0].text
-
-    # Creating the desired output format
-    result = {"prompt": output_text}
-
-    return result if output_text else None
-
-
 @app.function(
     image=vllm_image,
-    gpu=modal.gpu.A10G(count=N_GPU),
+    gpu=modal.gpu.A100(size="80GB",count=N_GPU),
     container_idle_timeout=5 * MINUTES,
     timeout=24 * HOURS,
     allow_concurrent_inputs=1000,
@@ -92,17 +68,20 @@ async def generate_response(request: Any):
 )
 @modal.asgi_app()
 def serve():
+    import json
     import vllm.entrypoints.openai.api_server as api_server
     from vllm.engine.arg_utils import AsyncEngineArgs
     from vllm.engine.async_llm_engine import AsyncLLMEngine
     from vllm.entrypoints.logger import RequestLogger
     from vllm.entrypoints.openai.serving_chat import OpenAIServingChat
+    from vllm.usage.usage_lib import UsageContext
     from vllm.entrypoints.openai.serving_completion import (
             OpenAIServingCompletion
         )
+    from vllm.entrypoints.openai.protocol import ChatCompletionRequest
     from vllm.entrypoints.openai.serving_engine import BaseModelPath
-    from vllm.usage.usage_lib import UsageContext
-
+    from fastapi import Request
+    
     volume.reload()  # ensure we have the latest version of the weights
 
     # security: CORS middleware for external requests
@@ -120,14 +99,15 @@ def serve():
 
     # security: inject dependency on authed routes
     async def is_authenticated(api_key: str = fastapi.Security(http_bearer)):
-        # if api_key.credentials != TOKEN:
-        #     raise fastapi.HTTPException(
-        #         status_code=fastapi.status.HTTP_401_UNAUTHORIZED,
-        #         detail="Invalid authentication credentials",
-        #     )
+        if api_key.credentials != TOKEN:
+            raise fastapi.HTTPException(
+                status_code=fastapi.status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid authentication credentials",
+            )
         return {"username": "authenticated_user"}
 
-    router = fastapi.APIRouter(dependencies=[fastapi.Depends(is_authenticated)])
+    # router = fastapi.APIRouter(dependencies=[fastapi.Depends(is_authenticated)])
+    router = fastapi.APIRouter()
 
     # wrap vllm's router in auth router
     router.include_router(api_server.router)
@@ -138,7 +118,8 @@ def serve():
         model=MODELS_DIR + "/" + MODEL_NAME,
         tensor_parallel_size=N_GPU,
         gpu_memory_utilization=0.90,
-        max_model_len=100000,
+        max_model_len=10000,
+        trust_remote_code=True,
         enforce_eager=True,  # capture the graph for faster inference, but slower cold starts (30s > 20s)
     )
 
@@ -150,7 +131,7 @@ def serve():
 
     model_config = get_model_config(engine)
 
-    request_logger = RequestLogger(max_log_len=2048)
+    request_logger = RequestLogger(max_log_len=4096)
 
     base_model_paths = [
         BaseModelPath(name=MODEL_NAME.split("/")[1], model_path=MODEL_NAME)
@@ -167,7 +148,7 @@ def serve():
         enable_auto_tools=True,
         chat_template_content_format="auto",
         tool_parser="llama3_json",
-        chat_template="tool_chat_template_llama3.2_json.jinja",
+        chat_template=None
     )
     api_server.completion = lambda s: OpenAIServingCompletion(
         engine,
@@ -177,5 +158,66 @@ def serve():
         prompt_adapters=[],
         request_logger=request_logger,
     )
+    
+    @router.post("/v1/api/chat")
+    async def ollama_chat(request: Request):
+        json_data = await request.json() 
+        print("Request>>>>>>", json_data)
+        data = ChatCompletionRequest(**json_data)
+        try:
+            response = await api_server.chat(web_app.state.engine_client).create_chat_completion(data)
+
+            print("Main response>>>", response)
+
+            if hasattr(response, 'error') and response.error or not hasattr(response, 'choices') or not response.choices:
+                print("Error response>>>", response)
+                return response
+
+            choice = response.choices[0]
+            message_data = choice.message
+
+            content = message_data.content if message_data.content else ""
+
+            tool_calls = []
+            if message_data.tool_calls:
+                for tool_call in message_data.tool_calls:
+                    function_name = tool_call.function.name if tool_call.function else ""
+                    function_id = tool_call.id if tool_call.id else ""
+                    function_type = tool_call.type if tool_call.type else ""
+                    arguments = tool_call.function.arguments if tool_call.function and tool_call.function.arguments else ""
+
+                    if isinstance(arguments, str):
+                        try:
+                            arguments = json.loads(arguments)
+                        except json.JSONDecodeError:
+                            arguments = {}  # Default to empty dictionary if JSON decoding fails
+
+                    tool_calls.append({
+                        "id": function_id,
+                        "type": function_type,
+                        "function": {
+                            "name": function_name,
+                            "arguments": arguments
+                        }
+                    })
+
+            response = {
+                "message": {
+                    "role": message_data.role,
+                    "content": content,
+                    "tool_calls": tool_calls,
+                }
+            }
+
+            print("Formated response>>>", response)
+
+            return response
+        
+        except Exception as e:
+            print(f"Error during processing: {str(e)}")
+            return {"error": True, "message": "An error occurred during processing."}
+
+    # Add the router to the app
+    web_app.include_router(router)
 
     return web_app

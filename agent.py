@@ -32,7 +32,7 @@ _set_env("MAPLAB_API_KEY")
 tools = [optimize_routes, direction, isochrone, matrix, overpass, get_local_endpoint_schema]
 # fine-tuned 4o-mini id: ft:gpt-4o-mini-2024-07-18:maplab::AdljqShw
 # fine-tuned 4o id: ft:gpt-4o-2024-08-06:maplab::AfGjkfSB
-llm = ChatOpenAI(model="ft:gpt-4o-2024-08-06:maplab::AfGjkfSB")
+llm = ChatOpenAI(model="gpt-4o", streaming=True)
 
 llm_with_tools = llm.bind_tools(tools, parallel_tool_calls=False)
 
@@ -59,7 +59,6 @@ react_graph = builder.compile()
 
 @app.route('/assistant', methods=['POST']) 
 def invoke_assistant(): 
-    # return {"message":"Deliveries have been optimized: Vehicle 1 delivers to customer at -73.7986, 45.5046; Vehicle 2 delivers to customer at -73.6095, 45.6200; Vehicle 4 delivers to customer at -73.6355, 45.4507. Total distance covered: 50,121 meters.","data":{"vehicleRoutes":[{"vehicleId":1,"visits":[{"order":0,"nodeIndex":6,"nodeId":55474,"nodeLocation":{"longitude":-73.79861343871389,"latitude":45.504563581701404},"loadsOnVisit":[{"productId":1,"quantity":-1000},{"productId":2,"quantity":0}],"distanceFromLastNode":22436}],"totalRouteDistance":22436,"totalRouteLoads":[{"productId":1,"quantity":-1000},{"productId":2,"quantity":0}]},{"vehicleId":2,"visits":[{"order":0,"nodeIndex":4,"nodeId":11474,"nodeLocation":{"longitude":-73.60950763800484,"latitude":45.61997845928107},"loadsOnVisit":[{"productId":1,"quantity":-4500},{"productId":3,"quantity":-8000}],"distanceFromLastNode":16557}],"totalRouteDistance":16557,"totalRouteLoads":[{"productId":1,"quantity":-4500},{"productId":3,"quantity":-8000}]},{"vehicleId":3,"visits":[],"totalRouteDistance":0,"totalRouteLoads":[{"productId":1,"quantity":0},{"productId":2,"quantity":0}]},{"vehicleId":4,"visits":[{"order":0,"nodeIndex":5,"nodeId":55474,"nodeLocation":{"longitude":-73.63554749793641,"latitude":45.45069012897066},"loadsOnVisit":[{"productId":1,"quantity":-9900},{"productId":2,"quantity":-4000},{"productId":3,"quantity":-5000}],"distanceFromLastNode":11128}],"totalRouteDistance":11128,"totalRouteLoads":[{"productId":1,"quantity":-9900},{"productId":2,"quantity":-4000},{"productId":3,"quantity":-5000}]}],"totalDistance":50121,"totalLoads":[{"productId":1,"quantity":-15400},{"productId":2,"quantity":-4000},{"productId":3,"quantity":-13000}],"objective":4648504,"droppedOrders":[]},"type":"json"}
     userContent = request.json.get('user') 
     if not userContent: 
         return jsonify({"error": "Content is required"}), 400

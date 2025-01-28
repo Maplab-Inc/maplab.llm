@@ -3,7 +3,7 @@ import { Feature, GeoJsonProperties, Point } from 'geojson';
 export enum MapMarkerTagType {
   delivery = 'delivery',
   truck = 'truck',
-  marker = 'marker'
+  marker = 'location'
 }
 export class MappingMaps {
   static convertToMarker(

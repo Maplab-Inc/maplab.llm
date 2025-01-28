@@ -1,11 +1,10 @@
-import json
 import os, getpass
 
 from flask import Flask, jsonify, request
 
 from langchain_ollama import ChatOllama
-from langchain_openai import ChatOpenAI, OpenAI
-from langchain_groq import ChatGroq
+from langchain_openai import ChatOpenAI
+from langchain_community.llms import VLLM
 from langgraph.graph import MessagesState
 from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import START, StateGraph
@@ -19,8 +18,11 @@ from tools.isochrone_tool import isochrone
 from tools.matrix_tool import matrix
 from tools.overpass_tool import overpass
 from tools.route_optimization_tool import optimize_routes
+from flask_cors import CORS
+
 
 app = Flask(__name__)
+CORS(app)
 
 def _set_env(var: str):
     if not os.environ.get(var):
@@ -28,14 +30,15 @@ def _set_env(var: str):
 
 _set_env("MAPLAB_API_KEY")
 
-tools = [optimize_routes, direction, isochrone, matrix, overpass]
+tools = [optimize_routes, direction, isochrone, matrix, overpass, get_local_endpoint_schema]
 endpoint="https://maplab--maplab-vllm-serve.modal.run/v1/"
 llm = ChatOpenAI(
     base_url=endpoint,
-    model="Meta-Llama-3.1-8B-Instruct-quantized.w4a16"
-)
+    model="Llama-3.3-70B-Instruct",
+    temperature=0.6,
+    top_p=0.9)
 
-llm_with_tools = llm.bind_tools(tools, parallel_tool_calls=False)
+llm_with_tools = llm.bind_tools(tools)
 
 sys_msg = SystemMessage(content=get_assistant_guidelines())
 
@@ -60,12 +63,17 @@ react_graph = builder.compile()
 
 @app.route('/assistant', methods=['POST']) 
 def invoke_assistant(): 
-    content = request.json.get('content') 
-    if not content: 
+    userContent = request.json.get('user') 
+    if not userContent: 
         return jsonify({"error": "Content is required"}), 400
-
-    messages = [HumanMessage(content=content)]
-    resonse_messages = react_graph.invoke({"messages": messages}, {"recursion_limit": 50})
+    
+    messages = [HumanMessage(content=userContent)]
+    
+    sysContent = request.json.get('system')
+    if sysContent:
+        messages.append(SystemMessage(content=sysContent))
+    
+    resonse_messages = react_graph.invoke({"messages": messages}, {"recursion_limit": 100})
     
     result = []
     for m in resonse_messages['messages']:

@@ -1,0 +1,809 @@
+[
+    {
+        "id": "OP-NODE-1",
+        "prompt": "Fine me natural parks in Toronto",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Toronto}}->.searchArea; ( node[leisure=park](area.searchArea); way[leisure=park](area.searchArea); relation[leisure=park](area.searchArea); node[boundary=protected_area](area.searchArea); way[boundary=protected_area](area.searchArea); relation[boundary=protected_area](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-2",
+        "prompt": "Get all the museums in New York",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:New York}}->.searchArea; ( node[tourism=museum](area.searchArea); way[tourism=museum](area.searchArea); relation[tourism=museum](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-3",
+        "prompt": "Show all the restaurants in Paris",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Paris}}->.searchArea; ( node[amenity=restaurant](area.searchArea); way[amenity=restaurant](area.searchArea); relation[amenity=restaurant](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-4",
+        "prompt": "Display all schools in London",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:London}}->.searchArea; ( node[amenity=school](area.searchArea); way[amenity=school](area.searchArea); relation[amenity=school](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-5",
+        "prompt": "Identify all hospitals in Berlin",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Berlin}}->.searchArea; ( node[amenity=hospital](area.searchArea); way[amenity=hospital](area.searchArea); relation[amenity=hospital](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-6",
+        "prompt": "List me hotels in Rome",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Rome}}->.searchArea; ( node[tourism=hotel](area.searchArea); way[tourism=hotel](area.searchArea); relation[tourism=hotel](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-7",
+        "prompt": "Highlight airports in Madrid",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Madrid}}->.searchArea; ( node[aeroway=aerodrome](area.searchArea); way[aeroway=aerodrome](area.searchArea); relation[aeroway=aerodrome](area.searchArea); node[aeroway=airport](area.searchArea); way[aeroway=airport](area.searchArea); relation[aeroway=airport](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-8",
+        "prompt": "Show me all bus stops in Barcelona",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Barcelona}}->.searchArea; ( node[highway=bus_stop](area.searchArea); way[highway=bus_stop](area.searchArea); relation[highway=bus_stop](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-9",
+        "prompt": "Show all the train stations in Amsterdam",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Amsterdam}}->.searchArea; ( node[railway=station](area.searchArea); way[railway=station](area.searchArea); relation[railway=station](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-10",
+        "prompt": "Show all the libraries in Sydney",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Sydney}}->.searchArea; ( node[amenity=library](area.searchArea); way[amenity=library](area.searchArea); relation[amenity=library](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-11",
+        "prompt": "Show all the universities in Los Angeles",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Los Angeles}}->.searchArea; ( node[amenity=university](area.searchArea); way[amenity=university](area.searchArea); relation[amenity=university](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-12",
+        "prompt": "Show all the banks in Tokyo",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Tokyo}}->.searchArea; ( node[amenity=bank](area.searchArea); way[amenity=bank](area.searchArea); relation[amenity=bank](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-13",
+        "prompt": "Show all the post offices in Seoul",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Seoul}}->.searchArea; ( node[amenity=post_office](area.searchArea); way[amenity=post_office](area.searchArea); relation[amenity=post_office](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-14",
+        "prompt": "Show all the police stations in Moscow",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Moscow}}->.searchArea; ( node[amenity=police](area.searchArea); way[amenity=police](area.searchArea); relation[amenity=police](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-15",
+        "prompt": "Show all the fire stations in Shanghai",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Shanghai}}->.searchArea; ( node[amenity=fire_station](area.searchArea); way[amenity=fire_station](area.searchArea); relation[amenity=fire_station](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-16",
+        "prompt": "Show all the pharmacies in Buenos Aires",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Buenos Aires}}->.searchArea; ( node[amenity=pharmacy](area.searchArea); way[amenity=pharmacy](area.searchArea); relation[amenity=pharmacy](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-17",
+        "prompt": "Show all the gas stations in Mumbai",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Mumbai}}->.searchArea; ( node[amenity=fuel](area.searchArea); way[amenity=fuel](area.searchArea); relation[amenity=fuel](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-18",
+        "prompt": "Show all the supermarkets in Sao Paulo",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Sao Paulo}}->.searchArea; ( node[shop=supermarket](area.searchArea); way[shop=supermarket](area.searchArea); relation[shop=supermarket](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-19",
+        "prompt": "Show all the shopping malls in Istanbul",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Istanbul}}->.searchArea; ( node[shop=mall](area.searchArea); way[shop=mall](area.searchArea); relation[shop=mall](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-20",
+        "prompt": "Show all the cinemas in Mexico City",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Mexico City}}->.searchArea; ( node[amenity=cinema](area.searchArea); way[amenity=cinema](area.searchArea); relation[amenity=cinema](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-21",
+        "prompt": "Show all the gyms in Jakarta",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Jakarta}}->.searchArea; ( node[leisure=fitness_centre](area.searchArea); way[leisure=fitness_centre](area.searchArea); relation[leisure=fitness_centre](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-22",
+        "prompt": "Show all the parks in Cairo",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Cairo}}->.searchArea; ( node[leisure=park](area.searchArea); way[leisure=park](area.searchArea); relation[leisure=park](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-23",
+        "prompt": "Show all the bars in Bangkok",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Bangkok}}->.searchArea; ( node[amenity=bar](area.searchArea); way[amenity=bar](area.searchArea); relation[amenity=bar](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-24",
+        "prompt": "Show all the nightclubs in Dubai",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Dubai}}->.searchArea; ( node[amenity=nightclub](area.searchArea); way[amenity=nightclub](area.searchArea); relation[amenity=nightclub](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-25",
+        "prompt": "Show all the bookstores in Buenos Aires",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Buenos Aires}}->.searchArea; ( node[shop=books](area.searchArea); way[shop=books](area.searchArea); relation[shop=books](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-26",
+        "prompt": "Show all the bakeries in Mumbai",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Mumbai}}->.searchArea; ( node[shop=bakery](area.searchArea); way[shop=bakery](area.searchArea); relation[shop=bakery](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-27",
+        "prompt": "Show all the cafes in Sao Paulo",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Sao Paulo}}->.searchArea; ( node[amenity=cafe](area.searchArea); way[amenity=cafe](area.searchArea); relation[amenity=cafe](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-28",
+        "prompt": "Show all the ice cream shops in Istanbul",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Istanbul}}->.searchArea; ( node[amenity=ice_cream](area.searchArea); way[amenity=ice_cream](area.searchArea); relation[amenity=ice_cream](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-29",
+        "prompt": "Show all the fast food restaurants in Mexico City",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Mexico City}}->.searchArea; ( node[amenity=fast_food](area.searchArea); way[amenity=fast_food](area.searchArea); relation[amenity=fast_food](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-30",
+        "prompt": "Show all the bakeries in Jakarta",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Jakarta}}->.searchArea; ( node[shop=bakery](area.searchArea); way[shop=bakery](area.searchArea); relation[shop=bakery](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-31",
+        "prompt": "Show me all the recycling bins in Vancouver",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Vancouver}}->.searchArea; ( node[amenity=recycling](area.searchArea); way[amenity=recycling](area.searchArea); relation[amenity=recycling](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-32",
+        "prompt": "Show me all the swimming pools in Vancouver",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Vancouver}}->.searchArea; ( node[leisure=swimming_pool](area.searchArea); way[leisure=swimming_pool](area.searchArea); relation[leisure=swimming_pool](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-33",
+        "prompt": "Show me all the tennis courts in Calgary",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Calgary}}->.searchArea; ( node[leisure=pitch][sport=tennis](area.searchArea); way[leisure=pitch][sport=tennis](area.searchArea); relation[leisure=pitch][sport=tennis](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-34",
+        "prompt": "Show me all the golf courses in Ottawa",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Ottawa}}->.searchArea; ( node[leisure=golf_course](area.searchArea); way[leisure=golf_course](area.searchArea); relation[leisure=golf_course](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-35",
+        "prompt": "Show me all the basketball courts in Edmonton",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Edmonton}}->.searchArea; ( node[leisure=pitch][sport=basketball](area.searchArea); way[leisure=pitch][sport=basketball](area.searchArea); relation[leisure=pitch][sport=basketball](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-36",
+        "prompt": "Show me all the soccer fields in Quebec City",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Quebec City}}->.searchArea; ( node[leisure=pitch][sport=soccer](area.searchArea); way[leisure=pitch][sport=soccer](area.searchArea); relation[leisure=pitch][sport=soccer](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-37",
+        "prompt": "Show me all drinking water fountains in Casablanca",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Casablanca}}->.searchArea; ( node[amenity=drinking_water](area.searchArea); way[amenity=drinking_water](area.searchArea); relation[amenity=drinking_water](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-38",
+        "prompt": "Show me water bodies in Marrakech",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Marrakech}}->.searchArea; ( way[waterway=river](area.searchArea); way[waterway=canal](area.searchArea); way[waterway=stream](area.searchArea); way[water=pond](area.searchArea); way[water=lake](area.searchArea); way[water=reservoir](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-39",
+        "prompt": "Show me public wifi hotspots in Montreal",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Montreal}}->.searchArea; ( node[internet_access=wlan](area.searchArea); way[internet_access=wlan](area.searchArea); relation[internet_access=wlan](area.searchArea); ); out body;"
+    },
+    {
+        "id": "OP-NODE-41",
+        "prompt": "Show me all the benches in Tokyo",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Tokyo}}->.searchArea; ( node[amenity=bench](area.searchArea); way[amenity=bench](area.searchArea); relation[amenity=bench](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-42",
+        "prompt": "Show me all the parking lots in Montreal",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Montreal}}->.searchArea; ( node[amenity=parking](area.searchArea); way[amenity=parking](area.searchArea); relation[amenity=parking](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-43",
+        "prompt": "Show me all the playgrounds in Toronto",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Toronto}}->.searchArea; ( node[leisure=playground](area.searchArea); way[leisure=playground](area.searchArea); relation[leisure=playground](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-44",
+        "prompt": "Return the street intersection of 6th Avenue and West 23rd Street",
+        "type": "overpass",
+        "completion": "[bbox:{{bbox}}];way[highway][name='6th Avenue']->.w1;way[highway][name='West 23rd Street']->.w2;node(w.w1)(w.w2);out;"
+    },
+    {
+        "id": "OP-NODE-45",
+        "prompt": "Show me all the traffic lights in Vancouver",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Vancouver}}->.searchArea; ( node[highway=traffic_signals](area.searchArea); way[highway=traffic_signals](area.searchArea); relation[highway=traffic_signals](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-46",
+        "prompt": "Show me all the traffic cameras in Vancouver",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];{{geocodeArea:Vancouver}}->.searchArea;(node[highway='speed_camera'](area.searchArea);node['man_made'='surveillance']['surveillance:type'='traffic'](area.searchArea););out body;"
+    },
+    {
+        "id": "OP-NODE-47",
+        "system": "bbox=40.70702683593489,-73.9924478530884,40.73499861953061,-73.96536827087404",
+        "prompt": "Find intersections of major and minor roads in this bbox",
+        "type": "overpass",
+        "completion": "[bbox:40.70702683593489,-73.9924478530884,40.73499861953061,-73.96536827087404];way[highway~'^(motorway|trunk|primary|secondary|tertiary|(motorway|trunk|primary|secondary)_link)$']->.major;way[highway~'^(unclassified|residential|living_street|service|pedestrian|track)$']->.minor;node(w.major)(w.minor);out;"
+    },
+    {
+        "id": "OP-NODE-47-1",
+        "system": "bbox=45.4105,-73.9580,45.5600,-73.5159",
+        "prompt": "Find intersections between roads and bike paths",
+        "type": "overpass",
+        "completion": "[bbox:45.4105,-73.9580,45.5600,-73.5159];way[highway~'^(motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|service|pedestrian|track)$']->.roads;way[highway~'^(cycleway)$']->.bikePaths;node(w.roads)(w.bikePaths);out;"
+    },
+    {
+        "id": "OP-NODE-47-2",
+        "system": "bbox=45.302421964965546,-73.89541625976564,45.716248103400375,-73.4621429443359",
+        "prompt": "Find intersections between roads and waterways",
+        "type": "overpass",
+        "completion": "[bbox:];way[highway~'^(motorway|trunk|primary|secondary|tertiary|residential|service|track)$']->.roads;way[waterway~'^(river|stream|canal)$']->.waterways;node(w.roads)(w.waterways);out;"
+    },
+    {
+        "id": "OP-NODE-47-3",
+        "system": "bbox=40.84913799774759,-73.37905883789064,41.73647896274239,-72.51251220703126",
+        "prompt": "Find me intersections between Hiking Trails and Roads",
+        "type": "overpass",
+        "completion": "[bbox:40.84913799774759,-73.37905883789064,41.73647896274239,-72.51251220703126];way[highway~'^(residential|service|track)$']->.roads;way[highway=path][sac_scale~'^(hiking|mountain_hiking)$']->.hikingTrails;node(w.roads)(w.hikingTrails);out;"
+    },
+    {
+        "id": "OP-NODE-47-4",
+        "system": "bbox=45.410502277311544,-73.69285583496095,45.61739941393961,-73.47621917724611",
+        "prompt": "Find intersections of Cycleways and Railways",
+        "type": "overpass",
+        "completion": "[bbox:45.410502277311544,-73.69285583496095,45.61739941393961,-73.47621917724611];way[highway~'^(cycleway)$']->.bikePaths;way[railway~'^(rail|tram|subway|light_rail)$']->.railways;node(w.bikePaths)(w.railways);out;"
+    },
+    {
+        "id": "OP-NODE-49",
+        "system": "bbox=45.270054264401516,-73.86657714843751,45.6841174406096,-73.43330383300783",
+        "prompt": "Find banks where the closest police station is more than 3km away.",
+        "type": "overpass",
+        "completion": "[out:json][bbox:45.270054264401516,-73.86657714843751,45.6841174406096,-73.43330383300783][timeout:800];(node[amenity=police];way[amenity=police];rel[amenity=police];)->.polices;(node[amenity=bank];way[amenity=bank];rel[amenity=bank];)->.banks;(node.banks(around.polices:3000);way.banks(around.polices:3000);rel.banks(around.polices:3000);)->.banksNearPolices;(.banks; - .banksNearPolices;);out geom meta;"
+    },
+    {
+        "id": "OP-NODE-50",
+        "system": "bbox=43.30919109985688,-79.88021850585939,44.16250418310723,-79.01367187500001",
+        "prompt": "Find all fairways outside of any golf course",
+        "type": "overpass",
+        "completion": "[out:json][timeout:60][bbox:43.30919109985688,-79.88021850585939,44.16250418310723,-79.01367187500001];wr[leisure=golf_course];map_to_area ->.golfcourse;way(area.golfcourse)[golf=fairway] -> .fairGolf;way[golf=fairway] -> .fairAll;(way.fairAll; -way.fairGolf;);out; > ; out geom;"
+    },
+    {
+        "id": "OP-NODE-51",
+        "system": "bbox=43.30919109985688,-79.88021850585939,44.16250418310723,-79.01367187500001",
+        "prompt": "displays all villages in the current bounding box",
+        "type": "overpass",
+        "completion": "[bbox:43.30919109985688,-79.88021850585939,44.16250418310723,-79.01367187500001];(node[place=village];way[place=village];relation[place=village];);out;"
+    },
+    {
+        "id": "OP-NODE-52",
+        "parent_id": "OP-47",
+        "system": "bbox=45.40592270582534,-73.77353668212892,45.61283664729275,-73.55690002441408",
+        "prompt": "Find all parks in Montreal with a cafe within 200m",
+        "type": "overpass",
+        "completion": "[out:json][timeout:60][bbox:45.40592270582534,-73.77353668212892,45.61283664729275,-73.55690002441408];(node[leisure=park];way[leisure=park];relation[leisure=park];)->.parks;(node[amenity=cafe](around.parks:200);way[amenity=cafe](around.parks:200);relation[amenity=cafe](around.parks:200);)->.cafes;(.parks; .cafes;);out geom;"
+    },
+    {
+        "id": "OP-NODE-53",
+        "system": "{'type':'FeatureCollection','features':[{'type':'Feature','geometry':{'type':'Polygon','coordinates':[[[7.1,50.7],[7.15,50.8],[7.2,50.85],[7.25,50.75],[7.2,50.7],[7.1,50.7]]]},'properties':{}}]}",
+        "prompt": "Find me gas stations in following area",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];(node[amenity=fuel](poly:'50.7 7.1 50.8 7.15 50.85 7.2 50.75 7.25 50.7 7.2 50.7 7.1');way[amenity=fuel](poly:'50.7 7.1 50.8 7.15 50.85 7.2 50.75 7.25 50.7 7.2 50.7 7.1');relation[amenity=fuel](poly:'50.7 7.1 50.8 7.15 50.85 7.2 50.75 7.25 50.7 7.2 50.7 7.1'););out body;>;out skel qt;"
+    },
+    {
+        "id": "OP-NODE-54",
+        "prompt": "Find all speed bumps in Montreal",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Montreal}}->.searchArea; ( node[traffic_calming=bump](area.searchArea); way[traffic_calming=bump](area.searchArea); relation[traffic_calming=bump](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-NODE-55",
+        "system": "bbox=45.52630655279894,-73.5864043235779,45.532770308038785,-73.5796344280243",
+        "prompt": "Identify locations of crosswalks on roads",
+        "type": "overpass",
+        "completion": "[bbox:45.52630655279894,-73.5864043235779,45.532770308038785,-73.5796344280243];way[highway~'^(primary|secondary|tertiary|residential|service|living_street)$']->.roads;node[highway=crossing](w.roads);out;"
+    },
+    {
+        "id": "OP-NODE-56",
+        "prompt": "Find playgrounds near Central Park within 1 kilometer",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];{{geocodeArea:Central Park}}->.searchArea;(node[leisure=playground](around.searchArea:1000);way[leisure=playground](around.searchArea:1000);relation[leisure=playground](around.searchArea:1000););out body;>;out skel qt;"
+
+    },
+    {
+        "id": "OP-NODE-57",
+        "prompt": "Show all cafes in Paris with outdoor seating",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];{{geocodeArea:Paris}}->.searchArea;(node[amenity=cafe][outdoor_seating=yes](area.searchArea);way[amenity=cafe][outdoor_seating=yes](area.searchArea);relation[amenity=cafe][outdoor_seating=yes](area.searchArea););out body;>;out skel qt;"
+    },
+    {
+        "id": "OP-NODE-58",
+        "prompt": "What schools are located in downtown Boston?",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];{{geocodeArea:Downtown Boston}}->.searchArea;(node[amenity=school](area.searchArea);way[amenity=school](area.searchArea);relation[amenity=school](area.searchArea););out body;>;out skel qt;"
+    },
+    {
+        "id": "OP-NODE-59",
+        "prompt": "Where can I find public toilets in Sydney?",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];{{geocodeArea:Sydney}}->.searchArea;(node[amenity=toilets](area.searchArea);way[amenity=toilets](area.searchArea);relation[amenity=toilets](area.searchArea););out body;>;out skel qt;"
+    },
+    {
+        "id": "OP-NODE-60",
+        "prompt": "Find all grocery stores within 2 kilometers from Montreal city hall",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];area[name=Montreal]->.searchArea;(node[shop=supermarket](around:2000,45.5088,-73.5540);way[shop=supermarket](around:2000,45.5088,-73.5540);relation[shop=supermarket](around:2000,45.5088,-73.5540););out body;>;out skel qt;"
+    },
+    {
+        "id": "OP-NODE-61",
+        "prompt": "Show all pharmacies in London that are open 24 hours",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];{{geocodeArea:London}}->.searchArea;(node[amenity=pharmacy][opening_hours~'24/7'](area.searchArea);way[amenity=pharmacy][opening_hours~'24/7'](area.searchArea);relation[amenity=pharmacy][opening_hours~'24/7'](area.searchArea););out body;>;out skel qt;"
+    },
+    {
+        "id": "OP-NODE-62",
+        "prompt": "What hotels are within 500 meters of a train stations in Paris?",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];area[name=Paris]->.searchArea;(node[railway=station](area.searchArea);way[railway=station](area.searchArea);relation[railway=station](area.searchArea);)->.stations;(node[tourism=hotel](around.stations:500);way[tourism=hotel](around.stations:500);relation[tourism=hotel](around.stations:500););out body;>;out skel qt;"
+    },
+    {
+        "id": "OP-NODE-63",
+        "prompt": "Find supermarkets near Time Square.",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];area[name~Manhattan]->.searchArea;(node[shop=supermarket](area.searchArea);way[shop=supermarket](area.searchArea);relation[shop=supermarket](area.searchArea););out body;>;out skel qt;"
+    },
+    {
+        "id": "OP-NODE-64",
+        "prompt": "Show all restaurants near the Sydney Opera House",
+        "type": "overpass",
+        "instruction": "Get coordinates of Sydney Opera House then use them in the query",
+        "completion": "[out:json][timeout:25];{{geocodeArea:Sydney Opera House}}->.searchArea;nwr[amenity=restaurant](area.searchArea);out body;>;out skel qt;"
+    },
+    {
+        "id": "OP-NODE-67",
+        "prompt": "Find coworking spaces near the Financial District in New York City.",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];area[name=New York]->.searchArea;(node[amenity=coworking_space](area.searchArea);way[amenity=coworking_space](area.searchArea);relation[amenity=coworking_space](area.searchArea););out body;>;out skel qt;"
+    },
+    {
+        "id": "OP-NODE-68",
+        "prompt": "What amusement parks are within 50 kilometers of Orlando?",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];area[name=Orlando]->.searchArea;(node[tourism=theme_park](around:50000,28.5383,-81.3792);way[tourism=theme_park](around:50000,28.5383,-81.3792);relation[tourism=theme_park](around:50000,28.5383,-81.3792););out body;>;out skel qt;"
+    },
+    {
+        "id": "OP-NODE-69",
+        "prompt": "Find campgrounds within Banff National Park",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];area[name=Banff National Park]->.searchArea;(node[tourism=camp_site](area.searchArea);way[tourism=camp_site](area.searchArea);relation[tourism=camp_site](area.searchArea););out body;>;out skel qt;"
+    },
+    {
+        "id": "OP-NODE-70",
+        "prompt": "Show all picnic areas in Seattle parks with BBQ facilities.",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];area[name=Seattle]->.searchArea;(node[leisure=picnic_table](area.searchArea);way[leisure=picnic_table](area.searchArea);relation[leisure=picnic_table](area.searchArea););(node[amenity=bbq](area.searchArea);way[amenity=bbq](area.searchArea);relation[amenity=bbq](area.searchArea););out body;>;out skel qt;"
+    },
+    {
+        "id": "OP-NODE-71",
+        "prompt": "List all public toilets in Montreal near metro stations",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];{{geocodeArea:Montreal}}->.searchArea;(node[amenity=toilets](area.searchArea);way[amenity=toilets](area.searchArea);relation[amenity=toilets](area.searchArea);)->.toilets;(node[railway=station][station=subway](area.searchArea);way[railway=station][station=subway](area.searchArea);relation[railway=station][station=subway](area.searchArea);)->.stations;(node.toilets(around.stations:1000);way.toilets(around.stations:1000);rel.toilets(around.stations:1000););out body;>;out skel qt;"
+    },
+    {
+        "id": "OP-NODE-72",
+        "prompt": "Where can I find community gardens in Berlin?",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];{{geocodeArea:Berlin}}->.searchArea;(node[leisure=garden](area.searchArea);way[leisure=garden](area.searchArea);relation[leisure=garden](area.searchArea););out body;>;out skel qt;"
+    },
+    {
+        "id": "OP-NODE-73",
+        "prompt": "Show me all waterfalls within 50 kilometers of downtown Quebec City.",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];{{geocodeArea:Quebec City}}->.searchArea;(node[waterway=waterfall](around:50000,46.8139,-71.2082););out body;>;out skel qt;"
+    },    
+    {
+        "id": "OP-NODE-74",
+        "prompt": "Find all hardware stores in San Francisco",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];{{geocodeArea:San Francisco}}->.searchArea;(node[shop=hardware](area.searchArea);way[shop=hardware](area.searchArea);relation[shop=hardware](area.searchArea););out body;>;out skel qt;"
+    },
+    {
+        "id": "OP-NODE-75",
+        "prompt": "Find all buildings taller than 100 meters in Dubai",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];{{geocodeArea:Dubai}}->.searchArea;(way[building=yes][height~'^1[0-9]{2,}$'](area.searchArea);relation[building=yes][height~'^1[0-9]{2,}$'](area.searchArea););out body geom;"
+    },
+    {
+        "id": "OP-NODE-76",
+        "prompt": "Show the distribution of bus stops in Los Angeles",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];{{geocodeArea:Los Angeles}}->.searchArea;(node[highway=bus_stop](area.searchArea););out body;"
+    },
+    {
+        "id": "OP-NODE-77",
+        "prompt": "What castles are located within 50 kilometers of Edinburgh?",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];{{geocodeArea:Edinburgh}}->.searchArea;(way[historic](area.searchArea);relation[historic](area.searchArea);node[historic](area.searchArea););out body geom;"
+    },
+    {
+        "id": "OP-NODE-78",
+        "prompt": "Show me all heritage sites in Quebec City",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];{{geocodeArea:Quebec City}}->.searchArea;(node[historic=monument](area.searchArea);way[historic=monument](area.searchArea);relation[historic=monument](area.searchArea););out body geom;"
+    },
+    {
+        "id": "OP-NODE-79",
+        "prompt": "Find all metro stations in Montreal with accessibility for wheelchairs",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];{{geocodeArea:Montreal}}->.searchArea;(node[railway=station][station=subway][wheelchair=yes](area.searchArea);way[railway=station][station=subway][wheelchair=yes](area.searchArea);relation[railway=station][station=subway][wheelchair=yes](area.searchArea););out body;>;out skel qt;"
+    },
+    {
+        "id": "OP-NODE-80",
+        "prompt": "Where are the concert halls in Vienna?",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];{{geocodeArea:Vienna}}->.searchArea;(node[amenity=concert_hall](area.searchArea);way[amenity=concert_hall](area.searchArea);relation[amenity=concert_hall](area.searchArea););out body;>;out skel qt;"
+    },
+    {
+        "id": "OP-NODE-81",
+        "prompt": "Find historic landmarks in Kyoto's Gion district",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];{{geocodeArea:Gion, Kyoto}}->.searchArea;(node[historic](area.searchArea);way[historic](area.searchArea);relation[historic](area.searchArea););out body;>;out skel qt;"
+    },    
+    {
+        "id": "OP-POLY-1",
+        "prompt": "Draw me a polygon around Boston",
+        "type": "overpass",
+        "completion": "[out:json];area[name=Boston]->.a;(way[boundary=administrative](area.a);relation[boundary=administrative](area.a););out body;>;out skel qt;"
+    },
+    {
+        "id": "OP-POLY-2",
+        "prompt": "Draw me a polygon around San Francisco",
+        "type": "overpass",
+        "completion": "[out:json];{{geocodeArea:San Francisco}}->.a;(way[boundary=administrative](area.a);relation[boundary=administrative](area.a););out body;>;out skel qt;"
+    },
+    {
+        "id": "OP-POLY-3",
+        "prompt": "Draw me a polygon around Chicago",
+        "type": "overpass",
+        "completion": "[out:json];{{geocodeArea:Chicago}}->.a;(way[boundary=administrative](area.a);relation[boundary=administrative](area.a););out body;>;out skel qt;"
+    },
+    {
+        "id": "OP-POLY-4",
+        "prompt": "Draw me a polygon around Seattle",
+        "type": "overpass",
+        "completion": "[out:json];{{geocodeArea:Seattle}}->.a;(way[boundary=administrative](area.a);relation[boundary=administrative](area.a););out body;>;out skel qt;"
+    },
+    {
+        "id": "OP-POLY-5",
+        "prompt": "Draw me a polygon around Algeria",
+        "type": "overpass",
+        "completion": "[out:json];{{geocodeArea:Algeria}}->.a;(way[boundary=administrative](area.a);relation[boundary=administrative](area.a););out body;>;out skel qt;"
+    },
+    {
+        "id": "OP-POLY-6",
+        "prompt": "Show me all bridges in Montreal",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Montreal}}->.searchArea; ( way[bridge=yes](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-POLY-7",
+        "prompt": "Show me all bridges in Constantine",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Constantine}}->.searchArea; ( way[bridge=yes](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-POLY-8",
+        "prompt": "What are the boundaries of Chinatown in San Francisco?",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];{{geocodeArea:San Francisco}}->.searchArea;(way[boundary=administrative][name=Chinatown](area.searchArea);relation[boundary=administrative][name=Chinatown](area.searchArea););out body geom;"
+    },
+    {
+        "id": "OP-POLY-9",
+        "prompt": "Find all dog-friendly parks in Montreal",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];{{geocodeArea:Montreal}}->.searchArea;(node[leisure=dog_park](area.searchArea);way[leisure=dog_park](area.searchArea);relation[leisure=dog_park](area.searchArea););out body;>;out skel qt;"
+    },
+    {
+        "id": "OP-POLY-10",
+        "prompt": "Find all public parks in Toronto with playgrounds for children.",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];{{geocodeArea:Toronto}}->.searchArea;(node[leisure=playground](area.searchArea);way[leisure=playground](area.searchArea);relation[leisure=playground](area.searchArea););out body;>;out skel qt;"
+    },
+    {
+        "id": "OP-POLY-11",
+        "prompt": "What car rental services are available at JFK Airport?",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];{{geocodeArea:JFK Airport}}->.searchArea;(node[amenity=car_rental](area.searchArea);way[amenity=car_rental](area.searchArea);relation[amenity=car_rental](area.searchArea););out body;>;out skel qt;"
+    },
+    {
+        "id": "OP-POLY-11",
+        "prompt": "What ancient ruins are near the Acropolis in Greece?",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];{{geocodeArea:Acropolis of Athens}}->.searchArea;(node[historic=ruins](area.searchArea);way[historic=ruins](area.searchArea);relation[historic=ruins](area.searchArea););out body;>;out skel qt;"
+    },
+    {
+        "id": "OP-POLY-12",
+        "prompt": "How me all dog parks within 10 kilometers of Toronto's city center",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];area[name=Toronto]->.searchArea;(node[leisure=dog_park](around:10000,43.7,-79.42);way[leisure=dog_park](around:10000,43.7,-79.42);relation[leisure=dog_park](around:10000,43.7,-79.42););out body;>;out skel qt;"
+    },
+    {
+        "id": "OP-POLY-65",
+        "prompt": "What landmarks are within walking distance of the White House?",
+        "type": "overpass",
+        "instruction": "Get coordinates of the White House then use them in the query",
+        "completion": "[out:json][timeout:25];area[name=Washington]->.searchArea;(node[tourism](around:500,38.8977,-77.0365);way[tourism](around:500,38.8977,-77.0365);relation[tourism](around:500,38.8977,-77.0365););out body;>;out skel qt;"
+    },
+    {
+        "id": "OP-LIN-1",
+        "prompt": "Show me all rivers in Algiers",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Algiers}}->.searchArea; ( way[waterway=river](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-LIN-2",
+        "prompt": "Show me all rivers in Manhattan",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Manhattan}}->.searchArea; ( way[waterway=river](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-LIN-5",
+        "prompt": "Show me all railways in Dallas",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Dallas}}->.searchArea; ( way[railway](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-LIN-6",
+        "prompt": "Show me all railways in Toulouse",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Toulouse}}->.searchArea; ( way[railway](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-LIN-7",
+        "prompt": "Show me cycling and bikes paths in Montreal",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Montreal}}->.searchArea; ( way[highway=cycleway](area.searchArea); way[highway=path][bicycle=yes](area.searchArea); ); out body; >; out skel qt;"
+    },
+    {
+        "id": "OP-LIN-8",
+        "system": "bbox=45.34285561899392,-75.82222938537599,45.35582448170392,-75.8086895942688",
+        "prompt": "Shows all hiking-relations in the current bounding box",
+        "type": "overpass",
+        "completion": "[bbox:45.34285561899392,-75.82222938537599,45.35582448170392,-75.8086895942688];(relation[route=hiking][network~'^.wn$'];way(r);>;);out;"
+    },
+    {
+        "id": "OP-LIN-9",
+        "prompt": "Display hiking trails in Yosemite National Park",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];{{geocodeArea:Yosemite National Park}}->.searchArea;(way[highway=path][sac_scale~'^(hiking|mountain_hiking)$'](area.searchArea););out body;>;out skel qt;"
+    },
+    {
+        "id": "OP-LIN-10",
+        "prompt": "What metro lines serve Heathrow Airport?",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];{{geocodeArea:Heathrow Airport}}->.searchArea;(relation[route=subway][name](area.searchArea);way[route=subway][name](area.searchArea);node[public_transport=station][name~'Heathrow'](area.searchArea););out body;>;out skel qt;"
+    },
+    {
+        "id": "OP-LIN-11",
+        "prompt": "What ferry routes connect islands in the Seattle area?",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];{{geocodeArea:Seattle}}->.searchArea;(relation[route=ferry](area.searchArea);way[route=ferry](area.searchArea););out body;>;out skel qt;"
+    },
+    {
+        "id": "OP-LIN-12",
+        "prompt": "Show me bus routes to the Grand Canyon National Park Visitor Center",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];{{geocodeArea:Grand Canyon National Park}}->.searchArea;(relation[route=bus](area.searchArea);way[route=bus](area.searchArea);node[public_transport=station][name~'Grand Canyon'](area.searchArea););out body;>;out skel qt;"
+    },
+    {
+        "id": "OP-LIN-13",
+        "prompt": "Show all bridges crossing the Seine River in Paris.",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];{{geocodeArea:Paris}}->.searchArea;(way[bridge](area.searchArea);relation[bridge](area.searchArea););out body geom;"
+    },
+    {
+        "id": "OP-LIN-14",
+        "prompt": "Find all pedestrian-only streets in Madrid",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];{{geocodeArea:Madrid}}->.searchArea;(way[highway=pedestrian](area.searchArea);relation[highway=pedestrian](area.searchArea););out body geom;"
+    },
+    {
+        "id": "OP-LIN-15",
+        "prompt": "Map all underground tunnels in London.",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];{{geocodeArea:London}}->.searchArea;(way[tunnel](area.searchArea);relation[tunnel](area.searchArea););out body geom;"
+    },
+    {
+        "id": "OP-LIN-16",
+        "prompt": "Show me all water taxi routes in Venice",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];{{geocodeArea:Venice}}->.searchArea;(way[route=ferry](area.searchArea);relation[route=ferry](area.searchArea););out body geom;"
+    },
+    {
+        "id": "OP-LIN-17",
+        "prompt": "Find all pedestrian-only streets in Old Montreal",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];{{geocodeArea:Old Montreal}}->.searchArea;(way[highway=pedestrian](area.searchArea);relation[highway=pedestrian](area.searchArea););out body geom;"
+    },
+    {
+        "id": "OP-LIN-18",
+        "prompt": "Map all bike lanes in Paris.",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];{{geocodeArea:Paris}}->.searchArea;(way[highway=cycleway](area.searchArea);relation[highway=cycleway](area.searchArea););out body geom;"
+    },
+    {
+        "id": "OP-LIN-19",
+        "prompt": "Show me all tram lines in Amsterdam",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25];{{geocodeArea:Amsterdam}}->.searchArea;(relation[route=tram](area.searchArea);way[route=tram](area.searchArea););out body geom;"
+    },    
+    {
+        "id": "OP-CLC-1",
+        "prompt": "Count number of pharmacies in Stuttgart",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Stuttgart}}->.searchArea; ( node[amenity=pharmacy](area.searchArea); way[amenity=pharmacy](area.searchArea); relation[amenity=pharmacy](area.searchArea); ); out count;"
+    },
+    {
+        "id": "OP-CLC-2",
+        "parent_id": "OP-CLC-1",
+        "prompt": "How many schools are there in Munich?",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Munich}}->.searchArea; ( node[amenity=school](area.searchArea); way[amenity=school](area.searchArea); relation[amenity=school](area.searchArea); ); out count;"
+    },
+    {
+        "id": "OP-CLC-3",
+        "prompt": "How many nodes, ways, and relations in Chemnitz have an address with a house number?",
+        "type": "overpass",
+        "completion": "[out:csv(::count, ::'count:nodes', ::'count:ways', ::'count:relations')][timeout:25]; {{geocodeArea:Chemnitz}}->.searchArea; ( node['addr:housenumber'](area.searchArea); way['addr:housenumber'](area.searchArea); relation['addr:housenumber'](area.searchArea); ); out count;"
+    },
+    {
+        "id": "OP-CLC-4",
+        "parent_id": "OP-CLC-1",
+        "prompt": "How many restaurants are there in Dresden?",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Dresden}}->.searchArea; ( node[amenity=restaurant](area.searchArea); way[amenity=restaurant](area.searchArea); relation[amenity=restaurant](area.searchArea); ); out count;"
+    },
+    {
+        "id": "OP-CLC-5",
+        "parent_id": "OP-CLC-1",
+        "prompt": "How many hotels are there in Leipzig?",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Leipzig}}->.searchArea; ( node[tourism=hotel](area.searchArea); way[tourism=hotel](area.searchArea); relation[tourism=hotel](area.searchArea); ); out count;"
+    },
+    {
+        "id": "OP-CLC-6",
+        "parent_id": "OP-CLC-1",
+        "prompt": "How many universities are there in Nuremberg?",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Nuremberg}}->.searchArea; ( node[amenity=university](area.searchArea); way[amenity=university](area.searchArea); relation[amenity=university](area.searchArea); ); out count;"
+    },
+    {
+        "id": "OP-CLC-7",
+        "parent_id": "OP-CLC-1",
+        "prompt": "How many banks are there in Bremen?",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Bremen}}->.searchArea; ( node[amenity=bank](area.searchArea); way[amenity=bank](area.searchArea); relation[amenity=bank](area.searchArea); ); out count;"
+    },
+    {
+        "id": "OP-CLC-8",
+        "parent_id": "OP-CLC-1",
+        "prompt": "How many post offices are there in Hannover?",
+        "type": "overpass",
+        "completion": "[out:json][timeout:25]; {{geocodeArea:Hannover}}->.searchArea; ( node[amenity=post_office](area.searchArea); way[amenity=post_office](area.searchArea); relation[amenity=post_office](area.searchArea); ); out count;"
+    },
+    {
+        "id": "OP-CLC-9",
+        "system": "bbox=51.08282186160976,-12.8759765625,55.986091533808384,-1.86767578125",
+        "prompt": "Export for me a csv file that contains nodes, ways, and relations in the current bbox, columns are id, type, name in English, and name in German",
+        "type": "overpass",
+        "completion": "[timeout:300][bbox:51.08282186160976,-12.8759765625,55.986091533808384,-1.86767578125][out:csv(::id, ::type, name, 'name:en', 'name:ga')];(node[name]['name:en']['name:ga'](if:(t['name'] != t['name:en']) && (t['name'] != t['name:ga']));way[name]['name:en']['name:ga'](if:(t['name'] != t['name:en']) && (t['name'] != t['name:ga']));rel[name]['name:en']['name:ga'](if:(t['name'] != t['name:en']) && (t['name'] != t['name:ga'])););out;"
+    },
+    {
+        "id": "OP-CLC-10",
+        "system": "bbox=51.08282186160976,-12.8759765625,55.986091533808384,-1.86767578125",
+        "prompt": "Export a csv file that contains information about all pharmacies in the current bbox, columns are id, name, and address",
+        "type": "overpass",
+        "completion": "[timeout:300][bbox:51.08282186160976,-12.8759765625,55.986091533808384,-1.86767578125][out:csv(::id, name, 'addr:street', 'addr:housenumber', 'addr:city')];(node[amenity=pharmacy];way[amenity=pharmacy];relation[amenity=pharmacy];);out;"
+    },
+    {
+        "id": "OP-CLC-11",
+        "prompt": "Count the paths in Sweden that are not used in cities with designated foot or bicycle traffic, i.e. paths in the woods.",
+        "type": "overpass",
+        "completion": "[out:csv(number,length)][maxsize:1000000000];{{geocodeArea:Sweden}}->.searchArea;way[highway=path][!foot][!bicycle][!segregated](area.searchArea);make stat number=count(ways),length=sum(length());out;"
+    },
+    {
+        "id": "OP-CLC-12",
+        "prompt": "Count the number of nodes, ways, and relations in the city of Stockholm",
+        "type": "overpass",
+        "completion": "[out:csv(::count, ::'count:nodes', ::'count:ways', ::'count:relations')][timeout:25];{{geocodeArea:Stockholm}}->.searchArea;(node(area.searchArea);way(area.searchArea);relation(area.searchArea););out count;"
+    },
+    {
+        "id": "OP-CLC-13",
+        "parent_id": "OP-CLC-11",
+        "prompt": "Count the number of nodes, ways, and relations in the city of Copenhagen",
+        "type": "overpass",
+        "completion": "[out:csv(::count, ::'count:nodes', ::'count:ways', ::'count:relations')][timeout:25];{{geocodeArea:Copenhagen}}->.searchArea;(node(area.searchArea);way(area.searchArea);relation(area.searchArea););out count;"
+    },
+    {
+        "id": "OP-CLC-14",
+        "prompt": "Calculate the total length of Route 66",
+        "type": "overpass",
+        "completion": "[out:json][timeout:60];relation[route=road][name~'Route 101'];make stats length=sum(length());out;"
+    },
+    {
+        "id": "OP-CLC-15",
+        "parent_id": "OP-CLC-13",
+        "prompt": "Give me the total length of Californian route 101",
+        "type": "overpass",
+        "completion": "[out:json][timeout:60];relation[route=road][name~'Route 101'];make stats length=sum(length());out;"
+    },
+    {
+        "id": "OP-CLC-16",
+        "prompt": "Calculate the total length of the German Autobahn",
+        "type": "overpass",
+        "completion": "[out:json][timeout:60];relation[route=road][name~'Autobahn'];make stats length=sum(length());out;"
+    },
+    {
+        "id": "OP-CLC-17",
+        "prompt": "What is the total length of hiking trails in Yosemite National Park?",
+        "type": "overpass",
+        "completion": "[out:json][timeout:60];relation[route=hiking][name~'Yosemite'];make stats length=sum(length());out;"
+    },
+    {
+        "id": "OP-NODE-POLY-NODE-1",
+        "system": "bbox=45.55324648724617,-73.5981845855713,45.5790846657274,-73.57110500335695",
+        "prompt": "Identifies schools within the given bounding box and finds nearby streets with a speed limit over 30 km/h.",
+        "type": "overpass",
+        "completion": "[out:json][timeout:800];(way[amenity=school](45.55324648724617,-73.5981845855713,45.5790846657274,-73.57110500335695);node[amenity=school](45.55324648724617,-73.5981845855713,45.5790846657274,-73.57110500335695);rel[amenity=school](45.55324648724617,-73.5981845855713,45.5790846657274,-73.57110500335695);)->.schools;way(around.schools:50)[highway][highway!~'^(footway|path)$'](if: (is_number(t['maxspeed']) && t['maxspeed'] > 30) || !is_tag(maxspeed))->.streets;(node.schools(around.streets:50);way.schools(around.streets:50);rel.schools(around.streets:50);)->.matchingSchools;(.matchingSchools;.streets;);out geom;"
+    }
+]

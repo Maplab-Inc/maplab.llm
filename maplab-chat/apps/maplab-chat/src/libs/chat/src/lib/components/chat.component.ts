@@ -8,7 +8,14 @@ import {
   Output,
   ViewChild,
 } from '@angular/core';
-import { Feature, GeoJsonProperties, Geometry, Point, Polygon } from 'geojson';
+import {
+  Feature,
+  FeatureCollection,
+  GeoJsonProperties,
+  Geometry,
+  Point,
+  Polygon,
+} from 'geojson';
 import {
   FullscreenControl,
   GeoJSONSource,
@@ -45,6 +52,8 @@ import { DIRECTIONS_API_URL } from '@maplab-chat/tokens';
 import { ContextFacade } from '../+state/context/context.facade';
 import { DeliveryRequestService } from '../services/context-services/delivery-request.service';
 import { TrucksService } from '../services/context-services/trucks-service';
+
+declare var require: any;
 
 interface IStyle {
   style: string;
@@ -83,9 +92,6 @@ export class ChatComponent implements AfterViewInit {
     public chatFacade: ChatFacade,
     private http: HttpClient,
     private dialogService: DialogService,
-    private router: Router,
-    private activatedRoute: ActivatedRoute,
-    private destroyRef: DestroyRef,
     private contextFacade: ContextFacade,
     private deliveryRequestService: DeliveryRequestService,
     private trucksService: TrucksService,
@@ -100,7 +106,7 @@ export class ChatComponent implements AfterViewInit {
     this.initStylesMenu();
 
     this.chatFacade.chat$.subscribe({
-      next: (response: AssistantCompletion | null) => {
+      next: async (response: AssistantCompletion | null) => {
         if (response) {
           // Remove loader message
           this.messages.pop();
@@ -122,21 +128,100 @@ export class ChatComponent implements AfterViewInit {
             }
           }
 
-          // Now safely cast to IVrpAssignment
-          let vrpAssignment = responseData as IVrpAssignment;
-          let directionsRequests = this.createDirections(vrpAssignment);
-          forkJoin(
-            directionsRequests.map((directionsRequest) =>
-              this.getDirections(directionsRequest)
-            )
-          ).subscribe({
-            next: (results: Feature<Geometry, GeoJsonProperties>[]) => {
-              this.onRoutes(results);
-            },
-            error: (err) => {
-              console.error('Failed to fetch directions:', err);
-            },
-          });
+          if (response.type === 'route-optimization') {
+            let vrpAssignment = responseData as IVrpAssignment;
+            let directionsRequests = this.createDirections(vrpAssignment);
+            forkJoin(
+              directionsRequests.map((directionsRequest) =>
+                this.getDirections(directionsRequest)
+              )
+            ).subscribe({
+              next: (results: Feature<Geometry, GeoJsonProperties>[]) => {
+                this.onRoutes(results);
+              },
+              error: (err) => {
+                console.error('Failed to fetch directions:', err);
+              },
+            });
+          } else {
+            // convert json to geojson and display it on map.
+            const osmtogeojsonModule = await import('osmtogeojson');
+            const osmtogeojson = osmtogeojsonModule.default;
+            let osmData = osmtogeojson(structuredClone(response.data));
+
+            this.map.addSource('osm_source', {
+              type: 'geojson',
+              data: osmData,
+            });
+
+            let osmType = osmData.features[0].geometry.type;
+
+            if (osmType === 'Point') {
+              const iconImage: MapMarkerTagType = MapMarkerTagType.marker;
+              this.map.addLayer(
+                {
+                  id: 'symbol-layer',
+                  type: 'symbol',
+                  source: 'osm_source',
+                  layout: {
+                    ['icon-image']: iconImage,
+                    ['icon-overlap']: 'always',
+                    ['text-font']: ['Open Sans Bold', 'Arial Unicode MS Bold'],
+                    ['text-size']: 11,
+                    ['text-transform']: 'uppercase',
+                    ['text-letter-spacing']: 0.05,
+                    ['text-offset']: [0, 1.5],
+                  },
+                  paint: {
+                    ['text-color']: '#202',
+                    ['text-halo-color']: '#fff',
+                    ['text-halo-width']: 2,
+                  },
+                },
+                'z-index-1'
+              );
+              this.currentMarkersLayers.push('symbol-layer');
+
+              var bounds = new LngLatBounds();
+              osmData.features.forEach((coord: any) =>
+                bounds.extend({
+                  lng: coord.geometry.coordinates[0],
+                  lat: coord.geometry.coordinates[1],
+                })
+              );
+              this.map.fitBounds(bounds, { padding: this.padding });
+            } else if ((osmType = 'Polygon')) {
+              this.map.addLayer({
+                id: 'polygon-layer',
+                type: 'fill',
+                source: 'osm_source',
+                paint: {
+                  'fill-color': '#088',
+                  'fill-opacity': 0.8,
+                },
+              });
+
+              var bounds = new LngLatBounds();
+
+              osmData.features.forEach((feature: any) => {
+                if (
+                  feature.geometry.type === 'Polygon' ||
+                  feature.geometry.type === 'MultiPolygon'
+                ) {
+                  feature.geometry.coordinates.forEach((ring: any) => {
+                    ring.forEach((coord: any) => {
+                      bounds.extend(coord);
+                    });
+                  });
+                }
+              });
+
+              this.map.fitBounds(bounds, {
+                padding: { top: 20, bottom: 20, left: 20, right: 20 },
+                maxZoom: 15,
+              });
+            }
+          }
         }
       },
       error: (error: any) => {
@@ -222,12 +307,12 @@ export class ChatComponent implements AfterViewInit {
     this.imageTruck = document.createElement('img');
     this.imageTruck.width = 25;
     this.imageTruck.height = 25;
-    this.imageTruck.src ='/assets/truck.svg';
+    this.imageTruck.src = '/assets/truck.svg';
 
     this.imageMarker = document.createElement('img');
     this.imageMarker.width = 25;
     this.imageMarker.height = 40;
-    this.imageMarker.src = '/assets/blue_marker.png';
+    this.imageMarker.src = '/assets/green_marker.png';
 
     this.map = new Map({
       container: mapContainer,
@@ -285,7 +370,7 @@ export class ChatComponent implements AfterViewInit {
           type: 'symbol',
           source: 'empty',
         },
-        'z-index-1',
+        'z-index-1'
       );
 
       this.mapIsLoaded = true;
@@ -298,14 +383,18 @@ export class ChatComponent implements AfterViewInit {
             let markersFeatures: Feature<Point, GeoJsonProperties>[] = [];
             if (routeOptimizationContext.vehicles.length > 0) {
               markersFeatures = [
-                ...this.trucksService.mapToGeoJson(routeOptimizationContext.vehicles),
+                ...this.trucksService.mapToGeoJson(
+                  routeOptimizationContext.vehicles
+                ),
               ];
             }
 
             if (routeOptimizationContext.jobs.length > 0) {
               markersFeatures = [
                 ...markersFeatures,
-                ...this.deliveryRequestService.mapToGeoJson(routeOptimizationContext.jobs),
+                ...this.deliveryRequestService.mapToGeoJson(
+                  routeOptimizationContext.jobs
+                ),
               ];
             }
 
