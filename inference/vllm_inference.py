@@ -8,11 +8,12 @@ import fastapi
 
 vllm_image = modal.Image.debian_slim(python_version="3.12").pip_install(
     "vllm==0.6.6.post1", "fastapi[standard]")
-MODELS_DIR = "/llama-70B"
-MODEL_NAME = "meta-llama/Llama-3.3-70B-Instruct"
+MODEL_VOL_NAME = "deepseek-r1"
+MODELS_DIR = "/{MODEL_VOL_NAME}"
+MODEL_NAME = "deepseek-ai/DeepSeek-R1-Distill-Llama-70B"
 
 try:
-    volume = modal.Volume.lookup("llama-70B", create_if_missing=False)
+    volume = modal.Volume.lookup(MODEL_VOL_NAME, create_if_missing=False)
 except modal.exception.NotFoundError:
     raise Exception("Download models first with modal run download_llama.py")
 

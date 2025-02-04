@@ -9,9 +9,10 @@ from typing import Optional
 def overpass(overpass_request: str) -> str:
     """
 Overpass Tool for querying and visualizing OpenStreetMap data. It helps extract specific information from the vast OSM database by writing queries in the Overpass QL query language. 
-Get Polygons Covering Areas: Fetching the boundary polygon for the city of Montreal.
-Find Amenities: Finding all gas stations in Laval.
-Custom Filters: finding all Italian restaurants in downtown Montreal with wheelchair access.
+Examples of queries that can be run using the Overpass Tool include:
+Get Polygons Covering Areas: Fetching the boundary polygon for a city.
+Find Amenities: Finding all gas stations in a certain area.
+Custom Filters: finding all Italian restaurants in a certain area.
 Analyzing Infrastructure: Retrieving all the bridges in a certain area.
     
     Args:
