@@ -12,7 +12,8 @@ from transformers import (
     AutoTokenizer)
 
 VOL_MOUNT_PATH = Path("/vol")
-MODELS_DIR = "/llama-8B-wattai"
+MODEL_NAME = "llama-8B-wattai"
+MODELS_DIR = f"/{MODEL_NAME}"
 BASE_MODEL = f"{MODELS_DIR}/watt-ai/watt-tool-8B"
 output_vol = modal.Volume.from_name("finetune-volume", create_if_missing=True)
 
@@ -143,8 +144,8 @@ except KeyboardInterrupt:  # handle possible preemption
     trainer.save_model()
     raise
 # Save the trained model and tokenizer to the mounted volume
-model.save_pretrained(str(VOL_MOUNT_PATH / "model"))
-tokenizer.save_pretrained(str(VOL_MOUNT_PATH / "tokenizer"))
+model.save_pretrained(str(VOL_MOUNT_PATH / MODEL_NAME))
+tokenizer.save_pretrained(str(VOL_MOUNT_PATH / MODEL_NAME))
 output_vol.commit()
 end_time = time.time()
 total_time = end_time - start_time
