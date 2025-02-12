@@ -8,7 +8,8 @@ image = modal.Image.from_registry("ubuntu:22.04", add_python="3.11").apt_install
     "transformers",
     "torch",
     "datasets",
-    "tensorboard"
+    "tensorboard",
+    "peft"
 )
 
 VOL_MOUNT_PATH = Path("/vol")
@@ -20,8 +21,8 @@ output_vol = modal.Volume.from_name("finetune-volume", create_if_missing=True)
 model_vol = modal.Volume.lookup("llama-8B-wattai", create_if_missing=False)
 
 @app.function(
-    gpu=modal.gpu.A100(size="80GB",count=2),
-    memory=85900,
+    gpu=modal.gpu.A10G(count=2),
+    #memory=85900,
     timeout=7200,
     volumes={VOL_MOUNT_PATH: output_vol, MODELS_DIR: model_vol},
     mounts=[modal.Mount.from_local_dir("./", remote_path="/root/")]
@@ -44,6 +45,8 @@ def setup():
     # Execute the command
     try:
         subprocess.run(command, check=True)
+        # with output_vol.batch_upload(force=True) as batch:
+        #     batch.put_file("config.json", "llama-8B-wattai/config.json")
         print("Accelerate command executed successfully!")
     except subprocess.CalledProcessError as e:
         print(f"Error while executing accelerate command: {e}")

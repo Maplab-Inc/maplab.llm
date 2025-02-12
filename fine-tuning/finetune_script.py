@@ -3,8 +3,9 @@ import modal
 import torch
 from pathlib import Path
 from datasets import load_dataset
+from peft import LoraConfig, get_peft_model, PeftModel, PeftConfig
 from transformers import (
-    AutoModel,
+    AutoModelForCausalLM,
     LlamaForCausalLM,
     TrainingArguments,
     Trainer,
@@ -55,8 +56,31 @@ else:
 tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL)
 model =  LlamaForCausalLM.from_pretrained(
     BASE_MODEL, 
+    use_safetensors=True,
     torch_dtype=torch.bfloat16,
     device_map="cpu")
+
+config = LoraConfig(
+    r=32,
+    lora_alpha=32,
+    target_modules=["q_proj", "v_proj"],
+    lora_dropout=0.1,
+    bias="none"
+)
+
+model.enable_input_require_grads()
+
+model = get_peft_model(model, config)
+
+trainable_params = 0
+all_param = 0
+for _, param in model.named_parameters():
+    all_param += param.numel()
+    if param.requires_grad:
+        trainable_params += param.numel()
+print(
+    f"trainable params: {trainable_params} || all params: {all_param} || trainable%: {100 * trainable_params / all_param:.2f}"
+)
 
 print(f"✅ Tokenizer/Model loaded!")
 # Replace all padding tokens with a large negative number so that the loss function ignores them in
@@ -129,9 +153,9 @@ trainer = Trainer(
 )
 
 #Evaluate before training
-# print("Evaluating model before training...")
-# eval_results_before = trainer.evaluate()
-# print(f"Pre-training evaluation results: {eval_results_before}")
+#print("Evaluating model before training...")
+#eval_results_before = trainer.evaluate()
+#print(f"Pre-training evaluation results: {eval_results_before}")
 
 try:
     resume = restarts > 0
@@ -143,10 +167,20 @@ except KeyboardInterrupt:  # handle possible preemption
     trainer.save_state()
     trainer.save_model()
     raise
+
 # Save the trained model and tokenizer to the mounted volume
-model.save_pretrained(str(VOL_MOUNT_PATH / MODEL_NAME))
+model.save_pretrained(str(VOL_MOUNT_PATH / MODEL_NAME), safe_serialization=True)
 tokenizer.save_pretrained(str(VOL_MOUNT_PATH / MODEL_NAME))
 output_vol.commit()
+
+# Merge the model and save it to the mounted volume
+config = PeftConfig.from_pretrained(str(VOL_MOUNT_PATH / MODEL_NAME))
+original_model = AutoModelForCausalLM.from_pretrained(config.base_model_name_or_path)
+lora_model = PeftModel.from_pretrained(original_model, str(VOL_MOUNT_PATH / MODEL_NAME))
+merged_model = lora_model.merge_and_unload()
+merged_model.save_pretrained(str(config.base_model_name_or_path / "merged" / MODEL_NAME))
+output_vol.commit()
+
 end_time = time.time()
 total_time = end_time - start_time
 hours = total_time // 3600

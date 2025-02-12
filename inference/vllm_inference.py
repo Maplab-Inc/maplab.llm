@@ -8,9 +8,9 @@ import fastapi
 
 vllm_image = modal.Image.debian_slim(python_version="3.12").pip_install(
     "vllm==0.6.6.post1", "fastapi[standard]")
-MODEL_VOL_NAME = "finetune-volume"
+MODEL_VOL_NAME = "deepseek-r1"
 MODELS_DIR = f"/{MODEL_VOL_NAME}"
-MODEL_NAME = "llama-8B-wattai"
+MODEL_NAME = "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"
 
 try:
     volume = modal.Volume.lookup(MODEL_VOL_NAME, create_if_missing=False)
@@ -61,7 +61,7 @@ web_app = fastapi.FastAPI(
 
 @app.function(
     image=vllm_image,
-    gpu=modal.gpu.A100(size="80GB",count=N_GPU),
+    gpu=modal.gpu.A100(count=N_GPU),
     container_idle_timeout=5 * MINUTES,
     timeout=24 * HOURS,
     allow_concurrent_inputs=1000,
@@ -135,7 +135,10 @@ def serve():
     request_logger = RequestLogger(max_log_len=4096)
 
     base_model_paths = [
-        BaseModelPath(name=MODEL_NAME.split("/")[1], model_path=MODEL_NAME)
+    BaseModelPath(
+        name=MODEL_NAME.split("/")[1] if "/" in MODEL_NAME else MODEL_NAME,
+        model_path=MODEL_NAME
+        )
     ]
 
     api_server.chat = lambda s: OpenAIServingChat(
