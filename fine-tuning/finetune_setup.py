@@ -16,7 +16,7 @@ VOL_MOUNT_PATH = Path("/vol")
 MODELS_DIR = "/llama-8B-wattai"
 BASE_MODEL = f"{MODELS_DIR}/watt-ai/watt-tool-8B"
 
-app = modal.App(name="overpass-trainer", image=image)
+app = modal.App(name="trainer", image=image)
 output_vol = modal.Volume.from_name("finetune-volume", create_if_missing=True)
 model_vol = modal.Volume.lookup("llama-8B-wattai", create_if_missing=False)
 
@@ -27,7 +27,7 @@ model_vol = modal.Volume.lookup("llama-8B-wattai", create_if_missing=False)
     volumes={VOL_MOUNT_PATH: output_vol, MODELS_DIR: model_vol},
     mounts=[modal.Mount.from_local_dir("./", remote_path="/root/")]
 )
-def setup():
+def training():
     import subprocess
     # Define your config file path and script name
     config_file_path = "/root/fsdp_config.yaml"
@@ -45,8 +45,8 @@ def setup():
     # Execute the command
     try:
         subprocess.run(command, check=True)
-        # with output_vol.batch_upload(force=True) as batch:
-        #     batch.put_file("config.json", "llama-8B-wattai/config.json")
+        #with output_vol.batch_upload(force=True) as batch:
+        #     batch.put_file("special_tokens_map.json", "llama-8B-wattai/adapter_config.json")
         print("Accelerate command executed successfully!")
     except subprocess.CalledProcessError as e:
         print(f"Error while executing accelerate command: {e}")

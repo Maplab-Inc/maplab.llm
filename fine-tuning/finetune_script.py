@@ -14,6 +14,7 @@ from transformers import (
 
 VOL_MOUNT_PATH = Path("/vol")
 MODEL_NAME = "llama-8B-wattai"
+FINETUNED_MODEL_NAME = "llama-8B-wattai-finetuned"
 MODELS_DIR = f"/{MODEL_NAME}"
 BASE_MODEL = f"{MODELS_DIR}/watt-ai/watt-tool-8B"
 output_vol = modal.Volume.from_name("finetune-volume", create_if_missing=True)
@@ -69,7 +70,6 @@ config = LoraConfig(
 )
 
 model.enable_input_require_grads()
-
 model = get_peft_model(model, config)
 
 trainable_params = 0
@@ -88,11 +88,14 @@ print(f"✅ Tokenizer/Model loaded!")
 padding_token_id = -100
 batch_size = 1
 def preprocess(batch):
-    # prepend summarize: prefix to document to convert the example to a summarization instruction
     inputs = [
     f"{batch['system'][i]} {batch['prompt'][i]}" if batch['system'][i] else batch['prompt'][i]
     for i in range(len(batch['system']))
     ]
+    #print first 10 inputs
+    print(inputs[:10])
+    print(batch["completion"][:10])
+    
     model_inputs = tokenizer(
         inputs,
         padding="max_length",
@@ -158,7 +161,7 @@ trainer = Trainer(
 #print(f"Pre-training evaluation results: {eval_results_before}")
 
 try:
-    resume = restarts > 0
+    resume = restarts > 1
     if resume:
         print("resuming from checkpoint")
     trainer.train(resume_from_checkpoint=False)
@@ -168,17 +171,24 @@ except KeyboardInterrupt:  # handle possible preemption
     trainer.save_model()
     raise
 
-# Save the trained model and tokenizer to the mounted volume
+# Save the trained adapter and tokenizer to the mounted volume
 model.save_pretrained(str(VOL_MOUNT_PATH / MODEL_NAME), safe_serialization=True)
-tokenizer.save_pretrained(str(VOL_MOUNT_PATH / MODEL_NAME))
+tokenizer.save_pretrained(str(VOL_MOUNT_PATH / FINETUNED_MODEL_NAME))
 output_vol.commit()
 
 # Merge the model and save it to the mounted volume
-config = PeftConfig.from_pretrained(str(VOL_MOUNT_PATH / MODEL_NAME))
-original_model = AutoModelForCausalLM.from_pretrained(config.base_model_name_or_path)
-lora_model = PeftModel.from_pretrained(original_model, str(VOL_MOUNT_PATH / MODEL_NAME))
+peft_config = PeftConfig.from_pretrained(str(VOL_MOUNT_PATH / MODEL_NAME))
+original_model = AutoModelForCausalLM.from_pretrained(
+    peft_config.base_model_name_or_path, 
+    torch_dtype=torch.bfloat16,
+    device_map="cpu")
+lora_model = PeftModel.from_pretrained(
+    original_model, 
+    str(VOL_MOUNT_PATH / MODEL_NAME),
+    torch_dtype=torch.float16,
+    device_map="cpu")
 merged_model = lora_model.merge_and_unload()
-merged_model.save_pretrained(str(config.base_model_name_or_path / "merged" / MODEL_NAME))
+merged_model.save_pretrained(str(VOL_MOUNT_PATH / FINETUNED_MODEL_NAME))
 output_vol.commit()
 
 end_time = time.time()

@@ -8,12 +8,15 @@ import fastapi
 
 vllm_image = modal.Image.debian_slim(python_version="3.12").pip_install(
     "vllm==0.6.6.post1", "fastapi[standard]")
-MODEL_VOL_NAME = "deepseek-r1"
+MODEL_VOL_NAME = "finetune-volume"
+MODEL_FINETUNED_NAME = "finetune-volume"
 MODELS_DIR = f"/{MODEL_VOL_NAME}"
-MODEL_NAME = "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"
+MODEL_NAME = "llama-8B-wattai-finetuned"
+LORA_ADAPTER_DIR = f"/{MODEL_FINETUNED_NAME}"
 
 try:
     volume = modal.Volume.lookup(MODEL_VOL_NAME, create_if_missing=False)
+    finetuned_volume = modal.Volume.lookup(MODEL_FINETUNED_NAME, create_if_missing=False)
 except modal.exception.NotFoundError:
     raise Exception("Download models first with modal run download_llama.py")
 
@@ -61,11 +64,11 @@ web_app = fastapi.FastAPI(
 
 @app.function(
     image=vllm_image,
-    gpu=modal.gpu.A100(count=N_GPU),
+    gpu=modal.gpu.A10G(count=N_GPU),
     container_idle_timeout=5 * MINUTES,
     timeout=24 * HOURS,
     allow_concurrent_inputs=1000,
-    volumes={MODELS_DIR: volume},
+    volumes={MODELS_DIR: volume, LORA_ADAPTER_DIR: finetuned_volume},
 )
 @modal.asgi_app()
 def serve():
@@ -79,11 +82,15 @@ def serve():
     from vllm.entrypoints.openai.serving_completion import (
             OpenAIServingCompletion
         )
+    from vllm.entrypoints.openai.serving_engine import (
+        BaseModelPath,
+        LoRAModulePath
+        )
     from vllm.entrypoints.openai.protocol import ChatCompletionRequest
-    from vllm.entrypoints.openai.serving_engine import BaseModelPath
     from fastapi import Request
     
     volume.reload()  # ensure we have the latest version of the weights
+    finetuned_volume.reload()  # ensure we have the latest version of the weights
 
     # security: CORS middleware for external requests
     http_bearer = fastapi.security.HTTPBearer(
@@ -121,6 +128,9 @@ def serve():
         gpu_memory_utilization=0.90,
         max_model_len=10000,
         trust_remote_code=True,
+        enable_lora=True,
+        max_loras=1,
+        max_lora_rank=32,
         enforce_eager=True,  # capture the graph for faster inference, but slower cold starts (30s > 20s)
     )
 
@@ -137,7 +147,7 @@ def serve():
     base_model_paths = [
     BaseModelPath(
         name=MODEL_NAME.split("/")[1] if "/" in MODEL_NAME else MODEL_NAME,
-        model_path=MODEL_NAME
+        model_path=MODELS_DIR + "/" + MODEL_NAME
         )
     ]
 
@@ -146,7 +156,11 @@ def serve():
         model_config=model_config,
         base_model_paths=base_model_paths,
         response_role="assistant",
-        lora_modules=[],
+        #lora_modules=[    
+        #    LoRAModulePath(
+        #        name="overpass",
+        #        path=LORA_ADAPTER_DIR + "/" + MODEL_VOL_NAME
+        #    )],
         prompt_adapters=[],
         request_logger=request_logger,
         enable_auto_tools=True,
@@ -158,7 +172,12 @@ def serve():
         engine,
         model_config=model_config,
         base_model_paths=base_model_paths,
-        lora_modules=[],
+        #lora_modules=[    
+        #    LoRAModulePath(
+        #        name="overpass",
+        #        path=LORA_ADAPTER_DIR + "/" + MODEL_VOL_NAME,
+        #        base_model_name= MODEL_NAME.split("/")[1] if "/" in MODEL_NAME else MODEL_NAME,
+        #    )],
         prompt_adapters=[],
         request_logger=request_logger,
     )
