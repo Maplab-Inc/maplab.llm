@@ -2,6 +2,11 @@
     {
         "id": "OP-NODE-1",
         "prompt": "Fine me natural parks in %%CITY%%",
+        "rephrases": [
+            "Can you list all protected areas in %%CITY%%",
+            "Show me all parks in %%CITY%%",
+            "Where can I find nature reserves in %%CITY%%?"
+        ],
         "type": "overpass",
         "mutation": "5",
         "completion": "[out:json][timeout:25]; {{geocodeArea:%%CITY%%}}->.searchArea; ( node[leisure=park](area.searchArea); way[leisure=park](area.searchArea); relation[leisure=park](area.searchArea); node[boundary=protected_area](area.searchArea); way[boundary=protected_area](area.searchArea); relation[boundary=protected_area](area.searchArea); ); out body; >; out skel qt;"
@@ -9,6 +14,10 @@
     {
         "id": "OP-NODE-2",
         "prompt": "Get all the museums in %%CITY%%",
+        "rephrases": [
+            "Where can I find art galleries in %%CITY%%?",
+            "Find me art galleries in %%CITY%%"
+        ],
         "type": "overpass",
         "mutation": "5",
         "completion": "[out:json][timeout:25]; {{geocodeArea:%%CITY%%}}->.searchArea; ( node[tourism=museum](area.searchArea); way[tourism=museum](area.searchArea); relation[tourism=museum](area.searchArea); ); out body; >; out skel qt;"
@@ -16,6 +25,12 @@
     {
         "id": "OP-NODE-3",
         "prompt": "Show all the restaurants in %%CITY%%",
+        "rephrases": [
+            "Display all dining establishments in %%CITY%%.",
+            "Locate all eateries in %%CITY%%",
+            "Find all food establishments in %%CITY%%",
+            "Show me all cafes and restaurants in %%CITY%%"
+        ],
         "type": "overpass",
         "mutation": "5",
         "completion": "[out:json][timeout:25]; {{geocodeArea:%%CITY%%}}->.searchArea; ( node[amenity=restaurant](area.searchArea); way[amenity=restaurant](area.searchArea); relation[amenity=restaurant](area.searchArea); ); out body; >; out skel qt;"
@@ -23,6 +38,13 @@
     {
         "id": "OP-NODE-4",
         "prompt": "Display all schools in %%CITY%%",
+        "rephrases": [
+            "Show all educational centers in %%CITY%%",
+            "Display all learning institutions in %%CITY%%",
+            "Locate all academic institutions in %%CITY%%",
+            "Find all educational facilities in %%CITY%%",
+            "Display all primary and secondary schools in %%CITY%%"
+        ],
         "type": "overpass",
         "mutation": "5",
         "completion": "[out:json][timeout:25]; {{geocodeArea:%%CITY%%}}->.searchArea; ( node[amenity=school](area.searchArea); way[amenity=school](area.searchArea); relation[amenity=school](area.searchArea); ); out body; >; out skel qt;"
@@ -30,6 +52,11 @@
     {
         "id": "OP-NODE-5",
         "prompt": "Identify all hospitals in %%CITY%%",
+        "rephrases": [
+            "Locate all medical facilities in %%CITY%%",
+            "Find all healthcare centers in %%CITY%%",
+            "Display all hospitals in %%CITY%%"
+        ],
         "type": "overpass",
         "mutation": "5",
         "completion": "[out:json][timeout:25]; {{geocodeArea:%%CITY%%}}->.searchArea; ( node[amenity=hospital](area.searchArea); way[amenity=hospital](area.searchArea); relation[amenity=hospital](area.searchArea); ); out body; >; out skel qt;"
@@ -37,6 +64,10 @@
     {
         "id": "OP-NODE-6",
         "prompt": "List me hotels in %%CITY%%",
+        "rephrases": [
+            "Find all accommodations in %%CITY%%",
+            "Show me all lodging establishments in %%CITY%%"
+        ],
         "type": "overpass",
         "mutation": "5",
         "completion": "[out:json][timeout:25]; {{geocodeArea:%%CITY%%}}->.searchArea; ( node[tourism=hotel](area.searchArea); way[tourism=hotel](area.searchArea); relation[tourism=hotel](area.searchArea); ); out body; >; out skel qt;"
@@ -44,6 +75,9 @@
     {
         "id": "OP-NODE-7",
         "prompt": "Highlight airports in %%CITY%%",
+        "rephrases": [
+            "Find all major and regional airports in %%CITY%%."
+        ],
         "type": "overpass",
         "mutation": "5",
         "completion": "[out:json][timeout:25]; {{geocodeArea:%%CITY%%}}->.searchArea; ( node[aeroway=aerodrome](area.searchArea); way[aeroway=aerodrome](area.searchArea); relation[aeroway=aerodrome](area.searchArea); node[aeroway=airport](area.searchArea); way[aeroway=airport](area.searchArea); relation[aeroway=airport](area.searchArea); ); out body; >; out skel qt;"
@@ -51,6 +85,11 @@
     {
         "id": "OP-NODE-8",
         "prompt": "Show me all bus stops in %%CITY%%",
+        "rephrases": [
+            "List all public transit stops in %%CITY%%.",
+            "Find all public transportation stops in %%CITY%%.",
+            "Locate all bus pickup points in %%CITY%%."
+        ],
         "type": "overpass",
         "mutation": "5",
         "completion": "[out:json][timeout:25]; {{geocodeArea:%%CITY%%}}->.searchArea; ( node[highway=bus_stop](area.searchArea); way[highway=bus_stop](area.searchArea); relation[highway=bus_stop](area.searchArea); ); out body; >; out skel qt;"
@@ -58,6 +97,9 @@
     {
         "id": "OP-NODE-9",
         "prompt": "Show all the train stations in %%CITY%%",
+        "rephrases": [
+            "Find all railway stations in %%CITY%%"
+        ],
         "type": "overpass",
         "mutation": "5",
         "completion": "[out:json][timeout:25]; {{geocodeArea:%%CITY%%}}->.searchArea; ( node[railway=station](area.searchArea); way[railway=station](area.searchArea); relation[railway=station](area.searchArea); ); out body; >; out skel qt;"
@@ -65,6 +107,10 @@
     {
         "id": "OP-NODE-10",
         "prompt": "Show all the libraries in %%CITY%%",
+        "rephrases": [
+            "Locate all public libraries in %%CITY%%",
+            "Show all reading centers in %%CITY%%"
+        ],
         "type": "overpass",
         "mutation": "5",
         "completion": "[out:json][timeout:25]; {{geocodeArea:%%CITY%%}}->.searchArea; ( node[amenity=library](area.searchArea); way[amenity=library](area.searchArea); relation[amenity=library](area.searchArea); ); out body; >; out skel qt;"
@@ -72,6 +118,11 @@
     {
         "id": "OP-NODE-11",
         "prompt": "Show all the universities %%CITY%%",
+        "rephrases": [
+            "Find all higher education institutions in %%CITY%%",
+            "Locate all academic institutions in %%CITY%%",
+            "Show me the campuses in %%CITY%%"
+        ],
         "type": "overpass",
         "mutation": "5",
         "completion": "[out:json][timeout:25]; {{geocodeArea:%%CITY%%}}->.searchArea; ( node[amenity=university](area.searchArea); way[amenity=university](area.searchArea); relation[amenity=university](area.searchArea); ); out body; >; out skel qt;"
@@ -79,6 +130,9 @@
     {
         "id": "OP-NODE-12",
         "prompt": "Show all the banks in %%CITY%%",
+        "rephrases": [
+            "Locate all financial institutions in %%CITY%%"
+        ],
         "type": "overpass",
         "mutation": "5",
         "completion": "[out:json][timeout:25]; {{geocodeArea:%%CITY%%}}->.searchArea; ( node[amenity=bank](area.searchArea); way[amenity=bank](area.searchArea); relation[amenity=bank](area.searchArea); ); out body; >; out skel qt;"
@@ -86,6 +140,10 @@
     {
         "id": "OP-NODE-13",
         "prompt": "Show all the post offices in %%CITY%%",
+        "rephrases": [
+            "Locate all postal services in %%CITY%%",
+            "Find all mail centers in %%CITY%%"
+        ],
         "type": "overpass",
         "mutation": "5",
         "completion": "[out:json][timeout:25]; {{geocodeArea:%%CITY%%}}->.searchArea; ( node[amenity=post_office](area.searchArea); way[amenity=post_office](area.searchArea); relation[amenity=post_office](area.searchArea); ); out body; >; out skel qt;"
@@ -93,6 +151,10 @@
     {
         "id": "OP-NODE-14",
         "prompt": "Show all the police stations in %%CITY%%",
+        "rephrases": [
+            "Locate all law enforcement facilities in %%CITY%%",
+            "Locate all police departments in %%CITY%%"
+        ],
         "type": "overpass",
         "mutation": "5",
         "completion": "[out:json][timeout:25]; {{geocodeArea:%%CITY%%}}->.searchArea; ( node[amenity=police](area.searchArea); way[amenity=police](area.searchArea); relation[amenity=police](area.searchArea); ); out body; >; out skel qt;"
@@ -100,6 +162,10 @@
     {
         "id": "OP-NODE-15",
         "prompt": "Show all the fire stations in %%CITY%%",
+        "rephrases": [
+            "Locate all fire departments in %%CITY%%",
+            "Find all fire stations in %%CITY%%"
+        ],
         "type": "overpass",
         "mutation": "5",
         "completion": "[out:json][timeout:25]; {{geocodeArea:%%CITY%%}}->.searchArea; ( node[amenity=fire_station](area.searchArea); way[amenity=fire_station](area.searchArea); relation[amenity=fire_station](area.searchArea); ); out body; >; out skel qt;"
@@ -107,6 +173,10 @@
     {
         "id": "OP-NODE-16",
         "prompt": "Show all the pharmacies in %%CITY%%",
+        "rephrases": [
+            "List all drugstores in %%CITY%%",
+            "Where can i find medical supply stores in %%CITY%%?"
+        ],
         "type": "overpass",
         "mutation": "5",
         "completion": "[out:json][timeout:25]; {{geocodeArea:%%CITY%%}}->.searchArea; ( node[amenity=pharmacy](area.searchArea); way[amenity=pharmacy](area.searchArea); relation[amenity=pharmacy](area.searchArea); ); out body; >; out skel qt;"
@@ -114,6 +184,12 @@
     {
         "id": "OP-NODE-17",
         "prompt": "Show all the gas stations in %%CITY%%",
+        "rephrases": [
+            "Find all fuel stations in %%CITY%%",
+            "Locate all petrol stations in %%CITY%%",
+            "List me all fueling stations in %%CITY%%",
+            "Can you please list all service stations in %%CITY%%"
+        ],
         "type": "overpass",
         "mutation": "5",
         "completion": "[out:json][timeout:25]; {{geocodeArea:%%CITY%%}}->.searchArea; ( node[amenity=fuel](area.searchArea); way[amenity=fuel](area.searchArea); relation[amenity=fuel](area.searchArea); ); out body; >; out skel qt;"
@@ -121,6 +197,11 @@
     {
         "id": "OP-NODE-18",
         "prompt": "Show all the supermarkets in %%CITY%%",
+        "rephrases": [
+            "Locate all grocery stores in %%CITY%%",
+            "Show all food markets in %%CITY%%.",
+            "Retrieve all grocery shops in %%CITY%%."
+        ],
         "type": "overpass",
         "mutation": "5",
         "completion": "[out:json][timeout:25]; {{geocodeArea:%%CITY%%}}->.searchArea; ( node[shop=supermarket](area.searchArea); way[shop=supermarket](area.searchArea); relation[shop=supermarket](area.searchArea); ); out body; >; out skel qt;"
@@ -128,6 +209,9 @@
     {
         "id": "OP-NODE-19",
         "prompt": "Show all the shopping malls in %%CITY%%",
+        "rephrases": [
+            "Help me find shopping centers in %%CITY%%"
+        ],
         "type": "overpass",
         "mutation": "5",
         "completion": "[out:json][timeout:25]; {{geocodeArea:%%CITY%%}}->.searchArea; ( node[shop=mall](area.searchArea); way[shop=mall](area.searchArea); relation[shop=mall](area.searchArea); ); out body; >; out skel qt;"
@@ -135,6 +219,9 @@
     {
         "id": "OP-NODE-20",
         "prompt": "Show all the cinemas in %%CITY%%",
+        "rephrases": [
+            "Can you list me movie theaters in %%CITY%%?"
+        ],
         "type": "overpass",
         "mutation": "5",
         "completion": "[out:json][timeout:25]; {{geocodeArea:%%CITY%%}}->.searchArea; ( node[amenity=cinema](area.searchArea); way[amenity=cinema](area.searchArea); relation[amenity=cinema](area.searchArea); ); out body; >; out skel qt;"
@@ -142,20 +229,19 @@
     {
         "id": "OP-NODE-21",
         "prompt": "Show all the gyms in %%CITY%%",
+        "rephrases": [
+            "Show me all fitness centers in %%CITY%%"
+        ],
         "type": "overpass",
         "mutation": "5",
         "completion": "[out:json][timeout:25]; {{geocodeArea:%%CITY%%}}->.searchArea; ( node[leisure=fitness_centre](area.searchArea); way[leisure=fitness_centre](area.searchArea); relation[leisure=fitness_centre](area.searchArea); ); out body; >; out skel qt;"
     },
     {
-        "id": "OP-NODE-22",
-        "prompt": "Show all the parks in %%CITY%%",
-        "type": "overpass",
-        "mutation": "5",
-        "completion": "[out:json][timeout:25]; {{geocodeArea:%%CITY%%}}->.searchArea; ( node[leisure=park](area.searchArea); way[leisure=park](area.searchArea); relation[leisure=park](area.searchArea); ); out body; >; out skel qt;"
-    },
-    {
         "id": "OP-NODE-23",
         "prompt": "Show all the bars in %%CITY%%",
+        "rephrases": [
+            "Find all pubs in %%CITY%%"
+        ],
         "type": "overpass",
         "mutation": "5",
         "completion": "[out:json][timeout:25]; {{geocodeArea:%%CITY%%}}->.searchArea; ( node[amenity=bar](area.searchArea); way[amenity=bar](area.searchArea); relation[amenity=bar](area.searchArea); ); out body; >; out skel qt;"

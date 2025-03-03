@@ -4,6 +4,8 @@ import torch
 from pathlib import Path
 from datasets import load_dataset
 from peft import LoraConfig, get_peft_model, PeftModel, PeftConfig
+from accelerate.test_utils.testing import get_backend
+import numpy as np
 from transformers import (
     AutoModelForCausalLM,
     LlamaForCausalLM,
@@ -13,10 +15,10 @@ from transformers import (
     AutoTokenizer)
 
 VOL_MOUNT_PATH = Path("/vol")
-MODEL_NAME = "llama-8B-wattai"
-FINETUNED_MODEL_NAME = "llama-8B-wattai-finetuned"
+MODEL_NAME = "llama-70B"
+FINETUNED_MODEL_NAME = "llama-70B-finetuned"
 MODELS_DIR = f"/{MODEL_NAME}"
-BASE_MODEL = f"{MODELS_DIR}/watt-ai/watt-tool-8B"
+BASE_MODEL = f"{MODELS_DIR}/meta-llama/Llama-3.3-70B-Instruct"
 output_vol = modal.Volume.from_name("finetune-volume", create_if_missing=True)
 
 def track_restarts(restart_tracker: modal.Dict) -> int:
@@ -36,7 +38,7 @@ restart_tracker_dict = modal.Dict.from_name(
 
 print(f"GPUs available: {torch.cuda.device_count()}")
 
-epochs: int = 10
+epochs: int = 40
 size_percentage: int = 0
 
 start_time = time.time()
@@ -48,22 +50,24 @@ if size_percentage > 0:
     op_test = load_dataset("Maplabai/finetuning", split=f"test[:{size_percentage}%]", trust_remote_code=True)
 # Load the whole dataset
 else:
-    op = load_dataset("Maplabai/finetuning")
-    split_data = op["train"].train_test_split(test_size=2, train_size=5, seed=42)
+    dataset = load_dataset("Maplabai/finetuning")
+    split_data = dataset["train"].train_test_split(train_size=0.9, seed=42)
     op_train = split_data["train"]
     op_test = split_data["test"]
+    
+print(op_train)
+print(op_test)
     
 # Load the tokenizer and model
 tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL)
 model =  LlamaForCausalLM.from_pretrained(
     BASE_MODEL, 
     use_safetensors=True,
-    torch_dtype=torch.bfloat16,
-    device_map="cpu")
+    torch_dtype=torch.bfloat16)
 
 config = LoraConfig(
-    r=32,
-    lora_alpha=32,
+    r=16,
+    lora_alpha=16,
     target_modules=["q_proj", "v_proj"],
     lora_dropout=0.1,
     bias="none"
@@ -83,59 +87,109 @@ print(
 )
 
 print(f"✅ Tokenizer/Model loaded!")
+
 # Replace all padding tokens with a large negative number so that the loss function ignores them in
 # its calculation
 padding_token_id = -100
 batch_size = 1
+# print(f"Padding token: {tokenizer.pad_token}, Padding token ID: {tokenizer.pad_token_id}")
+# print(f"Vocab Size: {tokenizer.vocab_size}")
+# print(f"Is 128004 in vocab?: {128004 in tokenizer.get_vocab().values()}")
+# print(f"Tokenizing geocodeArea:")
+# print(tokenizer.tokenize("geocodeArea"))
+# print(tokenizer.encode("geocodeArea"))
+
+DEVICE, _, _ = get_backend() 
+inputs = tokenizer(["Generate an Overpass Turbo query to find all basketball courts in Montreal."], return_tensors="pt").to('cpu')
+output_ids = model.generate(**inputs)
+output_text = tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0]
+print(f"prediction: {output_text}")
+
 def preprocess(batch):
     inputs = [
-    f"{batch['system'][i]} {batch['prompt'][i]}" if batch['system'][i] else batch['prompt'][i]
-    for i in range(len(batch['system']))
+        f"Using this data {batch['system'][i]}, generate overpass turbo query: {batch['prompt'][i]}"
+        if batch['system'][i] else f"Generate overpass turbo query: {batch['prompt'][i]}"
+        for i in range(len(batch['prompt']))
     ]
-    #print first 10 inputs
-    print(inputs[:10])
-    print(batch["completion"][:10])
+    
+    #print first input
+    # print(inputs[0])
+    # print(batch["completion"][0])
+    # print(tokenizer.tokenize(batch["completion"][0]))
+    # print(tokenizer(batch["completion"][0]))
     
     model_inputs = tokenizer(
         inputs,
-        padding="max_length",
-        max_length=512, 
-    )
-    labels = tokenizer(
         text_target=batch["completion"],
         padding="max_length",
-        max_length=512, 
+        max_length=256, 
     )
-    labels["input_ids"] = [
-        [
-            l if l != tokenizer.pad_token_id else padding_token_id
-            for l in label
-        ]
-        for label in labels["input_ids"]
-    ]
-    model_inputs["labels"] = labels["input_ids"]
+    # labels = tokenizer(
+    #     text_target=batch["completion"],
+    #     padding="max_length",
+    #     max_length=512, 
+    # )
+    # labels["input_ids"] = [
+    #     [
+    #         l if l != tokenizer.pad_token_id else padding_token_id
+    #         for l in label
+    #     ]
+    #     for label in labels["input_ids"]
+    # ]
+    # model_inputs["labels"] = labels
     return model_inputs
+
 tokenized_op_train = op_train.map(
-    preprocess, batched=True, remove_columns=["system", "prompt", "completion", "id"]
-)
+    preprocess, batched=True, remove_columns=op_train.column_names)
 tokenized_op_test = op_test.map(
-    preprocess, batched=True, remove_columns=["system", "prompt", "completion", "id"]
-)
+    preprocess, batched=True, remove_columns=op_test.column_names)
+
+def compute_metrics(eval_pred):
+    logits, labels = eval_pred
+    
+    # Convert logits to token IDs
+    predictions = np.argmax(logits, axis=-1)
+    
+    # Remove ignored index (-128004) from labels
+    labels = [[token for token in label if token != -128004] for label in labels]
+
+    # Convert token IDs back to text
+    predictions_text = [tokenizer.decode(pred, skip_special_tokens=True) for pred in predictions]
+    labels_text = [tokenizer.decode(label, skip_special_tokens=True) for label in labels]
+
+    # Debug: Print first 5 examples
+    for i in range(len(predictions_text)):
+        print(f"✅ Label {i}: {predictions_text[i]}")
+        print(f"✅ Label {i}: {labels_text[i]}")
+        print("-" * 50)
+
+    # Compute Exact Match
+    exact_matches = sum([pred == ref for pred, ref in zip(predictions_text, labels_text)])
+    em_score = exact_matches / len(labels_text) if len(labels_text) > 0 else 0
+
+    return {"eval_exact_match": em_score}
+
 
 data_collator = DataCollatorForSeq2Seq(
     tokenizer,
     model=model,
-    label_pad_token_id=padding_token_id,
-    pad_to_multiple_of=batch_size,
+    # label_pad_token_id=padding_token_id,
+    # pad_to_multiple_of=batch_size,
 )
+
+# test data collator 
+batch = data_collator([tokenized_op_train[i] for i in range(1, 3)])
+# print(batch.keys())
+# print(batch["input_ids"])
 
 training_args = TrainingArguments(
     num_train_epochs = epochs,
     output_dir=str(VOL_MOUNT_PATH / "model"),
     logging_dir=str(VOL_MOUNT_PATH / "logs"),
+    metric_for_best_model="exact_match",
     logging_strategy="steps",
     logging_steps=10,
-    evaluation_strategy="steps",
+    eval_strategy="steps",
     save_strategy="steps",
     save_steps=100,
     save_total_limit=2,
@@ -144,7 +198,8 @@ training_args = TrainingArguments(
     per_device_train_batch_size=1,
     per_device_eval_batch_size=1,
     gradient_accumulation_steps=8,
-    gradient_checkpointing=True
+    gradient_checkpointing=True,
+    label_names=["labels"]
 )
 
 trainer = Trainer(
@@ -153,6 +208,7 @@ trainer = Trainer(
     data_collator=data_collator,
     train_dataset=tokenized_op_train,
     eval_dataset=tokenized_op_test,
+    compute_metrics=compute_metrics
 )
 
 #Evaluate before training

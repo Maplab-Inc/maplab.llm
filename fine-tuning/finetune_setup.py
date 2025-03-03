@@ -9,21 +9,22 @@ image = modal.Image.from_registry("ubuntu:22.04", add_python="3.11").apt_install
     "torch",
     "datasets",
     "tensorboard",
-    "peft"
+    "peft",
+    "evaluate"
 )
 
 VOL_MOUNT_PATH = Path("/vol")
-MODELS_DIR = "/llama-8B-wattai"
-BASE_MODEL = f"{MODELS_DIR}/watt-ai/watt-tool-8B"
+MODELS_DIR = "/llama-70B"
+BASE_MODEL = f"{MODELS_DIR}/meta-llama/Llama-3.3-70B-Instruct"
 
 app = modal.App(name="trainer", image=image)
 output_vol = modal.Volume.from_name("finetune-volume", create_if_missing=True)
-model_vol = modal.Volume.lookup("llama-8B-wattai", create_if_missing=False)
+model_vol = modal.Volume.lookup("llama-70B", create_if_missing=False)
 
 @app.function(
-    gpu=modal.gpu.A10G(count=2),
+    gpu=modal.gpu.A100(count=2),
     #memory=85900,
-    timeout=7200,
+    timeout=72000,
     volumes={VOL_MOUNT_PATH: output_vol, MODELS_DIR: model_vol},
     mounts=[modal.Mount.from_local_dir("./", remote_path="/root/")]
 )
