@@ -51,7 +51,7 @@ if size_percentage > 0:
 # Load the whole dataset
 else:
     dataset = load_dataset("Maplabai/finetuning")
-    split_data = dataset["train"].train_test_split(train_size=0.9, seed=42)
+    split_data = dataset["train"].train_test_split(test_size=2, train_size=5, seed=42)
     op_train = split_data["train"]
     op_test = split_data["test"]
     
@@ -66,7 +66,7 @@ model =  LlamaForCausalLM.from_pretrained(
     torch_dtype=torch.bfloat16)
 
 config = LoraConfig(
-    r=16,
+    r=1,
     lora_alpha=16,
     target_modules=["q_proj", "v_proj"],
     lora_dropout=0.1,
@@ -92,18 +92,20 @@ print(f"✅ Tokenizer/Model loaded!")
 # its calculation
 padding_token_id = -100
 batch_size = 1
-# print(f"Padding token: {tokenizer.pad_token}, Padding token ID: {tokenizer.pad_token_id}")
-# print(f"Vocab Size: {tokenizer.vocab_size}")
-# print(f"Is 128004 in vocab?: {128004 in tokenizer.get_vocab().values()}")
-# print(f"Tokenizing geocodeArea:")
-# print(tokenizer.tokenize("geocodeArea"))
-# print(tokenizer.encode("geocodeArea"))
+print(f"Padding token: {tokenizer.pad_token}, Padding token ID: {tokenizer.pad_token_id}")
+print(f"Vocab Size: {tokenizer.vocab_size}")
+print(f"Is 128004 in vocab?: {128004 in tokenizer.get_vocab().values()}")
+print(f"Tokenizing geocodeArea:")
+print(tokenizer.tokenize("geocodeArea"))
+print(tokenizer.encode("geocodeArea"))
 
-DEVICE, _, _ = get_backend() 
-inputs = tokenizer(["Generate an Overpass Turbo query to find all basketball courts in Montreal."], return_tensors="pt").to('cpu')
-output_ids = model.generate(**inputs)
-output_text = tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0]
-print(f"prediction: {output_text}")
+# DEVICE, _, _ = get_backend() 
+# test_inputs = tokenizer(["Generate an Overpass Turbo query to find all basketball courts in Montreal."], return_tensors="pt").to('cpu')
+# test_output_ids = model.generate(**test_inputs)
+# test_output_text = [tokenizer.decode(output, skip_special_tokens=True) for output in test_output_ids]
+# for i in range(len(test_output_text)):
+#     print(f"✅ test prediction {i}: {test_output_text[i]}")
+#     print("-" * 50)
 
 def preprocess(batch):
     inputs = [
@@ -150,16 +152,27 @@ def compute_metrics(eval_pred):
     # Convert logits to token IDs
     predictions = np.argmax(logits, axis=-1)
     
+    # Debug: Check raw logits and token IDs
+    print("Raw Logits:", logits.shape)
+    print("Predictions Token IDs:", predictions)
+    
     # Remove ignored index (-128004) from labels
     labels = [[token for token in label if token != -128004] for label in labels]
 
     # Convert token IDs back to text
-    predictions_text = [tokenizer.decode(pred, skip_special_tokens=True) for pred in predictions]
+    predictions_text = [tokenizer.decode(pred, skip_special_tokens=True) for pred in output_ids]
     labels_text = [tokenizer.decode(label, skip_special_tokens=True) for label in labels]
+    
+    test_inputs = tokenizer(["Generate an Overpass Turbo query to find all basketball courts in Montreal."], return_tensors="pt").to('cpu')
+    test_output_ids = model.generate(**test_inputs)
+    test_output_text = [tokenizer.decode(output, skip_special_tokens=True) for output in test_output_ids]
+    for i in range(len(test_output_text)):
+        print(f"✅ test prediction {i}: {test_output_text[i]}")
+        print("*" * 50)
 
     # Debug: Print first 5 examples
     for i in range(len(predictions_text)):
-        print(f"✅ Label {i}: {predictions_text[i]}")
+        print(f"✅ Prediction {i}: {predictions_text[i]}")
         print(f"✅ Label {i}: {labels_text[i]}")
         print("-" * 50)
 
@@ -172,15 +185,18 @@ def compute_metrics(eval_pred):
 
 data_collator = DataCollatorForSeq2Seq(
     tokenizer,
-    model=model,
-    # label_pad_token_id=padding_token_id,
-    # pad_to_multiple_of=batch_size,
+    model=model
 )
 
 # test data collator 
 batch = data_collator([tokenized_op_train[i] for i in range(1, 3)])
-# print(batch.keys())
-# print(batch["input_ids"])
+print(batch.keys())
+print(batch["input_ids"])
+
+# Print results
+for i, text in enumerate(output_text):
+    print(f"Generated Output with collator {i}: {text}")
+
 
 training_args = TrainingArguments(
     num_train_epochs = epochs,
@@ -210,11 +226,6 @@ trainer = Trainer(
     eval_dataset=tokenized_op_test,
     compute_metrics=compute_metrics
 )
-
-#Evaluate before training
-#print("Evaluating model before training...")
-#eval_results_before = trainer.evaluate()
-#print(f"Pre-training evaluation results: {eval_results_before}")
 
 try:
     resume = restarts > 1
