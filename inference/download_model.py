@@ -4,14 +4,14 @@
 
 import modal
 
-MODELS_DIR = "/deepseek-r1"
+MODELS_DIR = "/flan-t5"
 
 #neuralmagic/Meta-Llama-3.1-8B-Instruct-quantized.w4a16
 #neuralmagic/Meta-Llama-3.1-70B-Instruct-FP8
-DEFAULT_NAME = "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"
+DEFAULT_NAME = "nvidia/Llama-3.1-Nemotron-70B-Instruct-HF"
 DEFAULT_REVISION = "a7c09948d9a632c2c840722f519672cd94af885d"
 
-volume = modal.Volume.from_name("deepseek-r1", create_if_missing=True)
+volume = modal.Volume.from_name("nvidia", create_if_missing=True)
 
 image = (
     modal.Image.debian_slim(python_version="3.10")

@@ -14,15 +14,15 @@ image = modal.Image.from_registry("ubuntu:22.04", add_python="3.11").apt_install
 )
 
 VOL_MOUNT_PATH = Path("/vol")
-MODELS_DIR = "/llama-70B"
-BASE_MODEL = f"{MODELS_DIR}/meta-llama/Llama-3.3-70B-Instruct"
+MODELS_DIR = "/flan-t5"
+BASE_MODEL = f"{MODELS_DIR}/google/flan-t5-large"
 
 app = modal.App(name="trainer", image=image)
-output_vol = modal.Volume.from_name("finetune-volume", create_if_missing=True)
-model_vol = modal.Volume.lookup("llama-70B", create_if_missing=False)
+output_vol = modal.Volume.from_name("finetune-volume-t5", create_if_missing=True)
+model_vol = modal.Volume.lookup("flan-t5", create_if_missing=False)
 
 @app.function(
-    gpu=modal.gpu.A100(count=2),
+    gpu=modal.gpu.A10G(count=2),
     #memory=85900,
     timeout=72000,
     volumes={VOL_MOUNT_PATH: output_vol, MODELS_DIR: model_vol},

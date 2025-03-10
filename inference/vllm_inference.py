@@ -8,7 +8,7 @@ import fastapi
 
 vllm_image = modal.Image.debian_slim(python_version="3.12").pip_install(
     "vllm==0.6.6.post1", "fastapi[standard]")
-MODEL_VOL_NAME = "finetune-volume"
+MODEL_VOL_NAME = "llama-8B-wattai"
 MODEL_FINETUNED_NAME = "finetune-volume"
 MODELS_DIR = f"/{MODEL_VOL_NAME}"
 MODEL_NAME = "llama-8B-wattai-finetuned"
