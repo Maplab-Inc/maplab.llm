@@ -61,10 +61,12 @@ model =  LlamaForCausalLM.from_pretrained(
     BASE_MODEL, 
     use_safetensors=True)
 
+print(model)
+
 config = LoraConfig(
     r=16,
     lora_alpha=16,
-    target_modules=["q_proj", "v_proj"],
+    target_modules=["q_proj", "v_proj",  "k_proj", "o_proj", "down_proj", "up_proj", "gate_proj"],
     lora_dropout=0.1,
     bias="none"
 )

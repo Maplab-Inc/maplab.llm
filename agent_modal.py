@@ -34,7 +34,7 @@ tools = [optimize_routes, direction, isochrone, matrix, overpass, get_local_endp
 endpoint="https://maplab--maplab-vllm-serve.modal.run/v1/"
 llm = ChatOpenAI(
     base_url=endpoint,
-    model="DeepSeek-R1-Distill-Llama-70B",
+    model="overpass",
     temperature=0.6,
     top_p=0.9)
 

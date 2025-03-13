@@ -8,14 +8,14 @@ import fastapi
 
 vllm_image = modal.Image.debian_slim(python_version="3.12").pip_install(
     "vllm==0.6.6.post1", "fastapi[standard]")
-MODEL_VOL_NAME = "llama-8B-wattai"
+MODEL_NAME = "llama-8B-wattai"
+MODELS_DIR = f"/{MODEL_NAME}"
+BASE_MDOEL = f"{MODELS_DIR}/watt-ai/watt-tool-8B"
 MODEL_FINETUNED_NAME = "finetune-volume"
-MODELS_DIR = f"/{MODEL_VOL_NAME}"
-MODEL_NAME = "llama-8B-wattai-finetuned"
 LORA_ADAPTER_DIR = f"/{MODEL_FINETUNED_NAME}"
 
 try:
-    volume = modal.Volume.lookup(MODEL_VOL_NAME, create_if_missing=False)
+    volume = modal.Volume.lookup(MODEL_NAME, create_if_missing=False)
     finetuned_volume = modal.Volume.lookup(MODEL_FINETUNED_NAME, create_if_missing=False)
 except modal.exception.NotFoundError:
     raise Exception("Download models first with modal run download_llama.py")
@@ -123,7 +123,7 @@ def serve():
     web_app.include_router(router)
 
     engine_args = AsyncEngineArgs(
-        model=MODELS_DIR + "/" + MODEL_NAME,
+        model=BASE_MDOEL,
         tensor_parallel_size=N_GPU,
         gpu_memory_utilization=0.90,
         max_model_len=10000,
@@ -156,11 +156,11 @@ def serve():
         model_config=model_config,
         base_model_paths=base_model_paths,
         response_role="assistant",
-        #lora_modules=[    
-        #    LoRAModulePath(
-        #        name="overpass",
-        #        path=LORA_ADAPTER_DIR + "/" + MODEL_VOL_NAME
-        #    )],
+        lora_modules=[    
+           LoRAModulePath(
+               name="overpass",
+               path=LORA_ADAPTER_DIR + "/" + MODEL_NAME
+           )],
         prompt_adapters=[],
         request_logger=request_logger,
         enable_auto_tools=True,
@@ -175,71 +175,13 @@ def serve():
         #lora_modules=[    
         #    LoRAModulePath(
         #        name="overpass",
-        #        path=LORA_ADAPTER_DIR + "/" + MODEL_VOL_NAME,
+        #        path=LORA_ADAPTER_DIR + "/" + MODEL_NAME,
         #        base_model_name= MODEL_NAME.split("/")[1] if "/" in MODEL_NAME else MODEL_NAME,
         #    )],
         prompt_adapters=[],
         request_logger=request_logger,
     )
     
-    @router.post("/v1/api/chat")
-    async def ollama_chat(request: Request):
-        json_data = await request.json() 
-        print("Request>>>>>>", json_data)
-        data = ChatCompletionRequest(**json_data)
-        try:
-            response = await api_server.chat(web_app.state.engine_client).create_chat_completion(data)
-
-            print("Main response>>>", response)
-
-            if hasattr(response, 'error') and response.error or not hasattr(response, 'choices') or not response.choices:
-                print("Error response>>>", response)
-                return response
-
-            choice = response.choices[0]
-            message_data = choice.message
-
-            content = message_data.content if message_data.content else ""
-
-            tool_calls = []
-            if message_data.tool_calls:
-                for tool_call in message_data.tool_calls:
-                    function_name = tool_call.function.name if tool_call.function else ""
-                    function_id = tool_call.id if tool_call.id else ""
-                    function_type = tool_call.type if tool_call.type else ""
-                    arguments = tool_call.function.arguments if tool_call.function and tool_call.function.arguments else ""
-
-                    if isinstance(arguments, str):
-                        try:
-                            arguments = json.loads(arguments)
-                        except json.JSONDecodeError:
-                            arguments = {}  # Default to empty dictionary if JSON decoding fails
-
-                    tool_calls.append({
-                        "id": function_id,
-                        "type": function_type,
-                        "function": {
-                            "name": function_name,
-                            "arguments": arguments
-                        }
-                    })
-
-            response = {
-                "message": {
-                    "role": message_data.role,
-                    "content": content,
-                    "tool_calls": tool_calls,
-                }
-            }
-
-            print("Formated response>>>", response)
-
-            return response
-        
-        except Exception as e:
-            print(f"Error during processing: {str(e)}")
-            return {"error": True, "message": "An error occurred during processing."}
-
     # Add the router to the app
     web_app.include_router(router)
 
