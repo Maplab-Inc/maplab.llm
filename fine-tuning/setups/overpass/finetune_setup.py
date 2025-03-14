@@ -23,7 +23,7 @@ output_vol = modal.Volume.from_name("finetune-volume-large", create_if_missing=T
 model_vol = modal.Volume.lookup("llama-70B", create_if_missing=False)
 
 @app.function(
-    gpu="A100-40GB:2",
+    gpu="H100:2",
     timeout=72000,
     volumes={VOL_MOUNT_PATH: output_vol, MODELS_DIR: model_vol},
     mounts=[modal.Mount.from_local_dir("./", remote_path="/root/")]
