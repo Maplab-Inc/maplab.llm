@@ -9,17 +9,15 @@ from accelerate.test_utils.testing import get_backend
 from trl import SFTTrainer
 import numpy as np
 from transformers import (
-    AutoModelForCausalLM,
     LlamaForCausalLM,
     TrainingArguments,
     AutoTokenizer)
 
 VOL_MOUNT_PATH = Path("/vol")
-MODEL_NAME = "llama-8B-wattai"
-FINETUNED_MODEL_NAME = "llama-8B-finetuned"
+MODEL_NAME = "llama-70B"
 MODELS_DIR = f"/{MODEL_NAME}"
-BASE_MODEL = f"{MODELS_DIR}/watt-ai/watt-tool-8B"
-output_vol = modal.Volume.from_name("finetune-volume", create_if_missing=True)
+BASE_MODEL = f"{MODELS_DIR}/meta-llama/Llama-3.3-70B-Instruct"
+output_vol = modal.Volume.from_name("finetune-volume-large", create_if_missing=True)
 
 def track_restarts(restart_tracker: modal.Dict) -> int:
     if not restart_tracker.contains("count"):
@@ -56,10 +54,13 @@ else:
     op_test = split_data["test"]
     
 # Load the tokenizer and model
-tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL)
-model =  LlamaForCausalLM.from_pretrained(
+model = LlamaForCausalLM.from_pretrained(
     BASE_MODEL, 
-    use_safetensors=True)
+    torch_dtype=torch.bfloat16, 
+    use_safetensors=True,
+    device_map="cpu"
+)
+tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL)
 
 print(model)
 
@@ -86,9 +87,6 @@ print(
 
 print(f"✅ Tokenizer/Model loaded!")
 
-# Replace all padding tokens with a large negative number so that the loss function ignores them in
-# its calculation
-padding_token_id = -100
 batch_size = 1
 
 tokenizer = get_chat_template(
@@ -150,6 +148,8 @@ training_args = TrainingArguments(
     save_steps=100,
     save_total_limit=2,
     learning_rate=3e-5,
+    fp16=False,
+    bf16=True,
     per_device_train_batch_size=1,
     per_device_eval_batch_size=1,
     gradient_accumulation_steps=8,

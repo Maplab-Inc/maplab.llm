@@ -17,40 +17,37 @@ image = modal.Image.from_registry("ubuntu:22.04", add_python="3.11").apt_install
 )
 
 VOL_MOUNT_PATH = Path("/vol")
-MODELS_DIR = "/llama-8B-wattai"
-BASE_MODEL = f"{MODELS_DIR}/watt-ai/watt-tool-8B"
-
+MODELS_DIR = "/llama-70B"
 app = modal.App(name="trainer", image=image)
-output_vol = modal.Volume.from_name("finetune-volume", create_if_missing=True)
-model_vol = modal.Volume.lookup("llama-8B-wattai", create_if_missing=False)
+output_vol = modal.Volume.from_name("finetune-volume-large", create_if_missing=True)
+model_vol = modal.Volume.lookup("llama-70B", create_if_missing=False)
 
 @app.function(
-    gpu=modal.gpu.A100(count=2),
-    #memory=85900,
+    gpu="A100-40GB:2",
     timeout=72000,
     volumes={VOL_MOUNT_PATH: output_vol, MODELS_DIR: model_vol},
     mounts=[modal.Mount.from_local_dir("./", remote_path="/root/")]
 )
 def training():
     import subprocess
-    # Define your config file path and script name
     config_file_path = "/root/fsdp_config.yaml"
     script_name = "/root/finetune_script.py"
     
-    # Build the command as a list
     command = [
         "accelerate", "launch",
         f"--config_file={config_file_path}",
         script_name,
-        "--multi_gpu=true"
+        "--multi_gpu=true",
         "--bf16"
     ]
     
-    # Execute the command
+    # Run without accelerate
+    # command = [
+    #     "python", script_name
+    # ]
+    
     try:
         subprocess.run(command, check=True)
-        #with output_vol.batch_upload(force=True) as batch:
-        #     batch.put_file("special_tokens_map.json", "llama-8B-wattai/adapter_config.json")
         print("Accelerate command executed successfully!")
     except subprocess.CalledProcessError as e:
         print(f"Error while executing accelerate command: {e}")
