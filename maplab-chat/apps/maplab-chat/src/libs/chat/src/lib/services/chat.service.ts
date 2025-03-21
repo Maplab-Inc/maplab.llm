@@ -17,7 +17,7 @@ export class ChatService {
   ) { }
 
   getCompletion(request: CompletionRequest): Observable<AssistantCompletion> {
-    return this.http.post<AssistantCompletion>(`${this.apiUrl}/assistant`,
+    return this.http.post<AssistantCompletion>(`${this.apiUrl}/geoassistant`,
       JSON.stringify(request),
       {
         headers: this.headers

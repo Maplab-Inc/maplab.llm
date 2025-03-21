@@ -4,25 +4,25 @@ from helpers.openapi_schema_helper import get_local_endpoint_schema
 from langchain_core.tools import tool
 import requests
 from typing import Optional
+import urllib.parse
 
 @tool
 def overpass(overpass_request: str) -> str:
     """
-Overpass Tool for querying and visualizing OpenStreetMap data. It helps extract specific information from the vast OSM database by writing queries in the Overpass QL query language. 
-Examples of queries that can be run using the Overpass Tool include:
-Get Polygons Covering Areas: Fetching the boundary polygon for a city.
-Find Amenities: Finding all gas stations in a certain area.
-Custom Filters: finding all Italian restaurants in a certain area.
-Analyzing Infrastructure: Retrieving all the bridges in a certain area.
-    
+    Overpass Tool for querying and visualizing OpenStreetMap data. It helps extract specific information from the vast OSM database by writing queries in the Overpass QL query language. 
     Args:
         overpass_request: A text string that contains the Overpass QL query. 
-        example: // This query fetches all parks in Montreal [out:json][timeout:25]; // fetch area “Montreal” to search in {{geocodeArea:Montreal}}->.searchArea; // gather results ( node["leisure"="park"](area.searchArea); way["leisure"="park"](area.searchArea); relation["leisure"="park"](area.searchArea); ); // print results out body; >; out skel qt;
     """
     url = "https://overpass-api.de/api/interpreter" 
     
     try:
-        response = requests.post(url, data=overpass_request)
+        # overpass_request = """[out:json][timeout:25];{{geocodeArea:Montreal}}->.searchArea;(way[boundary=administrative](area.searchArea);relation[boundary=administrative](area.searchArea););out body geom;"""
+        overpass_request = """[out:json][timeout:25];area[name="Montreal"][admin_level=8];node["amenity"="fuel"](area);out;"""
+        encoded_query = urllib.parse.quote(overpass_request, safe='')
+        print(f"calling overpass with following query >>> {encoded_query}")
+        response = requests.post(url, data=f"data={encoded_query}")
+        print(f"got following overpass response status >>> {response.status_code}")
+        print(f"got following overpass response content >>> {response.content}")
         response.raise_for_status() 
 
         return response.text 

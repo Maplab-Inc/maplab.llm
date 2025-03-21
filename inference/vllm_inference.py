@@ -1,28 +1,29 @@
-from typing import Any, List, Literal, Union
+from typing import List, Literal, Union
 from pydantic import Field
 import modal
 from openai import BaseModel
 import fastapi
+import os
 
-#modal deploy ./inference/vllm_inference.py
+#modal deploy ./vllm_inference.py
 
 vllm_image = modal.Image.debian_slim(python_version="3.12").pip_install(
     "vllm==0.6.6.post1", "fastapi[standard]")
-MODEL_NAME = "llama-8B-wattai"
+MODEL_NAME = "llama-70B" #available models: (1) llama-8B-wattai; (2) llama-70B
 MODELS_DIR = f"/{MODEL_NAME}"
-BASE_MDOEL = f"{MODELS_DIR}/watt-ai/watt-tool-8B"
-MODEL_FINETUNED_NAME = "finetune-volume"
+BASE_MDOEL = f"{MODELS_DIR}/meta-llama/Llama-3.3-70B-Instruct" #models directories: (1) watt-ai/watt-tool-8B; (2) meta-llama/Llama-3.3-70B-Instruct
+MODEL_FINETUNED_NAME = "finetune-volume-large" #lora adapters: (1) finetune-volume; (2) finetune-volume-large
 LORA_ADAPTER_DIR = f"/{MODEL_FINETUNED_NAME}"
 
 try:
-    volume = modal.Volume.lookup(MODEL_NAME, create_if_missing=False)
-    finetuned_volume = modal.Volume.lookup(MODEL_FINETUNED_NAME, create_if_missing=False)
+    volume = modal.Volume.from_name(MODEL_NAME, create_if_missing=False)
+    finetuned_volume = modal.Volume.from_name(MODEL_FINETUNED_NAME, create_if_missing=False)
 except modal.exception.NotFoundError:
     raise Exception("Download models first with modal run download_llama.py")
 
 app = modal.App("maplab-vllm", image=vllm_image)
 
-N_GPU = 2  # tip: for best results, first upgrade to more powerful GPUs, and only then increase GPU count
+N_GPU = 4  # tip: for best results, first upgrade to more powerful GPUs, and only then increase GPU count
 TOKEN = "super-secret-token"  # auth token. for production use, replace with a modal.Secret
 
 MINUTES = 60  # seconds
@@ -64,8 +65,8 @@ web_app = fastapi.FastAPI(
 
 @app.function(
     image=vllm_image,
-    gpu=modal.gpu.A10G(count=N_GPU),
-    container_idle_timeout=5 * MINUTES,
+    gpu=f"A100-80GB:{N_GPU}",
+    scaledown_window=5 * MINUTES,
     timeout=24 * HOURS,
     allow_concurrent_inputs=1000,
     volumes={MODELS_DIR: volume, LORA_ADAPTER_DIR: finetuned_volume},
@@ -121,17 +122,23 @@ def serve():
     router.include_router(api_server.router)
     # add authed vllm to our fastAPI app
     web_app.include_router(router)
+    
+    os.environ["VLLM_ALLOW_LONG_MAX_MODEL_LEN"] = "1"
 
     engine_args = AsyncEngineArgs(
         model=BASE_MDOEL,
         tensor_parallel_size=N_GPU,
-        gpu_memory_utilization=0.90,
-        max_model_len=10000,
+        gpu_memory_utilization=0.95,
+        max_model_len=None,
         trust_remote_code=True,
         enable_lora=True,
         max_loras=1,
         max_lora_rank=32,
-        enforce_eager=True,  # capture the graph for faster inference, but slower cold starts (30s > 20s)
+        enforce_eager=False,
+        #pipeline_parallel_size = 4,
+        enable_chunked_prefill=True,
+        enable_prefix_caching=True,
+        max_num_batched_tokens=16192
     )
 
     engine = AsyncLLMEngine.from_engine_args(
