@@ -23,7 +23,7 @@ except modal.exception.NotFoundError:
 
 app = modal.App("maplab-vllm", image=vllm_image)
 
-N_GPU = 4  # tip: for best results, first upgrade to more powerful GPUs, and only then increase GPU count
+N_GPU = 4 
 TOKEN = "super-secret-token"  # auth token. for production use, replace with a modal.Secret
 
 MINUTES = 60  # seconds
@@ -67,7 +67,7 @@ web_app = fastapi.FastAPI(
     image=vllm_image,
     gpu=f"A100-80GB:{N_GPU}",
     scaledown_window=5 * MINUTES,
-    timeout=24 * HOURS,
+    timeout=1 * HOURS,
     allow_concurrent_inputs=1000,
     volumes={MODELS_DIR: volume, LORA_ADAPTER_DIR: finetuned_volume},
 )
@@ -128,7 +128,7 @@ def serve():
     engine_args = AsyncEngineArgs(
         model=BASE_MDOEL,
         tensor_parallel_size=N_GPU,
-        gpu_memory_utilization=0.95,
+        gpu_memory_utilization=0.93,
         max_model_len=None,
         trust_remote_code=True,
         enable_lora=True,

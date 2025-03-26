@@ -1,8 +1,3 @@
-"""Define a custom Reasoning and Action agent.
-
-Works with a chat model with tool calling support.
-"""
-
 from datetime import datetime, timezone
 from typing import Dict, List, Literal, cast
 
@@ -20,6 +15,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import requests
 import copy
+import json
 import re
 
 
@@ -84,9 +80,9 @@ async def call_model(
         }
         
     if truncated:
-        response.content = response.content.replace("OVERPASS_DATA", last_message.content)
+        parsed_data = json.loads(last_message.content)  # Parse to ensure it's valid JSON
+        response.content = response.content.replace('"OVERPASS_DATA"', json.dumps(parsed_data)) 
 
-    # Return the model's response as a list to be added to existing messages
     return {"messages": [response]}
 
 async def call_overpass(
@@ -257,6 +253,7 @@ CORS(app)
 
 @app.route('/geoassistant', methods=['POST']) 
 async def invoke_assistant(): 
+    
     userContent = request.json.get('user') 
     if not userContent: 
         return jsonify({"error": "Content is required"}), 400

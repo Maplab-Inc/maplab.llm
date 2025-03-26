@@ -115,7 +115,7 @@ export class MapsComponent implements AfterViewInit {
       ) as IStyle;
     } else {
       this.currentStyle = {
-        style: 'https://tiles.maplab.ai/styles/maplab/style.json?key=LX.EHWNMgxtK7sH05CiZTjRGWMuRa-618h9z_x93EoH3e0',
+        style: 'https://tiles.maplab.ai/styles/maplab/style.json?key=LX.rlZ1yLh8hOBsM_XpMJYvQm2fCFaeX7i7Z7Mni5-j6AQ',
         type: 'dark',
       };
     }
@@ -259,6 +259,7 @@ export class MapsComponent implements AfterViewInit {
         return MarkerIcon.marker;
     }
   }
+  
   private initMap(): void {
     const mapContainer = document.createElement('div');
     mapContainer.classList.add('map');

@@ -99,7 +99,7 @@ export class ChatComponent implements AfterViewInit {
   ) {
     this.currentStyle = {
       style:
-        'https://tiles.maplab.ai/styles/osm_liberty/style.json?key=LX.EHWNMgxtK7sH05CiZTjRGWMuRa-618h9z_x93EoH3e0',
+        'https://tiles.maplab.ai/styles/osm_liberty/style.json?key=LX.rlZ1yLh8hOBsM_XpMJYvQm2fCFaeX7i7Z7Mni5-j6AQ',
       type: 'dark',
     };
     this.initMap();
@@ -149,20 +149,32 @@ export class ChatComponent implements AfterViewInit {
             const osmtogeojson = osmtogeojsonModule.default;
             let osmData = osmtogeojson(structuredClone(response.data));
 
-            this.map.addSource('osm_source', {
+            const sourceId = `osm_source_${Math.random().toString(36).substring(2, 10)}`;
+            this.map.addSource(sourceId, {
               type: 'geojson',
               data: osmData,
             });
 
-            let osmType = osmData.features[0].geometry.type;
+            const hasPolygons = osmData.features.some(
+              (f) =>
+                f.geometry.type === 'Polygon' ||
+                f.geometry.type === 'MultiPolygon'
+            );
+            const hasPoints = osmData.features.some(
+              (f) =>
+                f.geometry.type === 'Point' || f.geometry.type === 'MultiPoint'
+            );
+            const hasLines = osmData.features.some(f => 
+              f.geometry.type === 'LineString' || f.geometry.type === 'MultiLineString'
+            );
 
-            if (osmType === 'Point') {
+            if (hasPoints) {
               const iconImage: MapMarkerTagType = MapMarkerTagType.marker;
               this.map.addLayer(
                 {
                   id: 'symbol-layer',
                   type: 'symbol',
-                  source: 'osm_source',
+                  source: sourceId,
                   layout: {
                     ['icon-image']: iconImage,
                     ['icon-overlap']: 'always',
@@ -183,25 +195,6 @@ export class ChatComponent implements AfterViewInit {
               this.currentMarkersLayers.push('symbol-layer');
 
               var bounds = new LngLatBounds();
-              osmData.features.forEach((coord: any) =>
-                bounds.extend({
-                  lng: coord.geometry.coordinates[0],
-                  lat: coord.geometry.coordinates[1],
-                })
-              );
-              this.map.fitBounds(bounds, { padding: this.padding });
-            } else if ((osmType = 'Polygon')) {
-              this.map.addLayer({
-                id: 'polygon-layer',
-                type: 'fill',
-                source: 'osm_source',
-                paint: {
-                  'fill-color': '#088',
-                  'fill-opacity': 0.8,
-                },
-              });
-
-              var bounds = new LngLatBounds();
 
               osmData.features.forEach((feature: any) => {
                 if (
@@ -220,6 +213,43 @@ export class ChatComponent implements AfterViewInit {
                 padding: { top: 20, bottom: 20, left: 20, right: 20 },
                 maxZoom: 15,
               });
+            }
+            if (hasPolygons) {
+              this.map.addLayer({
+                id: 'polygon-fill-layer',
+                type: 'fill',
+                source: sourceId,
+                paint: {
+                  'fill-color': '#088',
+                  'fill-opacity': 0.5,
+                },
+              });
+              this.currentMarkersLayers.push('polygon-fill-layer');
+
+              // Add outline for polygons
+              this.map.addLayer({
+                id: 'polygon-outline-layer',
+                type: 'line',
+                source: sourceId,
+                paint: {
+                  'line-color': '#000',
+                  'line-width': 2,
+                },
+              });
+              this.currentMarkersLayers.push('polygon-outline-layer');
+            }
+            if (hasLines) {
+              this.map.addLayer({
+                id: 'line-layer',
+                type: 'line',
+                source: sourceId,
+                paint: {
+                  'line-color': '#ff6600', // Orange for visibility
+                  'line-width': 3,
+                  'line-opacity': 0.8
+                }
+              });
+              this.currentMarkersLayers.push('line-layer');
             }
           }
         }
