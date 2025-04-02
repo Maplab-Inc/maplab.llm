@@ -11,12 +11,13 @@ export class ChatService {
     'Content-Type': 'application/json'
   });
 
-  constructor(
+  constructor(  
     private http: HttpClient,
     @Inject(ASSISTANT_API_URL) private apiUrl: string,
   ) { }
 
   getCompletion(request: CompletionRequest): Observable<AssistantCompletion> {
+    debugger
     return this.http.post<AssistantCompletion>(`${this.apiUrl}/geoassistant`,
       JSON.stringify(request),
       {

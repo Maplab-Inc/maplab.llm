@@ -37,7 +37,7 @@ import {
   ResponseFormat,
 } from '../models/directions-request';
 import { forkJoin, map, Observable } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { IResponseError } from '../models/response-error';
 import { GradientColors } from '../utils/gradient-colors';
 import { IVehicle } from '../models/vehicle';
@@ -128,7 +128,7 @@ export class ChatComponent implements AfterViewInit {
             }
           }
 
-          if (response.type === 'route-optimization') {
+          if (response.type === 'route_optimization') {
             let vrpAssignment = responseData as IVrpAssignment;
             let directionsRequests = this.createDirections(vrpAssignment);
             forkJoin(
@@ -143,13 +143,89 @@ export class ChatComponent implements AfterViewInit {
                 console.error('Failed to fetch directions:', err);
               },
             });
-          } else {
+          } else if (response.type === 'isochrone') {
+            const sourceId = `isochrone_source_${Math.random()
+              .toString(36)
+              .substring(2, 10)}`;
+
+            this.map.addSource(sourceId, {
+              type: 'geojson',
+              data: response.data as GeoJSON.FeatureCollection, // Use data directly
+            });
+
+            const colors = [
+              '#440154',
+              '#3B528B',
+              '#21908D',
+              '#5DC963',
+              '#FDE725',
+            ]; // Gradient colors for different isochrones
+
+            (response.data as GeoJSON.FeatureCollection).features.forEach(
+              (feature: any, index: number) => {
+                if (
+                  feature.geometry.type === 'Polygon' ||
+                  feature.geometry.type === 'MultiPolygon'
+                ) {
+                  const fillLayerId = `isochrone-fill-layer-${index}`;
+                  const outlineLayerId = `isochrone-outline-layer-${index}`;
+
+                  this.map.addLayer({
+                    id: fillLayerId,
+                    type: 'fill',
+                    source: sourceId,
+                    paint: {
+                      'fill-color': colors[index % colors.length], // Cycle through colors
+                      'fill-opacity': 0.4,
+                    },
+                  });
+
+                  this.map.addLayer({
+                    id: outlineLayerId,
+                    type: 'line',
+                    source: sourceId,
+                    paint: {
+                      'line-color': '#000',
+                      'line-width': 1.5,
+                    },
+                    filter: ['==', ['id'], feature.id],
+                  });
+
+                  this.currentMarkersLayers.push(fillLayerId, outlineLayerId);
+                }
+              }
+            );
+
+            // Fit the map to the bounds of all isochrone polygons
+            const bounds = new LngLatBounds();
+            (response.data as GeoJSON.FeatureCollection).features.forEach(
+              (feature: any) => {
+                if (
+                  feature.geometry.type === 'Polygon' ||
+                  feature.geometry.type === 'MultiPolygon'
+                ) {
+                  feature.geometry.coordinates.forEach((ring: any) => {
+                    ring.forEach((coord: any) => {
+                      bounds.extend(coord);
+                    });
+                  });
+                }
+              }
+            );
+
+            this.map.fitBounds(bounds, {
+              padding: { top: 20, bottom: 20, left: 20, right: 20 },
+              maxZoom: 13,
+            });
+          } else if (response.type === 'overpass') {
             // convert json to geojson and display it on map.
             const osmtogeojsonModule = await import('osmtogeojson');
             const osmtogeojson = osmtogeojsonModule.default;
             let osmData = osmtogeojson(structuredClone(response.data));
 
-            const sourceId = `osm_source_${Math.random().toString(36).substring(2, 10)}`;
+            const sourceId = `osm_source_${Math.random()
+              .toString(36)
+              .substring(2, 10)}`;
             this.map.addSource(sourceId, {
               type: 'geojson',
               data: osmData,
@@ -164,8 +240,10 @@ export class ChatComponent implements AfterViewInit {
               (f) =>
                 f.geometry.type === 'Point' || f.geometry.type === 'MultiPoint'
             );
-            const hasLines = osmData.features.some(f => 
-              f.geometry.type === 'LineString' || f.geometry.type === 'MultiLineString'
+            const hasLines = osmData.features.some(
+              (f) =>
+                f.geometry.type === 'LineString' ||
+                f.geometry.type === 'MultiLineString'
             );
 
             if (hasPoints) {
@@ -239,16 +317,27 @@ export class ChatComponent implements AfterViewInit {
               this.currentMarkersLayers.push('polygon-outline-layer');
             }
             if (hasLines) {
+              const colors = [
+                '#ff6600',
+                '#0099ff',
+                '#33cc33',
+                '#ffcc00',
+                '#cc33ff',
+              ]; // Five visible colors
+              const randomColor =
+                colors[Math.floor(Math.random() * colors.length)];
+
               this.map.addLayer({
                 id: 'line-layer',
                 type: 'line',
                 source: sourceId,
                 paint: {
-                  'line-color': '#ff6600', // Orange for visibility
+                  'line-color': randomColor,
                   'line-width': 3,
-                  'line-opacity': 0.8
-                }
+                  'line-opacity': 0.8,
+                },
               });
+
               this.currentMarkersLayers.push('line-layer');
             }
           }
@@ -725,7 +814,12 @@ export class ChatComponent implements AfterViewInit {
     return this.http
       .post<Feature<Geometry, GeoJsonProperties>>(
         `${this.directionsApiUrl}router/directions`,
-        body.direction
+        body.direction,
+        {
+          headers: new HttpHeaders({
+            'X-API-KEY': 'LX.rlZ1yLh8hOBsM_XpMJYvQm2fCFaeX7i7Z7Mni5-j6AQ',
+          }),
+        }
       )
       .pipe(
         map((result: Feature<Geometry, GeoJsonProperties> | IResponseError) => {
