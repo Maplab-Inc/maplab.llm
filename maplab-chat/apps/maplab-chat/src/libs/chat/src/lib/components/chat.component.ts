@@ -99,7 +99,7 @@ export class ChatComponent implements AfterViewInit {
   ) {
     this.currentStyle = {
       style:
-        'https://tiles.maplab.ai/styles/osm_liberty/style.json?key=LX.rlZ1yLh8hOBsM_XpMJYvQm2fCFaeX7i7Z7Mni5-j6AQ',
+        'https://tiles.maplab.ai/styles/maplab/style.json?key=LX.rlZ1yLh8hOBsM_XpMJYvQm2fCFaeX7i7Z7Mni5-j6AQ',
       type: 'dark',
     };
     this.initMap();
