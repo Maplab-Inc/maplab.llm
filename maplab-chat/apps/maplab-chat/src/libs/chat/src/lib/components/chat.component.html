@@ -36,6 +36,14 @@
                 </div>
             </div>
             <div class="chat-prompt">
+                <p-fileupload accept=".csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" 
+                    name="myfile[]" [auto]="true" styleClass="borderless-upload" (onSelect)="handleUpload($event)">
+                    <ng-template #header let-files let-chooseCallback="chooseCallback">
+                        <div class="flex gap-2">
+                            <p-button icon="pi pi-paperclip" (click)="chooseCallback()" [rounded]="true" styleClass="upload-button"></p-button>
+                        </div>
+                    </ng-template>
+                </p-fileupload>
                 <div class="input-container">
                     <input [(ngModel)]="userInput" [disabled]="(chatFacade.chatLoading$ | async) ?? false"
                         (keyup.enter)="sendMessage()" placeholder="Type your message..." />

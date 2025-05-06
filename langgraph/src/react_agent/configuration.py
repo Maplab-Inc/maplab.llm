@@ -29,9 +29,33 @@ class Configuration:
             "This prompt sets the context and behavior for the agent."
         },
     )
+    
+    routing_system_prompt: str = field(
+        default=prompts.ROUTING_SYSTEM_PROMPT,
+        metadata={
+            "description": "The system prompt to use for the agent's interactions. "
+            "This prompt sets the context and behavior for the agent."
+        },
+    )
+    
+    route_optimization_system_prompt: str = field(
+        default=prompts.ROUTE_OPTIMIZATION_SYSTEM_PROMPT,
+        metadata={
+            "description": "The system prompt to use for the agent's interactions. "
+            "This prompt sets the context and behavior for the agent."
+        },
+    )
+    
+    geometry_system_prompt: str = field(
+        default=prompts.GEOMETRY_SYSTEM_PROMPT,
+        metadata={
+            "description": "The system prompt to use for the agent's interactions. "
+            "This prompt sets the context and behavior for the agent."
+        },
+    )
 
     model: Annotated[str, {"__template_metadata__": {"kind": "llm"}}] = field(
-        default="openai",
+        default="llama",
         metadata={
             "description": "The name of the language model to use for the agent's main interactions. "
             "Should be in the form: provider/model-name."
@@ -40,6 +64,30 @@ class Configuration:
     
     overpass_model: Annotated[str, {"__template_metadata__": {"kind": "llm"}}] = field(
         default="overpass",
+        metadata={
+            "description": "The name of the language model to use for the agent's main interactions. "
+            "Should be in the form: provider/model-name."
+        },
+    )
+    
+    routing_model: Annotated[str, {"__template_metadata__": {"kind": "llm"}}] = field(
+        default="openai",
+        metadata={
+            "description": "The name of the language model to use for the agent's main interactions. "
+            "Should be in the form: provider/model-name."
+        },
+    )
+    
+    route_optimization_model: Annotated[str, {"__template_metadata__": {"kind": "llm"}}] = field(
+        default="openai",
+        metadata={
+            "description": "The name of the language model to use for the agent's main interactions. "
+            "Should be in the form: provider/model-name."
+        },
+    )
+        
+    geometry_model: Annotated[str, {"__template_metadata__": {"kind": "llm"}}] = field(
+        default="openai",
         metadata={
             "description": "The name of the language model to use for the agent's main interactions. "
             "Should be in the form: provider/model-name."

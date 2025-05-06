@@ -228,3 +228,20 @@
   left: 20px !important;
   top: 47px !important;
 }
+
+/* Remove all button styling */
+:host ::ng-deep .borderless-upload {
+  background-color: transparent;
+  border: none;
+  .p-fileupload-buttonbar, 
+  .p-fileupload-content {
+    padding: 0;
+    background-color: transparent;
+    border: none;
+  }
+
+  .upload-button {
+    width: 25px;
+    height: 25px;
+  }
+}

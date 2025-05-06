@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { ChatActions } from './chat.actions';
-import { exhaustMap, map, tap } from 'rxjs';
+import { exhaustMap, map} from 'rxjs';
 import { AssistantCompletion } from '../../models/assistant-completion';
 import { ChatService } from '../../services/chat.service';
 
@@ -14,7 +14,7 @@ export class ChatEffects {
         this.chatService
           .getCompletion(action.request)
           .pipe(
-            map((completion: AssistantCompletion) =>
+            map((completion: any) => 
               ChatActions.getCompletionSuccess({ completion })
             )
           )

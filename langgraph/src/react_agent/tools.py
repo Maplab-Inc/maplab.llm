@@ -16,6 +16,8 @@ from typing_extensions import Annotated
 
 from react_agent.configuration import Configuration
 
+from typing import List, Dict, Any
+
 import os
 import requests
 import json
@@ -106,7 +108,7 @@ async def matrix(matrix_request: str, *, config: Annotated[RunnableConfig, Injec
     except requests.RequestException as e:
         return f"API request failed! Please correct the request and try again: {response.text}"
     
-async def optimize_routes(route_optimization_request: str, *, config: Annotated[RunnableConfig, InjectedToolArg]) -> str:
+async def optimize_routes(route_optimization_request: str, *, config: Annotated[RunnableConfig, InjectedToolArg]) -> dict:
     """
     Call this tool to for route optimization of a given list of vehicles and jobs.
     
@@ -122,13 +124,13 @@ async def optimize_routes(route_optimization_request: str, *, config: Annotated[
         response = requests.post(url, data=route_optimization_request, headers={'Content-Type': 'application/json'})
         response.raise_for_status() 
 
-        return response.text 
+        return {
+            "response": response.text,
+            "code": response.status_code
+        } 
 
     except requests.RequestException as e:
         return f"API request failed! Please correct the request and try again: {response.text}"
-    
-import requests
-import re
 
 async def overpass(overpass_request: str) -> str:
     """
@@ -195,10 +197,10 @@ def get_local_endpoint_schema(endpoint: str) -> Optional[str]:
         endpoint: The specific endpoint to extract (e.g., "/api/v1/route-optimization").
     """
     endpoint_to_file_path = { 
-     "/api/v1/router/route-optimization": "./openapi/route_optimization.json", 
-     "/api/v1/router/directions": "./openapi/openapi_directions.json",
-     "/api/v1/router/isochrone": "./openapi/openapi_isochrone.json",
-     "/api/v1/router/matrix": "./openapi/openapi_matrix.json"
+     "/api/v1/router/route-optimization": "./langgraph/openapi/route_optimization.json", 
+     "/api/v1/router/directions": "./langgraph/openapi/openapi_directions.json",
+     "/api/v1/router/isochrone": "./langgraph/openapi/openapi_isochrone.json",
+     "/api/v1/router/matrix": "./langgraph/openapi/openapi_matrix.json"
     }
     local_file_path = endpoint_to_file_path.get(endpoint, "./openapi/openapi.json")
     
@@ -212,6 +214,76 @@ def get_local_endpoint_schema(endpoint: str) -> Optional[str]:
     except (FileNotFoundError, json.JSONDecodeError) as e:
         print(f"Failed to load OpenAPI JSON or extract endpoint schema: {e}")
         return None
+    
+def get_route_optimization_schema() -> Optional[str]:
+    """
+    Loads the local OpenAPI JSON file and extracts the schema for route optimization.
+    """
+    local_file_path = "./langgraph/openapi/route_optimization.json"
+    
+    try:
+        # Load the local OpenAPI JSON file
+        with open(local_file_path, 'r', encoding='utf-8') as file:
+            openapi_data = json.load(file)
+        
+        return openapi_data
 
-ROUTING_TOOLS: List[Callable[..., Any]] = [direction, isochrone, matrix, optimize_routes, get_local_endpoint_schema]
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        print(f"Failed to load OpenAPI JSON or extract endpoint schema: {e}")
+        return None
+    
+def geocode_addresses(
+    addresses: list[str], *, config: Annotated[RunnableConfig, InjectedToolArg]
+) -> List[Dict[str, Any]]:
+    """
+    Geocode a list of addresses using Nominatim and return their coordinates.
+
+    Args:
+        addresses (List[str]): A list of address strings to geocode.
+        config (RunnableConfig): Configuration context injected by LangChain.
+
+    Returns:
+        List[Dict[str, Any]]: A list of dictionaries with the original address,
+        and either latitude/longitude or an error message.
+    """
+
+    # No need for configuration anymore but keeping it in case you need it later
+    _ = config
+
+    results = []
+
+    headers = {
+        'User-Agent': 'MapLabGeocoder/1.0 (service@maplab.ai)'
+    }  # Nominatim requires a valid User-Agent!
+
+    for address in addresses:
+        try:
+            url = f"https://nominatim.openstreetmap.org/search"
+            params = {
+                "q": address,
+                "format": "json",
+                "limit": 1
+            }
+            response = requests.get(url, headers=headers, params=params)
+            response.raise_for_status()
+            data = response.json()
+
+            if not data:
+                results.append({"address": address, "error": "Address not found"})
+                continue
+
+            location = data[0]
+            results.append({
+                "address": address,
+                "longitude": float(location["lon"]),
+                "latitude": float(location["lat"])
+            })
+        except requests.RequestException:
+            results.append({"address": address, "error": "API request failed"})
+
+    return results
+
+ROUTING_TOOLS: List[Callable[..., Any]] = [direction, isochrone, matrix, get_local_endpoint_schema]
+ROUTE_OPTIMIZATION_TOOLS: List[Callable[..., Any]] = [optimize_routes]
 QUERY_TOOLS: List[Callable[..., Any]] = [overpass]
+GEOMETRY_TOOLS: List[Callable[..., Any]] = [geocode_addresses]

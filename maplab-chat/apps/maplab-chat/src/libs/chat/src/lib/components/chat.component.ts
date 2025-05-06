@@ -1,21 +1,13 @@
 import {
   AfterViewInit,
   Component,
-  DestroyRef,
   ElementRef,
   EventEmitter,
   Inject,
   Output,
   ViewChild,
 } from '@angular/core';
-import {
-  Feature,
-  FeatureCollection,
-  GeoJsonProperties,
-  Geometry,
-  Point,
-  Polygon,
-} from 'geojson';
+import { Feature, GeoJsonProperties, Geometry, Point } from 'geojson';
 import {
   FullscreenControl,
   GeoJSONSource,
@@ -26,7 +18,6 @@ import {
   MapMouseEvent,
   NavigationControl,
   ScaleControl,
-  TerrainControl,
 } from 'maplibre-gl';
 import { MenuItem } from 'primeng/api';
 import { ChatFacade } from '../+state/chat/chat.facade';
@@ -42,18 +33,14 @@ import { IResponseError } from '../models/response-error';
 import { GradientColors } from '../utils/gradient-colors';
 import { IVehicle } from '../models/vehicle';
 import { Coordinate } from '../models/coordinate';
-import { TrackMode } from '../models/enums/track-mode';
 import { DialogService } from 'primeng/dynamicdialog';
-import { ActivatedRoute, Router } from '@angular/router';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ContextContainerComponent } from '../modals/context-container/context-container.component';
 import { MapMarkerTagType } from '../utils/map-to-marker';
 import { DIRECTIONS_API_URL } from '@maplab-chat/tokens';
 import { ContextFacade } from '../+state/context/context.facade';
 import { DeliveryRequestService } from '../services/context-services/delivery-request.service';
 import { TrucksService } from '../services/context-services/trucks-service';
-
-declare var require: any;
+import { IJob } from '../models/job';
 
 interface IStyle {
   style: string;
@@ -71,6 +58,8 @@ export class ChatComponent implements AfterViewInit {
   messages: { content: string; sender: 'user' | 'ai' | 'loader' }[] = [];
   @ViewChild('mapContainer') private mapContainer!: ElementRef<HTMLElement>;
   @Output() mapClick = new EventEmitter<MapMouseEvent & Object>();
+
+  uploadedFile: string | null = null;
 
   public currentStyle!: IStyle;
   public height = '100vh';
@@ -99,7 +88,7 @@ export class ChatComponent implements AfterViewInit {
   ) {
     this.currentStyle = {
       style:
-        'https://tiles.maplab.ai/styles/maplab/style.json?key=LX.rlZ1yLh8hOBsM_XpMJYvQm2fCFaeX7i7Z7Mni5-j6AQ',
+        'https://tiles.maplab.ai/styles/basic-preview/style.json?key=LX.rlZ1yLh8hOBsM_XpMJYvQm2fCFaeX7i7Z7Mni5-j6AQ',
       type: 'dark',
     };
     this.initMap();
@@ -340,6 +329,166 @@ export class ChatComponent implements AfterViewInit {
 
               this.currentMarkersLayers.push('line-layer');
             }
+          } else if (response.type === 'geometry') {
+            var data = response.data as any;
+            if (data.metadata.geometry_type == 'job') {
+              let jobs = data.content as IJob[];
+              this.contextFacade.updateRouteOptimizationJobs(jobs);
+            } else if (data.metadata.geometry_type == 'vehicle') {
+              let vehicles = data.content as IVehicle[];
+              this.contextFacade.updateRouteOptimizationVehicles(vehicles);
+            }
+          } else {
+            let geojson: GeoJSON.FeatureCollection;
+
+            // Normalize geometry or FeatureCollection
+            if ((response.data as any).type === 'FeatureCollection') {
+              geojson = response.data as GeoJSON.FeatureCollection;
+            } else {
+              geojson = {
+                type: 'FeatureCollection',
+                features: [
+                  {
+                    type: 'Feature',
+                    geometry: response.data as GeoJSON.Geometry,
+                    properties: {},
+                  },
+                ],
+              };
+            }
+
+            const sourceId = `geometry_source_${Math.random()
+              .toString(36)
+              .substring(2, 10)}`;
+
+            this.map.addSource(sourceId, {
+              type: 'geojson',
+              data: geojson,
+            });
+
+            const bounds = new LngLatBounds();
+
+            geojson.features.forEach((feature: any, index: number) => {
+              const idSuffix = `geometry-layer-${index}`;
+              const geometryType = feature.geometry.type;
+
+              // POLYGON / MULTIPOLYGON
+              if (
+                geometryType === 'Polygon' ||
+                geometryType === 'MultiPolygon'
+              ) {
+                const fillLayerId = `fill-${idSuffix}`;
+                const outlineLayerId = `outline-${idSuffix}`;
+
+                this.map.addLayer({
+                  id: fillLayerId,
+                  type: 'fill',
+                  source: sourceId,
+                  paint: {
+                    'fill-color': '#0080ff',
+                    'fill-opacity': 0.3,
+                  },
+                });
+
+                this.map.addLayer({
+                  id: outlineLayerId,
+                  type: 'line',
+                  source: sourceId,
+                  paint: {
+                    'line-color': '#004080',
+                    'line-width': 2,
+                  },
+                  filter: ['==', ['id'], feature.id],
+                });
+
+                this.currentMarkersLayers.push(fillLayerId, outlineLayerId);
+
+                feature.geometry.coordinates.forEach((ring: any) => {
+                  ring.forEach((coord: any) => {
+                    bounds.extend(coord);
+                  });
+                });
+              }
+
+              // LINESTRING / MULTILINESTRING
+              else if (
+                geometryType === 'LineString' ||
+                geometryType === 'MultiLineString'
+              ) {
+                const lineLayerId = `line-${idSuffix}`;
+
+                this.map.addLayer({
+                  id: lineLayerId,
+                  type: 'line',
+                  source: sourceId,
+                  paint: {
+                    'line-color': '#ff6600',
+                    'line-width': 3,
+                  },
+                });
+
+                this.currentMarkersLayers.push(lineLayerId);
+
+                if (geometryType === 'LineString') {
+                  feature.geometry.coordinates.forEach((coord: any) =>
+                    bounds.extend(coord)
+                  );
+                } else {
+                  feature.geometry.coordinates.forEach((line: any) => {
+                    line.forEach((coord: any) => bounds.extend(coord));
+                  });
+                }
+              }
+
+              // POINT
+              else if (geometryType === 'Point') {
+                const pointLayerId = `point-${idSuffix}`;
+
+                this.map.addLayer({
+                  id: pointLayerId,
+                  type: 'circle',
+                  source: sourceId,
+                  paint: {
+                    'circle-radius': 6,
+                    'circle-color': '#e60049',
+                    'circle-stroke-color': '#fff',
+                    'circle-stroke-width': 2,
+                  },
+                });
+
+                this.currentMarkersLayers.push(pointLayerId);
+
+                bounds.extend(feature.geometry.coordinates);
+              }
+
+              // MULTIPOINT
+              else if (geometryType === 'MultiPoint') {
+                const multiPointLayerId = `multipoint-${idSuffix}`;
+
+                this.map.addLayer({
+                  id: multiPointLayerId,
+                  type: 'circle',
+                  source: sourceId,
+                  paint: {
+                    'circle-radius': 6,
+                    'circle-color': '#00b3a4',
+                    'circle-stroke-color': '#fff',
+                    'circle-stroke-width': 2,
+                  },
+                });
+
+                this.currentMarkersLayers.push(multiPointLayerId);
+
+                feature.geometry.coordinates.forEach((coord: any) =>
+                  bounds.extend(coord)
+                );
+              }
+            });
+
+            this.map.fitBounds(bounds, {
+              padding: { top: 20, bottom: 20, left: 20, right: 20 },
+              maxZoom: 14,
+            });
           }
         }
       },
@@ -395,14 +544,21 @@ export class ChatComponent implements AfterViewInit {
     this.contextFacade.routeOptimizationContext$
       .pipe(
         map((routeOptimizationContext) => {
+
+          if (this.userInput === "") {
+            return;
+          }
+
           if (routeOptimizationContext) {
             this.chatFacade.getCompletion({
               user: this.userInput,
               system: JSON.stringify(routeOptimizationContext),
+              file: this.uploadedFile ?? undefined,
             });
           } else {
             this.chatFacade.getCompletion({
               user: this.userInput,
+              file: this.uploadedFile ?? undefined,
             });
           }
         })
@@ -975,5 +1131,16 @@ export class ChatComponent implements AfterViewInit {
       },
       style: { ['max-height']: '95%' },
     });
+  }
+
+  handleUpload(event: any) {
+    const file = event.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.uploadedFile = reader.result as string;
+    };
+    reader.readAsText(file);
   }
 }

@@ -1,14 +1,13 @@
-from datetime import datetime, timezone
 from typing import Dict, List, Literal, cast
 
-from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
 from langchain_core.runnables import RunnableConfig
 from langgraph.graph import StateGraph
 from langgraph.prebuilt import ToolNode
 
 from react_agent.configuration import Configuration
 from react_agent.state import InputState, State
-from react_agent.tools import ROUTING_TOOLS, QUERY_TOOLS
+from react_agent.tools import GEOMETRY_TOOLS, ROUTE_OPTIMIZATION_TOOLS, ROUTING_TOOLS, QUERY_TOOLS
 from react_agent.utils import load_chat_model
 
 from flask import Flask, jsonify, request
@@ -17,13 +16,10 @@ import requests
 import copy
 import json
 import re
-import time
-
 
 # Define the function that calls the model
 
-
-async def call_model(
+async def orchestrator(
     state: State, config: RunnableConfig
 ) -> Dict[str, List[AIMessage]]:
     """Call the LLM powering our "agent".
@@ -40,7 +36,7 @@ async def call_model(
     configuration = Configuration.from_runnable_config(config)
 
     # Initialize the model with tool binding. Change the model or add more tools here.
-    model = load_chat_model(configuration.model).bind_tools(ROUTING_TOOLS)
+    model = load_chat_model(configuration.model)
 
     # Format the system prompt. Customize this to change the agent's behavior.
     # system_message = configuration.system_prompt.format(
@@ -51,24 +47,32 @@ async def call_model(
     
     messages = state.messages[:]
     last_message = copy.deepcopy(messages[-1])
+    
     is_overpass_response = (
         isinstance(last_message, AIMessage) and 
         last_message.additional_kwargs.get("origin") == "overpass"
     )
+    is_geometry_response = (
+        isinstance(last_message, AIMessage) and 
+        last_message.additional_kwargs.get("origin") == "geometry"
+    )
+    is_route_optimization_response = (
+        isinstance(last_message, AIMessage) and 
+        last_message.additional_kwargs.get("origin") == "route_optimization"
+    )
     
     content_type = ''
 
-    if is_overpass_response and len(last_message.content) > 2000:
+    if is_overpass_response:
         content_type = 'overpass'
-        messages[-1].content = "The Overpass response is too large to include directly. It has been saved in memory. Please generate the final response as usual and the Overpass data will be replaced dynamically."
-        
-    elif last_message.type == 'tool' and last_message.name == 'isochrone' and len(last_message.content) > 2000:
-        content_type = 'isochrone'
-        messages[-1].content = "The routing response is too large to include directly. It has been saved in memory. Please generate the final response as usual and the Isochrone data will be added dynamically."
-        
-    elif last_message.type == 'tool' and last_message.name == 'optimize_routes' and last_message.status == 'success':
+    elif is_geometry_response:
+        content_type = 'geometry'
+    elif is_route_optimization_response:
         content_type = 'route_optimization'
-
+        
+    if content_type and len(last_message.content) > 2000:
+        messages[-1].content = "The  response is too large to be included directly. It has been saved in memory. Please generate the final response as usual and the response data will be replaced dynamically."
+        
     # Get the model's response
     response = cast(
         AIMessage,
@@ -89,7 +93,7 @@ async def call_model(
         }
     
     if (content_type): 
-        parsed_data = json.loads(last_message.content)  # Parse to ensure it's valid JSON
+        parsed_data = json.loads(last_message.content)
         response.content = {
             "message": response.content,
             "data": parsed_data,
@@ -98,7 +102,7 @@ async def call_model(
 
     return {"messages": [response]}
 
-async def call_overpass(
+async def query(
     state: State, config: RunnableConfig
 ) -> Dict[str, List[AIMessage]]:
     """Call the Overpass LLM."""
@@ -138,6 +142,223 @@ async def call_overpass(
             )
         ]
     }
+    
+async def geometry(
+    state: State, config: RunnableConfig
+) -> Dict[str, List[AIMessage]]:
+    """Call the Geometry LLM."""
+
+    configuration = Configuration.from_runnable_config(config)
+
+    model = load_chat_model(configuration.geometry_model).bind_tools(GEOMETRY_TOOLS)
+
+    system_message = configuration.geometry_system_prompt
+    
+    response = cast(
+        AIMessage,
+        await model.ainvoke(
+            [{"role": "system", "content": system_message}, *state.messages], config
+        ),
+    )
+    
+    if state.is_last_step and response.tool_calls:
+        return {
+            "messages": [
+                AIMessage(
+                    id=response.id,
+                    content="Sorry, I could not find an answer in the given steps.",
+                )
+            ]
+        }
+        
+    response.additional_kwargs["origin"] = "geometry"
+        
+    return {"messages": [response]}
+
+async def routing(
+    state: State, config: RunnableConfig
+) -> Dict[str, List[AIMessage]]:
+    """Call the Routing LLM."""
+
+    configuration = Configuration.from_runnable_config(config)
+
+    model = load_chat_model(configuration.routing_model).bind_tools(ROUTING_TOOLS)
+
+    system_message = configuration.routing_system_prompt
+    
+    last_message = state.messages[-1]
+    
+    if last_message.type == 'tool' and last_message.status == 'success':
+        return {
+            "messages": [
+                AIMessage(
+                    id=last_message.id,
+                    content=last_message.content,
+                    additional_kwargs={"origin": "routing"},
+                )
+            ]
+        }
+
+    response = cast(
+        AIMessage,
+        await model.ainvoke(
+            [{"role": "system", "content": system_message}, *state.messages], config
+        ),
+    )
+
+    if state.is_last_step and response.tool_calls:
+        return {
+            "messages": [
+                AIMessage(
+                    id=response.id,
+                    content="Sorry, I could not find an answer in the given steps.",
+                )
+            ]
+        }
+        
+    return {"messages": [response]}
+
+async def route_optimization(
+    state: State, config: RunnableConfig
+) -> Dict[str, List[AIMessage]]:
+    """Call the Routing LLM."""
+
+    configuration = Configuration.from_runnable_config(config)
+
+    model = load_chat_model(configuration.route_optimization_model).bind_tools(ROUTE_OPTIMIZATION_TOOLS)
+
+    system_message = configuration.route_optimization_system_prompt
+    
+    last_message = state.messages[-1]
+    
+    # if last_message.type == 'tool' and last_message.name == 'optimize_routes' and last_message.status == 'success':
+    #     return {
+    #         "messages": [
+    #             AIMessage(
+    #                 id=last_message.id,
+    #                 content=last_message.content,
+    #                 additional_kwargs={"origin": "route_optimization"},
+    #             )
+    #         ]
+    #     }
+
+    response = cast(
+        AIMessage,
+        await model.ainvoke(
+            [{"role": "system", "content": system_message}, *state.messages], config
+        ),
+    )
+
+    if state.is_last_step and response.tool_calls:
+        return {
+            "messages": [
+                AIMessage(
+                    id=response.id,
+                    content="Sorry, I could not find an answer in the given steps.",
+                )
+            ]
+        }
+        
+    response.additional_kwargs["origin"] = "route_optimization"
+        
+    return {"messages": [response]}
+
+def orchestrator_conditional_edges(state: State) -> Literal["__end__", "query", "geometry", "routing", "route_optimization"]:
+    """Determine the next node based on the model's output.
+
+    This function checks if the model's last message contains tool calls.
+
+    Args:
+        state (State): The current state of the conversation.
+
+    Returns:
+        str: The name of the next node to call ("__end__", "query", "geometry", "routing").
+    """
+    last_message = state.messages[-1]
+    if not isinstance(last_message, AIMessage):
+        raise ValueError(
+            f"Expected AIMessage in output edges, but got {type(last_message).__name__}"
+        )
+        
+    if 'ROUTE_OVERPASS' in last_message.content:
+        return "query"
+    
+    if 'ROUTE_GEOMETRY' in last_message.content:
+        return "geometry"
+    
+    if 'ROUTE_ROUTING' in last_message.content:
+        return "routing"
+    
+    if 'ROUTE_OPTIMIZATION' in last_message.content:
+        return "route_optimization"
+    
+    return "__end__"
+
+def routing_conditional_edges(state: State) -> Literal["routing_tools", "orchestrator"]:
+    """Determine the next node based on the model's output.
+
+    This function checks if the model's last message contains tool calls.
+
+    Args:
+        state (State): The current state of the conversation.
+
+    Returns:
+        str: The name of the next node to call ("routing_tools", "orchestrator").
+    """
+    last_message = state.messages[-1]
+    if not isinstance(last_message, AIMessage):
+        raise ValueError(
+            f"Expected AIMessage in output edges, but got {type(last_message).__name__}"
+        )
+        
+    if not last_message.tool_calls:
+        return "orchestrator"
+    
+    return "routing_tools"
+
+def route_optimization_conditional_edges(state: State) -> Literal["route_optimization_tools", "orchestrator"]:
+    """Determine the next node based on the model's output.
+
+    This function checks if the model's last message contains tool calls.
+
+    Args:
+        state (State): The current state of the conversation.
+
+    Returns:
+        str: The name of the next node to call ("routing_tools", "orchestrator").
+    """
+    last_message = state.messages[-1]
+    if not isinstance(last_message, AIMessage):
+        raise ValueError(
+            f"Expected AIMessage in output edges, but got {type(last_message).__name__}"
+        )
+        
+    if not last_message.tool_calls:
+        return "orchestrator"
+    
+    return "route_optimization_tools"
+
+def geometry_conditional_edges(state: State) -> Literal["geometry_tools", "orchestrator"]:
+    """Determine the next node based on the model's output.
+
+    This function checks if the model's last message contains tool calls.
+
+    Args:
+        state (State): The current state of the conversation.
+
+    Returns:
+        str: The name of the next node to call ("geometry_tools", "orchestrator").
+    """
+    last_message = state.messages[-1]
+    if not isinstance(last_message, AIMessage):
+        raise ValueError(
+            f"Expected AIMessage in output edges, but got {type(last_message).__name__}"
+        )
+        
+    if not last_message.tool_calls:
+        return "orchestrator"
+    
+    return "geometry_tools"
 
 def overpass(overpass_request: str) -> str:
     """
@@ -199,59 +420,56 @@ def geocode_area(instr):
     
     return f"area(id:{area_ref})"
 
-# Define a new graph
-
 builder = StateGraph(State, input=InputState, config_schema=Configuration)
 
-# Define the two nodes we will cycle between
-builder.add_node(call_model)
-builder.add_node(call_overpass)
+builder.add_node(orchestrator)
+builder.add_node(query)
+builder.add_node(geometry)
+builder.add_node(route_optimization)
+builder.add_node(routing)
 builder.add_node("routing_tools", ToolNode(ROUTING_TOOLS))
+builder.add_node("route_optimization_tools", ToolNode(ROUTE_OPTIMIZATION_TOOLS))
+builder.add_node("geometry_tools", ToolNode(GEOMETRY_TOOLS))
 
-# Set the entrypoint as `call_model`
+# Set the entrypoint as `orchestrator`
 # This means that this node is the first one called
-builder.add_edge("__start__", "call_model")
+builder.add_edge("__start__", "orchestrator")
 
-
-def route_model_output(state: State) -> Literal["__end__", "routing_tools", "call_overpass"]:
-    """Determine the next node based on the model's output.
-
-    This function checks if the model's last message contains tool calls.
-
-    Args:
-        state (State): The current state of the conversation.
-
-    Returns:
-        str: The name of the next node to call ("__end__" or "tools" or "call_overpass").
-    """
-    last_message = state.messages[-1]
-    if not isinstance(last_message, AIMessage):
-        raise ValueError(
-            f"Expected AIMessage in output edges, but got {type(last_message).__name__}"
-        )
-        
-    if 'ROUTE_OVERPASS' in last_message.content:
-        return "call_overpass"
-    
-    # If there is no tool call, then we finish
-    if not last_message.tool_calls:
-        return "__end__"
-    
-    # Otherwise we execute the requested actions
-    return "routing_tools"
-
-# Add a conditional edge to determine the next step after `call_model`
+# Add a conditional edge to determine the next step after `orchestrator`
 builder.add_conditional_edges(
-    "call_model",
-    # After call_model finishes running, the next node(s) are scheduled
+    "orchestrator",
+    # After orchestrator finishes running, the next node(s) are scheduled
     # based on the output from route_model_output
-    route_model_output,
+    orchestrator_conditional_edges,
 )
 
-# Add a normal edge from `tools` to `call_model`
+builder.add_conditional_edges(
+    "routing",
+    # After orchestrator finishes running, the next node(s) are scheduled
+    # based on the output from route_model_output
+    routing_conditional_edges,
+)
+
+builder.add_conditional_edges(
+    "route_optimization",
+    # After orchestrator finishes running, the next node(s) are scheduled
+    # based on the output from route_model_output
+    route_optimization_conditional_edges,
+)
+
+builder.add_conditional_edges(
+    "geometry",
+    # After orchestrator finishes running, the next node(s) are scheduled
+    # based on the output from route_model_output
+    geometry_conditional_edges,
+)
+
+# Add a normal edge from `tools` to `orchestrator`
 # This creates a cycle: after using tools, we always return to the model
-builder.add_edge("routing_tools", "call_model")
-builder.add_edge("call_overpass", "call_model")
+builder.add_edge("query", "orchestrator")
+builder.add_edge("routing_tools", "routing")
+builder.add_edge("route_optimization_tools", "route_optimization")
+builder.add_edge("geometry_tools", "geometry")
 
 # Compile the builder into an executable graph
 # You can customize this by adding interrupt points for state updates
@@ -266,7 +484,7 @@ CORS(app)
 
 @app.route('/geoassistant', methods=['POST']) 
 async def invoke_assistant(): 
-  
+
   userContent = request.json.get('user') 
   if not userContent: 
       return jsonify({"error": "Content is required"}), 400
@@ -276,6 +494,10 @@ async def invoke_assistant():
   sysContent = request.json.get('system')
   if sysContent:
       messages.append(SystemMessage(content=sysContent))
+      
+  fileContent = request.json.get('file')
+  if fileContent:
+      messages.append(SystemMessage(content=fileContent))
   
   # resonse_messages = await graph.ainvoke({"messages": messages}, {"recursion_limit": 50})
   response_messages = await graph.ainvoke({"messages": messages}, {"recursion_limit": 50})

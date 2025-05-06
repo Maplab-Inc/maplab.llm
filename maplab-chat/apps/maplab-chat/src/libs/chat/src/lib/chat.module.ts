@@ -40,6 +40,7 @@ import { DynamicDialogModule } from 'primeng/dynamicdialog';
 import { ContextFacade } from './+state/context/context.facade';
 import { OptimizationGeneratorComponent } from './modals/optimization-generator/optimization-generator.component';
 import { RouteOptimizationGenerationService } from './services/context-services/route-optimization-generation.service';
+import { FileUploadModule } from 'primeng/fileupload';
 
 const routes: Routes = [
   {
@@ -59,6 +60,7 @@ const routes: Routes = [
     PanelModule,
     TableModule,
     CheckboxModule,
+    FileUploadModule,
     InputNumberModule,
     InputTextModule,
     AvatarModule,
