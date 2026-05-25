@@ -30,36 +30,6 @@ jobs:
       - name: Get AKS credentials
         run: az aks get-credentials --resource-group ${{ secrets.AKS_RESOURCE_GROUP }} --name ${{ secrets.AKS_CLUSTER_NAME }}
 
-      - name: Validate required secrets
-        run: |
-          if [ -z "${{ secrets.LITELLM_MASTER_KEY }}" ]; then
-            echo "::error::LITELLM_MASTER_KEY secret is not set. Add it to the production environment."
-            exit 1
-          fi
-          if [ -z "${{ secrets.FOUNDRY_API_KEY }}" ]; then
-            echo "::error::FOUNDRY_API_KEY secret is not set. Add it to the production environment."
-            exit 1
-          fi
-          if [ -z "${{ secrets.FOUNDRY_API_BASE }}" ]; then
-            echo "::error::FOUNDRY_API_BASE secret is not set. Add it to the production environment."
-            exit 1
-          fi
-          if [ -z "${{ secrets.DATABASE_URL }}" ]; then
-            echo "::error::DATABASE_URL secret is not set. Add it to the production environment."
-            exit 1
-          fi
-          echo "All required secrets are set."
-
-      - name: Create or update litellm-credentials secret
-        run: |
-          kubectl create secret generic litellm-credentials \
-            --from-literal=LITELLM_MASTER_KEY="${{ secrets.LITELLM_MASTER_KEY }}" \
-            --from-literal=FOUNDRY_API_KEY="${{ secrets.FOUNDRY_API_KEY }}" \
-            --from-literal=FOUNDRY_API_BASE="${{ secrets.FOUNDRY_API_BASE }}" \
-            --from-literal=DATABASE_URL="${{ secrets.DATABASE_URL }}" \
-            --namespace apps \
-            --dry-run=client -o yaml | kubectl apply -f -
-
       - name: Helm upgrade litellm
         run: |
           helm upgrade --install litellm ./k8s/litellm \
