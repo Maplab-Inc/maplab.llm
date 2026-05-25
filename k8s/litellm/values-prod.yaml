@@ -1,0 +1,18 @@
+image:
+  repository: ghcr.io/berriai/litellm-database
+  tag: main-stable
+
+ingress:
+  hosts:
+    - host: llm.maplab.ai
+      paths:
+        - path: /(.*)
+          pathType: Prefix
+          backend:
+            service:
+              name: litellm-svc
+              port: 4000
+  tls:
+    - secretName: llm.maplab-tls-secret
+      hosts:
+        - llm.maplab.ai

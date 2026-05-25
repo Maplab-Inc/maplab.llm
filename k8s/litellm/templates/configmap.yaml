@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: litellm-config
+  labels:
+    {{- include "litellm.labels" . | nindent 4 }}
+data:
+  config.yml: |
+    model_list:
+      - model_name: gpt-5.4-mini
+        litellm_params:
+          model: openai/gpt-5.4-mini
+          api_base: os.environ/AZURE_API_BASE
+          api_key: os.environ/AZURE_API_KEY
+        model_info:
+          base_model: gpt-5.4-mini
+          mode: chat
+
+    general_settings:
+      master_key: os.environ/LITELLM_MASTER_KEY
