@@ -1,0 +1,74 @@
+name: Deploy LiteLLM
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: deployment-${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  deploy-litellm:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Azure via federated auth
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_SP_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_SP_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          enable-AzPSSession: true
+
+      - name: Get AKS credentials
+        run: az aks get-credentials --resource-group ${{ secrets.AKS_RESOURCE_GROUP }} --name ${{ secrets.AKS_CLUSTER_NAME }}
+
+      - name: Validate required secrets
+        run: |
+          if [ -z "${{ secrets.LITELLM_MASTER_KEY }}" ]; then
+            echo "::error::LITELLM_MASTER_KEY secret is not set. Add it to the production environment."
+            exit 1
+          fi
+          if [ -z "${{ secrets.FOUNDRY_API_KEY }}" ]; then
+            echo "::error::FOUNDRY_API_KEY secret is not set. Add it to the production environment."
+            exit 1
+          fi
+          if [ -z "${{ secrets.FOUNDRY_API_BASE }}" ]; then
+            echo "::error::FOUNDRY_API_BASE secret is not set. Add it to the production environment."
+            exit 1
+          fi
+          if [ -z "${{ secrets.DATABASE_URL }}" ]; then
+            echo "::error::DATABASE_URL secret is not set. Add it to the production environment."
+            exit 1
+          fi
+          echo "All required secrets are set."
+
+      - name: Create or update litellm-credentials secret
+        run: |
+          kubectl create secret generic litellm-credentials \
+            --from-literal=LITELLM_MASTER_KEY="${{ secrets.LITELLM_MASTER_KEY }}" \
+            --from-literal=FOUNDRY_API_KEY="${{ secrets.FOUNDRY_API_KEY }}" \
+            --from-literal=FOUNDRY_API_BASE="${{ secrets.FOUNDRY_API_BASE }}" \
+            --from-literal=DATABASE_URL="${{ secrets.DATABASE_URL }}" \
+            --namespace apps \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Helm upgrade litellm
+        run: |
+          helm upgrade --install litellm ./k8s/litellm \
+            -f ./k8s/litellm/values.yaml \
+            -f ./k8s/litellm/values-prod.yaml \
+            --namespace apps
+
+      - name: Rollout restart
+        run: kubectl rollout restart deployment/litellm-deployment -n apps
+
+      - name: Wait for rollout
+        run: kubectl rollout status deployment/litellm-deployment -n apps --timeout=120s
