@@ -10,11 +10,12 @@ data:
       - model_name: gpt-5.4-mini
         litellm_params:
           model: openai/gpt-5.4-mini
-          api_base: os.environ/AZURE_API_BASE
-          api_key: os.environ/AZURE_API_KEY
+          api_base: os.environ/FOUNDRY_API_BASE
+          api_key: os.environ/FOUNDRY_API_KEY
         model_info:
           base_model: gpt-5.4-mini
           mode: chat
 
     general_settings:
       master_key: os.environ/LITELLM_MASTER_KEY
+      database_url: os.environ/DATABASE_URL
