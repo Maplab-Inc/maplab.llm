@@ -35,10 +35,6 @@ jobs:
           helm upgrade --install litellm ./k8s/litellm \
             -f ./k8s/litellm/values.yaml \
             -f ./k8s/litellm/values-prod.yaml \
-            --namespace apps
-
-      - name: Rollout restart
-        run: kubectl rollout restart deployment/litellm-deployment -n apps
-
-      - name: Wait for rollout
-        run: kubectl rollout status deployment/litellm-deployment -n apps --timeout=120s
+            --namespace apps \
+            --wait \
+            --timeout 5m

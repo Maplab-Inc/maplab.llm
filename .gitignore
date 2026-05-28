@@ -4,3 +4,4 @@ __pycache__/
 # LangGraph API
 .langgraph_api
 node_modules/*
+k8s/litellm/litellm-credentials.secret.yaml
