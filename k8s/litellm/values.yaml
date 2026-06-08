@@ -85,6 +85,10 @@ container:
         secretKeyRef:
           name: litellm-credentials
           key: LITELLM_MASTER_KEY
+    - name: UI_USERNAME
+      value: "admin"
+    - name: UI_PASSWORD
+      value: "Maplab@2024"
 
 resources: {}
 

@@ -16,10 +16,6 @@ model_list:
       base_model: gpt-5.1
       mode: chat
 
-environment_variables:
-  UI_USERNAME: admin
-  UI_PASSWORD: Mapal@2024
-
 general_settings:
   master_key: os.environ/LITELLM_MASTER_KEY
   database_url: os.environ/DATABASE_URL
