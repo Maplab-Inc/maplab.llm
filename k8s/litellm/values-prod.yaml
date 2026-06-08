@@ -2,6 +2,22 @@ image:
   repository: ghcr.io/berriai/litellm-database
   tag: main-stable
 
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+# Keep this disabled unless you explicitly want LiteLLM to schedule on a node
+# that is already reporting memory pressure. The safer fix is to free memory or
+# add capacity so the taint clears.
+# tolerations:
+#   - key: node.kubernetes.io/memory-pressure
+#     operator: Exists
+#     effect: NoSchedule
+
 ingress:
   hosts:
     - host: llm.maplab.ai
