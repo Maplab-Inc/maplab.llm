@@ -1,3 +1,6 @@
+import asyncio
+import os
+import random
 from typing import Dict, List, Literal, cast
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
@@ -482,8 +485,29 @@ graph.name = "Maplab GIS ReAct Agent"  # This customizes the name in LangSmith
 app = Flask(graph.name)
 CORS(app)
 
+# for demo
+responses = [
+    "langgraph/data/response1.json",
+    "langgraph/data/response_infractions.json",
+    "langgraph/data/response_ancrage.json",
+    "langgraph/data/response_time_ancrage.json"
+]
+
+call_counter = 0
+# for demo
+
 @app.route('/geoassistant', methods=['POST']) 
 async def invoke_assistant(): 
+  global call_counter 
+  file_path = responses[call_counter]
+  
+  delay = random.uniform(8, 12)
+  await asyncio.sleep(delay)
+  
+  with open(file_path, "r", encoding="utf-8") as f:
+      data = f.read()
+      call_counter = min(call_counter + 1, len(responses) - 1) 
+  return data  
 
   userContent = request.json.get('user') 
   if not userContent: 

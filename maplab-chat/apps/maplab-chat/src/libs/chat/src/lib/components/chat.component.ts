@@ -77,6 +77,8 @@ export class ChatComponent implements AfterViewInit {
   imageTruck!: HTMLImageElement;
   imageMarker!: HTMLImageElement;
 
+  colors = ['#ff5c05ff', '#0048ffff', '#ff3b25ff', '#5DC963', '#4c00ffff']; // Gradient colors for different isochrones
+
   constructor(
     public chatFacade: ChatFacade,
     private http: HttpClient,
@@ -142,14 +144,6 @@ export class ChatComponent implements AfterViewInit {
               data: response.data as GeoJSON.FeatureCollection, // Use data directly
             });
 
-            const colors = [
-              '#440154',
-              '#3B528B',
-              '#21908D',
-              '#5DC963',
-              '#FDE725',
-            ]; // Gradient colors for different isochrones
-
             (response.data as GeoJSON.FeatureCollection).features.forEach(
               (feature: any, index: number) => {
                 if (
@@ -164,7 +158,7 @@ export class ChatComponent implements AfterViewInit {
                     type: 'fill',
                     source: sourceId,
                     paint: {
-                      'fill-color': colors[index % colors.length], // Cycle through colors
+                      'fill-color': this.colors[index % this.colors.length], // Cycle through colors
                       'fill-opacity': 0.4,
                     },
                   });
@@ -369,7 +363,7 @@ export class ChatComponent implements AfterViewInit {
             const bounds = new LngLatBounds();
 
             geojson.features.forEach((feature: any, index: number) => {
-              const idSuffix = `geometry-layer-${index}`;
+              const idSuffix = `geometry-layer-${index}-${Math.floor(Math.random() * 10000)}`;
               const geometryType = feature.geometry.type;
 
               // POLYGON / MULTIPOLYGON
@@ -385,7 +379,7 @@ export class ChatComponent implements AfterViewInit {
                   type: 'fill',
                   source: sourceId,
                   paint: {
-                    'fill-color': '#0080ff',
+                    'fill-color': this.getRandomColor(),
                     'fill-opacity': 0.3,
                   },
                 });
@@ -405,7 +399,11 @@ export class ChatComponent implements AfterViewInit {
 
                 feature.geometry.coordinates.forEach((ring: any) => {
                   ring.forEach((coord: any) => {
-                    bounds.extend(coord);
+                    if (coord.length == 2) {
+                      bounds.extend(coord);
+                    } else {
+                      bounds.extend(coord[0]);
+                    }
                   });
                 });
               }
@@ -422,7 +420,7 @@ export class ChatComponent implements AfterViewInit {
                   type: 'line',
                   source: sourceId,
                   paint: {
-                    'line-color': '#ff6600',
+                    'line-color': this.getRandomColor(),
                     'line-width': 3,
                   },
                 });
@@ -544,8 +542,7 @@ export class ChatComponent implements AfterViewInit {
     this.contextFacade.routeOptimizationContext$
       .pipe(
         map((routeOptimizationContext) => {
-
-          if (this.userInput === "") {
+          if (this.userInput === '') {
             return;
           }
 
@@ -1142,5 +1139,10 @@ export class ChatComponent implements AfterViewInit {
       this.uploadedFile = reader.result as string;
     };
     reader.readAsText(file);
+  }
+
+  getRandomColor() {
+    const index = Math.floor(Math.random() * this.colors.length);
+    return this.colors[index];
   }
 }

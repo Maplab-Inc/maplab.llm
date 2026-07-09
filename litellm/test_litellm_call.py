@@ -1,11 +1,12 @@
+import os
 import sys
 
 from openai import OpenAI
 
 
-BASE_URL = "http://localhost:4000"
-API_KEY = "sk-1234"
-MODEL = "gpt-5.4-mini"
+BASE_URL = os.environ.get("LITELLM_BASE_URL", "https://llm.maplab.ai/")
+API_KEY = os.environ["LITELLM_API_KEY"]
+MODEL = os.environ.get("LITELLM_MODEL", "mapgears_ai")
 
 
 def main() -> int:
@@ -15,12 +16,12 @@ def main() -> int:
     )
 
     try:
-        response = client.chat.completions.create(
+        response = client.chat.completions.with_raw_response.create(
             model=MODEL,
             messages=[
                 {
                     "role": "user",
-                    "content": "Reply with a short sentence confirming the model name you used.",
+                    "content": "Reply with OK.",
                 }
             ],
         )
@@ -28,8 +29,13 @@ def main() -> int:
         print(f"Request failed: {error}", file=sys.stderr)
         return 1
 
-    message = response.choices[0].message.content
-    print(message)
+    parsed = response.parse()
+    message = parsed.choices[0].message.content
+    print(f"Requested model: {MODEL}")
+    print(f"Response model: {parsed.model}")
+    print(f"LiteLLM model group: {response.headers.get('x-litellm-model-group')}")
+    print(f"LiteLLM model id: {response.headers.get('x-litellm-model-id')}")
+    print(f"Assistant reply: {message}")
     return 0
 
 
